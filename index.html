@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Startseite</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            max-width: 900px;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .chef-image {
+            width: 35%;
+            max-width: 300px;
+            height: auto;
+        }
+
+        .speech-bubble {
+            width: 65%;
+            border: 3px solid #ffb700;
+            border-radius: 24px;
+            padding: 30px;
+            position: relative;
+            background-color: #fff;
+        }
+
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 40px;
+            border-width: 10px 20px 10px 0;
+            border-style: solid;
+            border-color: transparent #ffb700 transparent transparent;
+        }
+
+        .speech-bubble h1 {
+            margin-top: 0;
+            color: #333333;
+            font-size: 2.2rem;
+            font-weight: 600;
+        }
+
+        .speech-bubble h1 span {
+            color: #ffb700;
+        }
+
+        .speech-bubble p {
+            color: #444444;
+            font-size: 1.4rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .footer-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 40px;
+            padding-right: 40px;
+        }
+
+        .compass-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .compass-button:hover {
+            transform: scale(1.05);
+        }
+
+        .compass-image {
+            width: 120px;
+            height: auto;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                text-align: center;
+            }
+            .chef-image {
+                width: 60%;
+            }
+            .speech-bubble {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .speech-bubble::before {
+                left: 50%;
+                top: -20px;
+                border-width: 0 10px 20px 10px;
+                border-color: transparent transparent #ffb700 transparent;
+                transform: translateX(-50%);
+            }
+            .footer-container {
+                justify-content: center;
+                padding-right: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <img src="assets/figuren/pilot-winken.png" alt="Küchenpilot" class="chef-image">
+
+        <div class="speech-bubble">
+            <h1>Ich bin dein <span>Küchenpilot.</span></h1>
+            <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
+        </div>
+    </div>
+
+    <div class="footer-container">
+        <button class="compass-button" onclick="location.href='seite2.html'">
+            <img src="assets/icons/kompass.png" alt="Weiter zur App" class="compass-image">
+        </button>
+    </div>
+
+</body>
+</html>
