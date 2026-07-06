@@ -8,8 +8,7 @@
     <style>
         @font-face {
             font-family: "Architects Daughter";
-            src: 
-                 url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -48,8 +47,8 @@
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: 82px;
-            top: 34px;
+            right: 34px;
+            top: 76px;
             width: 190px;
             max-width: 30vw;
             pointer-events: none;
@@ -70,7 +69,7 @@
         .main-card {
             position: relative;
             z-index: 3;
-            width: min(100%, 760px);
+            width: min(100%, 710px);
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
@@ -253,9 +252,10 @@
                 left: 50%;
                 right: auto;
                 top: 28px;
-                width: 215px;
-                max-width: 70vw;
+                width: 225px;
+                max-width: 68vw;
                 transform: translateX(-50%);
+                z-index: 2;
                 border-radius: 28px;
                 padding: 10px;
             }
@@ -286,7 +286,7 @@
             }
 
             .pilot-card {
-                width: 180px;
+                width: 188px;
                 top: 30px;
             }
 
@@ -304,7 +304,7 @@
 <body>
     <main class="page" aria-label="Küchenpilot Personenseite">
         <div class="pilot-card">
-            <img src="assets/figuren/pilot-hinweis-halb.png" alt="Küchenpilot">
+            <img src="assets/figuren/pilot-hinweis.png" alt="Küchenpilot">
         </div>
 
         <section class="main-card">
