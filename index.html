@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Küchenpilot - Personen</title>
+    <title>Küchenpilot - Startseite</title>
     <style>
         @font-face {
             font-family: "Architects Daughter";
-            src: url("assets/fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
             font-weight: normal;
             font-style: normal;
             font-display: swap;
@@ -20,8 +20,6 @@
             --orange-dark: #df8f12;
             --text: #333333;
             --muted: #555555;
-            --line: rgba(245, 166, 35, 0.42);
-            --soft: rgba(245, 166, 35, 0.12);
             --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
         }
 
@@ -35,51 +33,58 @@
             font-family: "Architects Daughter", sans-serif;
             background: var(--sand);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--text);
         }
 
-        .page {
-            width: min(100%, 980px);
-            margin: 0 auto;
+        .start-page {
+            width: min(100%, 940px);
             position: relative;
-            padding: 40px 0;
+            padding: 48px 110px 48px 0;
         }
 
-        .hero {
+        .welcome-card {
             position: relative;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 210px;
-            gap: 22px;
-            align-items: center;
-            margin-bottom: 22px;
-        }
-
-        .intro-card,
-        .pilot-card,
-        .panel-card,
-        .person-card {
+            z-index: 3;
+            width: min(100%, 720px);
             background: var(--card);
-            border: 2px solid var(--line);
+            border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
+            padding: 42px 46px;
             box-shadow: var(--shadow);
         }
 
-        .intro-card {
-            padding: 38px 42px;
-        }
-
         .pilot-card {
-            padding: 10px;
+            position: absolute;
+            z-index: 2;
+            right: 105px;
+            top: 50%;
+            width: 190px;
+            max-width: 32vw;
+            transform: translateY(-50%);
+            pointer-events: none;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 6px;
             overflow: hidden;
         }
 
         .pilot-card img {
             width: 100%;
+            height: auto;
             display: block;
         }
 
+        .pilot-mobile {
+            display: none;
+        }
+
         h1 {
-            margin: 0 0 18px;
+            margin: 0 0 22px;
             font-size: clamp(2.1rem, 5vw, 3.5rem);
             line-height: 1.08;
             font-weight: 600;
@@ -91,185 +96,40 @@
 
         p {
             margin: 0;
-            max-width: 620px;
+            max-width: 560px;
             color: var(--muted);
-            font-size: clamp(1.15rem, 2.1vw, 1.45rem);
-            line-height: 1.5;
+            font-size: clamp(1.22rem, 2.4vw, 1.55rem);
+            line-height: 1.55;
         }
 
-        .panel-card {
-            padding: 30px;
+        .button-row {
+            margin-top: 34px;
+            display: flex;
+            justify-content: flex-end;
         }
 
-        .counter-wrap {
-            display: grid;
-            grid-template-columns: 80px minmax(120px, 1fr) 80px;
-            gap: 18px;
+        .next-button {
+            display: inline-flex;
             align-items: center;
-            max-width: 420px;
-            margin: 20px auto 14px;
-        }
-
-        .counter-button,
-        .add-button,
-        .nav-button,
-        .toggle-button,
-        .remove-button {
-            font-family: inherit;
-            cursor: pointer;
+            justify-content: center;
+            gap: 14px;
+            min-width: 220px;
+            min-height: 64px;
+            padding: 12px 24px;
             border: 2px solid var(--orange);
+            border-radius: 20px;
             background: #ffffff;
             color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.35rem;
+            font-weight: 600;
+            cursor: pointer;
             box-shadow: 0 10px 22px rgba(166, 112, 34, 0.12);
             transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
         }
 
-        .counter-button {
-            width: 80px;
-            height: 72px;
-            border-radius: 22px;
-            font-size: 2.1rem;
-            line-height: 1;
-        }
-
-        .counter-number {
-            min-height: 86px;
-            border-radius: 26px;
-            background: var(--soft);
-            border: 2px dashed var(--line);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3.4rem;
-            color: var(--orange-dark);
-        }
-
-        .hint {
-            text-align: center;
-            margin: 12px auto 0;
-            font-size: 1.18rem;
-            color: var(--muted);
-        }
-
-        .optional-area {
-            margin-top: 26px;
-        }
-
-        .toggle-button,
-        .add-button {
-            width: 100%;
-            min-height: 62px;
-            border-radius: 22px;
-            font-size: 1.28rem;
-            font-weight: 600;
-        }
-
-        .optional-fields {
-            display: none;
-            margin-top: 18px;
-            gap: 16px;
-        }
-
-        .optional-fields.is-open {
-            display: grid;
-        }
-
-        .person-card {
-            padding: 22px;
-            border-radius: 24px;
-            box-shadow: 0 10px 24px rgba(166, 112, 34, 0.12);
-        }
-
-        .person-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 14px;
-            align-items: center;
-            margin-bottom: 18px;
-            font-size: 1.32rem;
-            color: var(--orange-dark);
-            font-weight: 600;
-        }
-
-        label {
-            display: block;
-            margin: 14px 0 6px;
-            font-size: 1.08rem;
-            color: var(--text);
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            border: 2px solid rgba(245, 166, 35, 0.28);
-            border-radius: 18px;
-            padding: 13px 15px;
-            background: #ffffff;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1.08rem;
-            outline: none;
-        }
-
-        textarea {
-            min-height: 74px;
-            resize: vertical;
-        }
-
-        input:focus,
-        textarea:focus {
-            border-color: var(--orange);
-            box-shadow: 0 0 0 4px rgba(245, 166, 35, 0.12);
-        }
-
-        .remove-button {
-            min-height: 44px;
-            padding: 8px 14px;
-            border-radius: 16px;
-            font-size: 1rem;
-            box-shadow: none;
-        }
-
-        .add-button {
-            margin-top: 16px;
-            border-style: dashed;
-        }
-
-        .button-row {
-            margin-top: 28px;
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .nav-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            min-width: 190px;
-            min-height: 62px;
-            padding: 12px 22px;
-            border-radius: 20px;
-            font-size: 1.26rem;
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .nav-button.primary {
-            min-width: 220px;
-        }
-
-        .counter-button:hover,
-        .counter-button:focus-visible,
-        .add-button:hover,
-        .add-button:focus-visible,
-        .nav-button:hover,
-        .nav-button:focus-visible,
-        .toggle-button:hover,
-        .toggle-button:focus-visible,
-        .remove-button:hover,
-        .remove-button:focus-visible {
+        .next-button:hover,
+        .next-button:focus-visible {
             background: var(--orange);
             color: #ffffff;
             transform: translateY(-2px);
@@ -277,215 +137,120 @@
             outline: none;
         }
 
+        .next-button img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            transition: filter 0.18s ease;
+        }
+
+        .next-button:hover img,
+        .next-button:focus-visible img {
+            filter: brightness(0) invert(1);
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
         @media (max-width: 760px) {
             body {
                 padding: 18px;
+                align-items: flex-start;
             }
 
-            .page {
-                padding: 14px 0 26px;
+            .start-page {
+                width: 100%;
+                padding: 138px 0 0;
+                margin-top: 14px;
             }
 
-            .hero {
-                grid-template-columns: 1fr;
-                gap: 0;
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
             }
 
             .pilot-card {
-                width: 198px;
-                justify-self: center;
-                margin-bottom: -22px;
+                left: 50%;
+                right: auto;
+                top: 28px;
+                width: 225px;
+                max-width: 68vw;
+                transform: translateX(-50%);
                 z-index: 2;
+                border-radius: 28px;
+                padding: 10px;
             }
 
-            .intro-card {
-                padding: 42px 24px 26px;
-                border-radius: 26px;
-            }
-
-            .panel-card {
-                padding: 24px 18px;
-                border-radius: 26px;
-            }
-
-            .counter-wrap {
-                grid-template-columns: 66px minmax(96px, 1fr) 66px;
-                gap: 12px;
-            }
-
-            .counter-button {
-                width: 66px;
-                height: 64px;
-                border-radius: 20px;
-            }
-
-            .counter-number {
-                min-height: 76px;
-                font-size: 3rem;
-            }
-
-            .person-head {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .remove-button {
+            .welcome-card {
                 width: 100%;
+                z-index: 3;
+                padding: 60px 24px 26px;
+                border-radius: 26px;
+            }
+
+            h1 {
+                margin-bottom: 18px;
             }
 
             .button-row {
-                flex-direction: column;
+                margin-top: 28px;
+                justify-content: center;
             }
 
-            .nav-button,
-            .nav-button.primary {
+            .next-button {
                 width: 100%;
-                min-width: 0;
+                max-width: 340px;
+                min-height: 62px;
+                font-size: 1.28rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .start-page {
+                padding-top: 128px;
+            }
+
+            .pilot-card {
+                width: 188px;
+                top: 30px;
+            }
+
+            .welcome-card {
+                padding: 60px 20px 24px;
             }
         }
     </style>
 </head>
 <body>
 
-    <main class="page" aria-label="Küchenpilot Personen">
-        <section class="hero">
-            <div class="intro-card">
-                <h1>Wer <span>isst mit?</span></h1>
-                <p>Für wie viele Personen soll der Küchenpilot planen? Namen, Vorlieben und Unverträglichkeiten kannst du ergänzen — musst du aber nicht.</p>
-            </div>
+    <main class="start-page" aria-label="Küchenpilot Startseite">
+        <div class="pilot-card pilot-desktop">
+            <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot">
+        </div>
 
-            <div class="pilot-card">
-                <img src="assets/figuren/pilot-zeigen.png" alt="Küchenpilot zeigt auf die Eingabe">
-            </div>
-        </section>
+        <div class="pilot-card pilot-mobile">
+            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
+        </div>
 
-        <section class="panel-card" aria-label="Personenanzahl und optionale Angaben">
-            <p class="hint">Pflicht ist nur die Personenanzahl.</p>
-
-            <div class="counter-wrap">
-                <button class="counter-button" type="button" id="minusPerson" aria-label="Eine Person weniger">−</button>
-                <div class="counter-number" id="personCount" aria-live="polite">2</div>
-                <button class="counter-button" type="button" id="plusPerson" aria-label="Eine Person mehr">+</button>
-            </div>
-
-            <p class="hint">Optional: Angaben pro Person speichern, damit der Küchenpilot später besser mitdenken kann.</p>
-
-            <div class="optional-area">
-                <button class="toggle-button" type="button" id="toggleDetails">Optionale Personendaten öffnen</button>
-                <div class="optional-fields" id="personCards"></div>
-                <button class="add-button" type="button" id="addPerson" hidden>+ Person hinzufügen</button>
-            </div>
+        <section class="welcome-card">
+            <h1>Ich bin dein <span>Küchenpilot.</span></h1>
+            <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
 
             <div class="button-row">
-                <a class="nav-button" href="index.html">← Zurück</a>
-                <a class="nav-button primary" href="heute.html">Weiter →</a>
+                <button class="next-button" onclick="location.href='seite2.html'" aria-label="Weiter zur nächsten Seite">
+                    <img src="assets/icons/schneebesen.png" alt="">
+                    <span>Weiter</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </button>
             </div>
         </section>
     </main>
-
-    <script>
-        const state = {
-            count: 2,
-            detailsOpen: false,
-            people: [
-                { name: "", likes: "", dislikes: "", intolerances: "" },
-                { name: "", likes: "", dislikes: "", intolerances: "" }
-            ]
-        };
-
-        const personCount = document.getElementById("personCount");
-        const minusPerson = document.getElementById("minusPerson");
-        const plusPerson = document.getElementById("plusPerson");
-        const toggleDetails = document.getElementById("toggleDetails");
-        const personCards = document.getElementById("personCards");
-        const addPerson = document.getElementById("addPerson");
-
-        function ensurePeople() {
-            while (state.people.length < state.count) {
-                state.people.push({ name: "", likes: "", dislikes: "", intolerances: "" });
-            }
-            if (state.people.length > state.count) {
-                state.people.length = state.count;
-            }
-        }
-
-        function saveField(index, key, value) {
-            state.people[index][key] = value;
-        }
-
-        function render() {
-            ensurePeople();
-            personCount.textContent = state.count;
-            minusPerson.disabled = state.count <= 1;
-            toggleDetails.textContent = state.detailsOpen ? "Optionale Personendaten schließen" : "Optionale Personendaten öffnen";
-            addPerson.hidden = !state.detailsOpen;
-            personCards.classList.toggle("is-open", state.detailsOpen);
-
-            if (!state.detailsOpen) {
-                personCards.innerHTML = "";
-                return;
-            }
-
-            personCards.innerHTML = state.people.map((person, index) => `
-                <article class="person-card">
-                    <div class="person-head">
-                        <span>👤 Person ${index + 1}</span>
-                        ${state.count > 1 ? `<button class="remove-button" type="button" data-remove="${index}">Entfernen</button>` : ""}
-                    </div>
-
-                    <label for="name-${index}">Name optional</label>
-                    <input id="name-${index}" value="${person.name}" placeholder="z. B. Manuela" data-index="${index}" data-key="name">
-
-                    <label for="likes-${index}">❤️ Das mag ich optional</label>
-                    <textarea id="likes-${index}" placeholder="z. B. Kartoffeln, Fisch, Haferflocken" data-index="${index}" data-key="likes">${person.likes}</textarea>
-
-                    <label for="dislikes-${index}">🚫 Das mag ich nicht optional</label>
-                    <textarea id="dislikes-${index}" placeholder="z. B. Paprika, Bohnen" data-index="${index}" data-key="dislikes">${person.dislikes}</textarea>
-
-                    <label for="intolerances-${index}">🩺 Allergien / Unverträglichkeiten optional</label>
-                    <textarea id="intolerances-${index}" placeholder="z. B. Laktose, Nüsse, Gluten" data-index="${index}" data-key="intolerances">${person.intolerances}</textarea>
-                </article>
-            `).join("");
-        }
-
-        minusPerson.addEventListener("click", () => {
-            if (state.count <= 1) return;
-            state.count -= 1;
-            render();
-        });
-
-        plusPerson.addEventListener("click", () => {
-            state.count += 1;
-            render();
-        });
-
-        addPerson.addEventListener("click", () => {
-            state.count += 1;
-            render();
-        });
-
-        toggleDetails.addEventListener("click", () => {
-            state.detailsOpen = !state.detailsOpen;
-            render();
-        });
-
-        personCards.addEventListener("input", (event) => {
-            const field = event.target;
-            if (!field.dataset.key) return;
-            saveField(Number(field.dataset.index), field.dataset.key, field.value);
-        });
-
-        personCards.addEventListener("click", (event) => {
-            const button = event.target.closest("[data-remove]");
-            if (!button) return;
-            const index = Number(button.dataset.remove);
-            state.people.splice(index, 1);
-            state.count = Math.max(1, state.count - 1);
-            render();
-        });
-
-        render();
-    </script>
 
 </body>
 </html>
