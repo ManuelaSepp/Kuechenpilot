@@ -59,7 +59,7 @@
         .pilot-peek {
             position: absolute;
             z-index: 1;
-            right: 0;
+            right: 72;
             top: 50%;
             width: 260px;
             max-width: 32vw;
@@ -163,22 +163,24 @@
         margin-top: 14px;
     }
 
-    .pilot-peek {
-        position: absolute;
-        top: -10px;
-        left: 50%;
-        right: auto;
-        width: 240px;
-        max-width: 70vw;
-        transform: translateX(-50%);
-        z-index: 3;
-    }
+  .pilot-peek {
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    right: auto;
+    width: 230px;
+    max-width: 70vw;
+    transform: translateX(-50%);
+    z-index: 1;
+}
 
-    .welcome-card {
-        width: 100%;
-        padding: 90px 24px 26px;
-        border-radius: 26px;
-    }
+   .welcome-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 90px 24px 26px;
+    border-radius: 26px;
+}
 
     h1 {
         margin-bottom: 18px;
