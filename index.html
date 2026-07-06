@@ -5,147 +5,212 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Küchenpilot - Startseite</title>
     <style>
-@font-face {
-    font-family: "Architects Daughter";
-    src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
 
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+        }
 
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: "Architects Daughter", sans-serif;
-            background-color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+        * {
             box-sizing: border-box;
         }
 
-        .main-container {
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
             display: flex;
-            flex-direction: row;
             align-items: center;
-            max-width: 900px;
-            width: 100%;
-            gap: 20px;
+            justify-content: center;
+            color: var(--text);
         }
 
-        .chef-image {
-            width: 35%;
-            max-width: 300px;
-            height: auto;
-        }
-
-        .speech-bubble {
-            width: 65%;
-            border: 3px solid #ffb700;
-            border-radius: 24px;
-            padding: 30px;
+        .start-page {
+            width: min(100%, 920px);
             position: relative;
-            background-color: #fff;
+            padding: 46px 120px 46px 0;
         }
 
-        .speech-bubble::before {
-            content: '';
+        .welcome-card {
+            position: relative;
+            z-index: 2;
+            width: min(100%, 720px);
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: 42px 46px;
+            box-shadow: var(--shadow);
+        }
+
+        .pilot-peek {
             position: absolute;
-            left: -20px;
-            top: 40px;
-            border-width: 10px 20px 10px 0;
-            border-style: solid;
-            border-color: transparent #ffb700 transparent transparent;
+            z-index: 1;
+            right: 0;
+            top: 50%;
+            width: 260px;
+            max-width: 32vw;
+            transform: translateY(-50%);
+            pointer-events: none;
         }
 
-        .speech-bubble h1 {
-            margin-top: 0;
-            color: #333333;
-            font-size: 2.2rem;
+        h1 {
+            margin: 0 0 22px;
+            font-size: clamp(2.1rem, 5vw, 3.5rem);
+            line-height: 1.08;
             font-weight: 600;
         }
 
-        .speech-bubble h1 span {
-            color: #ffb700;
+        h1 span {
+            color: var(--orange);
         }
 
-        .speech-bubble p {
-            color: #444444;
-            font-size: 1.4rem;
-            line-height: 1.6;
-            margin-bottom: 0;
+        p {
+            margin: 0;
+            max-width: 560px;
+            color: var(--muted);
+            font-size: clamp(1.22rem, 2.4vw, 1.55rem);
+            line-height: 1.55;
         }
 
-        .footer-container {
-            width: 100%;
-            max-width: 900px;
+        .button-row {
+            margin-top: 34px;
             display: flex;
             justify-content: flex-end;
-            margin-top: 40px;
-            padding-right: 40px;
         }
 
-        .compass-button {
-            background: none;
-            border: none;
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-width: 220px;
+            min-height: 64px;
+            padding: 12px 24px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.35rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            box-shadow: 0 10px 22px rgba(166, 112, 34, 0.12);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
         }
 
-        .compass-button:hover {
-            transform: scale(1.05);
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(166, 112, 34, 0.20);
+            outline: none;
         }
 
-        .compass-image {
-            width: 120px;
-            height: auto;
+        .next-button img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            transition: filter 0.18s ease;
         }
 
-        @media (max-width: 768px) {
-            .main-container {
-                flex-direction: column;
-                text-align: center;
+        .next-button:hover img,
+        .next-button:focus-visible img {
+            filter: brightness(0) invert(1);
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px;
+                align-items: flex-start;
             }
-            .chef-image {
-                width: 60%;
+
+            .start-page {
+                padding: 98px 0 0;
+                margin-top: 14px;
             }
-            .speech-bubble {
+
+            .pilot-peek {
+                width: 190px;
+                max-width: 62vw;
+                right: -14px;
+                top: 0;
+                transform: none;
+            }
+
+            .welcome-card {
                 width: 100%;
-                box-sizing: border-box;
+                padding: 34px 24px 26px;
+                border-radius: 26px;
             }
-            .speech-bubble::before {
-                left: 50%;
-                top: -20px;
-                border-width: 0 10px 20px 10px;
-                border-color: transparent transparent #ffb700 transparent;
-                transform: translateX(-50%);
+
+            h1 {
+                margin-bottom: 18px;
             }
-            .footer-container {
+
+            .button-row {
+                margin-top: 28px;
                 justify-content: center;
-                padding-right: 0;
+            }
+
+            .next-button {
+                width: 100%;
+                max-width: 340px;
+                min-height: 62px;
+                font-size: 1.28rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .pilot-peek {
+                width: 168px;
+                right: -22px;
+            }
+
+            .welcome-card {
+                padding: 30px 20px 24px;
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <img src="assets/figuren/pilot-winken.png" alt="Küchenpilot" class="chef-image">
+    <main class="start-page" aria-label="Küchenpilot Startseite">
+        <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot" class="pilot-peek">
 
-        <div class="speech-bubble">
+        <section class="welcome-card">
             <h1>Ich bin dein <span>Küchenpilot.</span></h1>
             <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
-        </div>
-    </div>
 
-    <div class="footer-container">
-        <button class="compass-button" onclick="location.href='seite2.html'">
-            <img src="assets/icons/kompass.png" alt="Weiter zur App" class="compass-image">
-        </button>
-    </div>
+            <div class="button-row">
+                <button class="next-button" onclick="location.href='seite2.html'" aria-label="Weiter zur nächsten Seite">
+                    <img src="assets/icons/schneebesen.png" alt="">
+                    <span>Weiter</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </button>
+            </div>
+        </section>
+    </main>
 
 </body>
 </html>
