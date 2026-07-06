@@ -67,6 +67,9 @@
             pointer-events: none;
         }
 
+        .pilot-mobile {
+    display: none;
+}
         h1 {
             margin: 0 0 22px;
             font-size: clamp(2.1rem, 5vw, 3.5rem);
@@ -141,6 +144,14 @@
 
        @media (max-width: 760px) {
 
+            .pilot-desktop {
+        display: none;
+    }
+
+    .pilot-mobile {
+        display: block;
+    }
+
     body {
         padding: 18px;
         align-items: flex-start;
@@ -201,7 +212,8 @@
 <body>
 
     <main class="start-page" aria-label="Küchenpilot Startseite">
-      <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot" class="pilot-peek">
+     <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot" class="pilot-peek pilot-desktop">
+<img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot" class="pilot-peek pilot-mobile">
 
         <section class="welcome-card">
             <h1>Ich bin dein <span>Küchenpilot.</span></h1>
