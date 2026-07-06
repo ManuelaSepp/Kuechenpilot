@@ -40,14 +40,14 @@
         }
 
         .start-page {
-            width: min(100%, 920px);
+            width: min(100%, 940px);
             position: relative;
-            padding: 46px 120px 46px 0;
+            padding: 48px 150px 48px 0;
         }
 
         .welcome-card {
             position: relative;
-            z-index: 2;
+            z-index: 3;
             width: min(100%, 720px);
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
@@ -56,15 +56,27 @@
             box-shadow: var(--shadow);
         }
 
-        .pilot-peek {
+        .pilot-card {
             position: absolute;
-            z-index: 1;
-            right: 28px;
-            top: 54%;
-            width: 290px;
+            z-index: 2;
+            right: 38px;
+            top: 50%;
+            width: 270px;
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 14px;
+            overflow: hidden;
+        }
+
+        .pilot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         .pilot-mobile {
@@ -144,6 +156,17 @@
         }
 
         @media (max-width: 760px) {
+            body {
+                padding: 18px;
+                align-items: flex-start;
+            }
+
+            .start-page {
+                width: 100%;
+                padding: 138px 0 0;
+                margin-top: 14px;
+            }
+
             .pilot-desktop {
                 display: none;
             }
@@ -152,33 +175,22 @@
                 display: block;
             }
 
-            body {
-                padding: 18px;
-                align-items: flex-start;
-            }
-
-            .start-page {
-                position: relative;
-                padding: 140px 0 0;
-                margin-top: 14px;
-            }
-
-            .pilot-peek {
-                position: absolute;
-                top: 45px;
+            .pilot-card {
                 left: 50%;
                 right: auto;
-                width: 230px;
-                max-width: 70vw;
+                top: 28px;
+                width: 225px;
+                max-width: 68vw;
                 transform: translateX(-50%);
-                z-index: 1;
+                z-index: 2;
+                border-radius: 28px;
+                padding: 10px;
             }
 
             .welcome-card {
-                position: relative;
-                z-index: 2;
                 width: 100%;
-                padding: 90px 24px 26px;
+                z-index: 3;
+                padding: 88px 24px 26px;
                 border-radius: 26px;
             }
 
@@ -200,14 +212,17 @@
         }
 
         @media (max-width: 420px) {
-            .pilot-peek {
-                width: 168px;
-                left: 50%;
-                right: auto;
+            .start-page {
+                padding-top: 128px;
+            }
+
+            .pilot-card {
+                width: 188px;
+                top: 30px;
             }
 
             .welcome-card {
-                padding: 90px 20px 24px;
+                padding: 78px 20px 24px;
             }
         }
     </style>
@@ -215,8 +230,13 @@
 <body>
 
     <main class="start-page" aria-label="Küchenpilot Startseite">
-        <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot" class="pilot-peek pilot-desktop">
-        <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot" class="pilot-peek pilot-mobile">
+        <div class="pilot-card pilot-desktop">
+            <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot">
+        </div>
+
+        <div class="pilot-card pilot-mobile">
+            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
+        </div>
 
         <section class="welcome-card">
             <h1>Ich bin dein <span>Küchenpilot.</span></h1>
