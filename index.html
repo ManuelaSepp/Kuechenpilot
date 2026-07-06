@@ -139,47 +139,52 @@
             transform: translateY(-1px);
         }
 
-        @media (max-width: 760px) {
-            body {
-                padding: 18px;
-                align-items: flex-start;
-            }
+       @media (max-width: 760px) {
 
-            .start-page {
-                padding: 98px 0 0;
-                margin-top: 14px;
-            }
+    body {
+        padding: 18px;
+        align-items: flex-start;
+    }
 
-            .pilot-peek {
-                width: 190px;
-                max-width: 62vw;
-                right: -14px;
-                top: 0;
-                transform: none;
-            }
+    .start-page {
+        position: relative;
+        padding: 140px 0 0;
+        margin-top: 14px;
+    }
 
-            .welcome-card {
-                width: 100%;
-                padding: 34px 24px 26px;
-                border-radius: 26px;
-            }
+    .pilot-peek {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        right: auto;
+        width: 240px;
+        max-width: 70vw;
+        transform: translateX(-50%);
+        z-index: 3;
+    }
 
-            h1 {
-                margin-bottom: 18px;
-            }
+    .welcome-card {
+        width: 100%;
+        padding: 90px 24px 26px;
+        border-radius: 26px;
+    }
 
-            .button-row {
-                margin-top: 28px;
-                justify-content: center;
-            }
+    h1 {
+        margin-bottom: 18px;
+    }
 
-            .next-button {
-                width: 100%;
-                max-width: 340px;
-                min-height: 62px;
-                font-size: 1.28rem;
-            }
-        }
+    .button-row {
+        margin-top: 28px;
+        justify-content: center;
+    }
+
+    .next-button {
+        width: 100%;
+        max-width: 340px;
+        min-height: 62px;
+        font-size: 1.28rem;
+    }
+}
 
         @media (max-width: 420px) {
             .pilot-peek {
@@ -196,7 +201,7 @@
 <body>
 
     <main class="start-page" aria-label="Küchenpilot Startseite">
-        <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot" class="pilot-peek">
+      <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot" class="pilot-peek">
 
         <section class="welcome-card">
             <h1>Ich bin dein <span>Küchenpilot.</span></h1>
