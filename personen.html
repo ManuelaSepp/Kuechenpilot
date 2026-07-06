@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Wer isst mit?</title>
+
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("assets/fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        .page {
+            width: min(100%, 980px);
+            margin: 0 auto;
+            position: relative;
+            padding: 46px 0;
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            right: 34px;
+            top: 20px;
+            width: 175px;
+            max-width: 30vw;
+            pointer-events: none;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        .pilot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .main-card {
+            position: relative;
+            z-index: 3;
+            width: min(100%, 760px);
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: 42px 46px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            font-size: clamp(2.1rem, 5vw, 3.45rem);
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        p {
+            margin: 0;
+            max-width: 580px;
+            color: var(--muted);
+            font-size: clamp(1.18rem, 2.4vw, 1.45rem);
+            line-height: 1.5;
+        }
+
+        .counter-card {
+            margin-top: 34px;
+            width: min(100%, 520px);
+            background: #fffaf0;
+            border: 2px dashed rgba(245, 166, 35, 0.58);
+            border-radius: 26px;
+            padding: 24px;
+        }
+
+        .counter-title {
+            font-size: 1.38rem;
+            color: var(--text);
+            margin-bottom: 16px;
+        }
+
+        .counter-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .counter-button {
+            width: 58px;
+            height: 58px;
+            border: 2px solid var(--orange);
+            border-radius: 18px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 2rem;
+            line-height: 1;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(166, 112, 34, 0.10);
+        }
+
+        .counter-button:hover,
+        .counter-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .counter-value {
+            min-width: 74px;
+            text-align: center;
+            font-size: 2.7rem;
+            color: var(--orange-dark);
+        }
+
+        .optional-box {
+            margin-top: 26px;
+            width: min(100%, 620px);
+        }
+
+        .optional-box summary {
+            cursor: pointer;
+            color: var(--orange-dark);
+            font-size: 1.24rem;
+            list-style-position: outside;
+        }
+
+        .person-list {
+            margin-top: 18px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .person-card {
+            background: #ffffff;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 22px;
+            padding: 20px;
+        }
+
+        .person-card h2 {
+            margin: 0 0 14px;
+            font-size: 1.42rem;
+            color: var(--text);
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-size: 1.04rem;
+            color: var(--muted);
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            margin-top: 6px;
+            padding: 11px 13px;
+            border: 2px solid rgba(245, 166, 35, 0.25);
+            border-radius: 15px;
+            background: #fffdf8;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.02rem;
+        }
+
+        textarea {
+            min-height: 62px;
+            resize: vertical;
+        }
+
+        .button-row {
+            margin-top: 34px;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 190px;
+            min-height: 62px;
+            padding: 12px 24px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.24rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        .nav-button:hover,
+        .nav-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px;
+            }
+
+            .page {
+                width: 100%;
+                padding: 138px 0 0;
+                margin-top: 14px;
+            }
+
+            .pilot-card {
+                left: 50%;
+                right: auto;
+                top: 28px;
+                width: 205px;
+                max-width: 68vw;
+                transform: translateX(-50%);
+                border-radius: 28px;
+                padding: 10px;
+            }
+
+            .main-card {
+                width: 100%;
+                padding: 42px 24px 26px;
+                border-radius: 26px;
+            }
+
+            .counter-card {
+                padding: 22px;
+            }
+
+            .button-row {
+                justify-content: center;
+            }
+
+            .nav-button {
+                width: 100%;
+                max-width: 340px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .page {
+                padding-top: 128px;
+            }
+
+            .pilot-card {
+                width: 180px;
+                top: 30px;
+            }
+
+            .main-card {
+                padding: 40px 20px 24px;
+            }
+
+            .counter-row {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page" aria-label="Küchenpilot Personenseite">
+        <div class="pilot-card">
+            <img src="assets/figuren/pilot-zeigen.png" alt="Küchenpilot">
+        </div>
+
+        <section class="main-card">
+            <h1>Wer <span>isst mit?</span></h1>
+
+            <p>Für wie viele Personen soll der Küchenpilot planen? Weitere Angaben sind freiwillig und können jederzeit ergänzt werden.</p>
+
+            <div class="counter-card">
+                <div class="counter-title">Personenanzahl</div>
+
+                <div class="counter-row">
+                    <button class="counter-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
+                    <div class="counter-value" id="personCount">2</div>
+                    <button class="counter-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
+                </div>
+            </div>
+
+            <details class="optional-box">
+                <summary>Optionale Angaben ergänzen</summary>
+                <div class="person-list" id="personList"></div>
+            </details>
+
+            <div class="button-row">
+                <button class="nav-button" type="button" onclick="location.href='index.html'">← Zurück</button>
+                <button class="nav-button" type="button" onclick="location.href='heute.html'">Weiter →</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let personCount = 2;
+
+        function changePersons(amount) {
+            personCount = Math.max(1, personCount + amount);
+            document.getElementById("personCount").textContent = personCount;
+            renderPersons();
+        }
+
+        function renderPersons() {
+            const list = document.getElementById("personList");
+            list.innerHTML = "";
+
+            for (let i = 1; i <= personCount; i++) {
+                const card = document.createElement("div");
+                card.className = "person-card";
+                card.innerHTML = `
+                    <h2>Person ${i}</h2>
+
+                    <label>Name optional
+                        <input type="text" placeholder="z. B. Manuela">
+                    </label>
+
+                    <label>Vorlieben optional
+                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
+                    </label>
+
+                    <label>Mag ich nicht optional
+                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
+                    </label>
+
+                    <label>Allergien / Unverträglichkeiten optional
+                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
+                    </label>
+                `;
+                list.appendChild(card);
+            }
+        }
+
+        renderPersons();
+    </script>
+</body>
+</html>
