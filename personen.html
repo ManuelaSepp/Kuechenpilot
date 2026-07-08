@@ -40,28 +40,28 @@
         }
 
         .start-page {
-            width: min(100%, clamp(940px, 76vw, 990px));
+            width: min(100%, clamp(940px, 76vw, 1000px));
             position: relative;
-            padding: clamp(48px, 5vw, 56px) clamp(110px, 9vw, 120px) clamp(48px, 5vw, 56px) 0;
+            padding: 48px 110px 48px 0;
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, clamp(720px, 60vw, 750px));
+            width: min(100%, clamp(720px, 60vw, 760px));
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
-            padding: clamp(42px, 3.6vw, 46px) clamp(46px, 4vw, 52px);
+            padding: 42px 46px;
             box-shadow: var(--shadow);
         }
 
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: clamp(105px, 8vw, 116px);
+            right: clamp(105px, 8vw, 118px);
             top: 50%;
-            width: clamp(190px, 15vw, 202px);
+            width: clamp(190px, 15vw, 205px);
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
@@ -157,18 +157,18 @@
 
 
         .person-count-card {
-            margin-top: 34px;
-            width: min(100%, 520px);
+            margin-top: 26px;
+            width: min(100%, 470px);
             background: #fffaf0;
             border: 2px dashed rgba(245, 166, 35, 0.58);
-            border-radius: 26px;
-            padding: 24px;
+            border-radius: 24px;
+            padding: 18px 22px;
         }
 
         .person-count-title {
-            font-size: clamp(1.28rem, 2vw, 1.48rem);
+            font-size: clamp(1.18rem, 1.8vw, 1.34rem);
             color: var(--text);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .person-count-row {
@@ -178,14 +178,14 @@
         }
 
         .count-button {
-            width: 58px;
-            height: 58px;
+            width: 50px;
+            height: 50px;
             border: 2px solid var(--orange);
-            border-radius: 18px;
+            border-radius: 16px;
             background: #ffffff;
             color: var(--orange-dark);
             font-family: inherit;
-            font-size: 2rem;
+            font-size: 1.75rem;
             line-height: 1;
             cursor: pointer;
             box-shadow: 0 8px 18px rgba(166, 112, 34, 0.10);
@@ -199,77 +199,80 @@
         }
 
         .count-value {
-            min-width: 74px;
+            min-width: 64px;
             text-align: center;
-            font-size: clamp(2.45rem, 4vw, 2.9rem);
+            font-size: clamp(2.1rem, 3.4vw, 2.55rem);
             color: var(--orange-dark);
         }
 
         .optional-persons {
-            margin-top: 26px;
+            margin-top: 22px;
             width: min(100%, 620px);
         }
 
         .optional-persons summary {
             cursor: pointer;
             color: var(--orange-dark);
-            font-size: clamp(1.45rem, 3vw, 1.75rem);
+            font-size: clamp(1.28rem, 2.4vw, 1.52rem);
             font-weight: 600;
             line-height: 1.25;
             list-style-position: outside;
         }
 
         .person-list {
-            margin-top: 18px;
+            margin-top: 16px;
             display: grid;
-            gap: 18px;
+            gap: 16px;
         }
 
         .person-card {
             background: #ffffff;
             border: 2px solid rgba(245, 166, 35, 0.30);
             border-radius: 22px;
-            padding: 20px;
+            padding: 18px;
         }
 
         .person-card h2 {
-            margin: 0 0 14px;
-            font-size: 1.42rem;
+            margin: 0 0 12px;
+            font-size: 1.34rem;
             color: var(--text);
         }
 
         label {
             display: block;
-            margin-top: 12px;
-            font-size: 1.04rem;
+            margin-top: 10px;
+            font-size: 1rem;
             color: var(--muted);
         }
 
         input,
         textarea {
             width: 100%;
-            margin-top: 6px;
-            padding: 11px 13px;
+            margin-top: 5px;
+            padding: 10px 12px;
             border: 2px solid rgba(245, 166, 35, 0.25);
-            border-radius: 15px;
+            border-radius: 14px;
             background: #fffdf8;
             color: var(--text);
             font-family: inherit;
-            font-size: 1.02rem;
+            font-size: 1rem;
         }
 
         textarea {
-            min-height: 62px;
+            min-height: 56px;
             resize: vertical;
         }
 
         .button-row-double {
+            margin-top: 26px;
             justify-content: space-between;
             gap: 18px;
         }
 
         .button-row-double .next-button {
-            min-width: 190px;
+            min-width: 185px;
+            min-height: 58px;
+            font-size: 1.22rem;
         }
 
         @media (max-width: 760px) {
@@ -328,7 +331,9 @@
             }
 
             .person-count-card {
+                width: 100%;
                 padding: 22px;
+                margin-top: 30px;
             }
 
             .person-count-row {
