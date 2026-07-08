@@ -42,13 +42,13 @@
         .start-page {
             width: min(100%, clamp(940px, 78vw, 1040px));
             position: relative;
-            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
+            padding: clamp(48px, 5vw, 58px);
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, clamp(720px, 64vw, 790px));
+            width: 100%;
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
@@ -362,18 +362,39 @@
             }
         }
 
-    </style>
+    
+.person-template{
+    margin-top:32px;
+    background:var(--card);
+    border:2px solid rgba(245,166,35,.42);
+    border-radius:30px;
+    padding:42px 46px;
+    box-shadow:var(--shadow);
+}
+.person-template h2{
+    margin:0 0 18px;
+    color:var(--orange-dark);
+}
+.person-template label{
+    display:block;
+    margin-top:14px;
+}
+.person-template input,
+.person-template textarea{
+    width:100%;
+    margin-top:6px;
+    padding:10px 12px;
+    border:2px solid rgba(245,166,35,.25);
+    border-radius:14px;
+    font:inherit;
+}
+.person-template textarea{min-height:56px;}
+
+</style>
 </head>
 <body>
 
     <main class="start-page" aria-label="Küchenpilot Personenseite">
-        <div class="pilot-card pilot-desktop">
-            <img src="assets/figuren/pilot-mauer-schraeg.png" alt="Küchenpilot">
-        </div>
-
-        <div class="pilot-card pilot-mobile">
-            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
-        </div>
 
         <section class="welcome-card">
             <h1>Wer <span>isst mit?</span></h1>
@@ -403,7 +424,11 @@
                     <span class="arrow" aria-hidden="true">→</span>
                 </button>
             </div>
+        
         </section>
+
+        <section id="personCards"></section>
+
     </main>
 
     <script>
@@ -435,6 +460,43 @@
 
         renderPersons();
     </script>
+
+
+<script>
+function renderPersons(){
+ const wrap=document.getElementById('personCards');
+ if(!wrap) return;
+ wrap.innerHTML='';
+ for(let i=1;i<=personCount;i++){
+   wrap.insertAdjacentHTML('beforeend',`
+   <section class="person-template">
+      <h2>👤 Person ${i}</h2>
+
+      <label>Name
+        <input type="text" placeholder="Name">
+      </label>
+
+      <label>Vorlieben
+        <textarea></textarea>
+      </label>
+
+      <label>Mag ich nicht
+        <textarea></textarea>
+      </label>
+
+      <label>Allergien / Unverträglichkeiten
+        <textarea></textarea>
+      </label>
+   </section>`);
+ }
+}
+const oldChange=changePersons;
+changePersons=function(a){
+ oldChange(a);
+ renderPersons();
+}
+renderPersons();
+</script>
 
 </body>
 </html>
