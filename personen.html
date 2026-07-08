@@ -40,7 +40,7 @@
         }
 
         .start-page {
-            width: 940px;
+            width: min(100%, 940px);
             position: relative;
             padding: 48px 110px 48px 0;
         }
@@ -48,7 +48,7 @@
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: 720px;
+            width: min(100%, 720px);
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
@@ -233,6 +233,10 @@
 
         .person-page h1 {
             margin-bottom: 14px;
+        }
+
+        .person-page .intro-text {
+            max-width: 620px;
         }
 
         .person-row {
