@@ -40,28 +40,28 @@
         }
 
         .start-page {
-            width: min(100%, 940px);
+            width: min(100%, clamp(940px, 78vw, 1040px));
             position: relative;
-            padding: 48px 110px 48px 0;
+            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, 720px);
+            width: min(100%, clamp(720px, 64vw, 790px));
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
-            padding: 42px 46px;
+            padding: clamp(42px, 4vw, 50px) clamp(46px, 4.5vw, 56px);
             box-shadow: var(--shadow);
         }
 
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: 105px;
+            right: clamp(105px, 9vw, 126px);
             top: 50%;
-            width: 190px;
+            width: clamp(190px, 17vw, 215px);
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
@@ -99,11 +99,11 @@
             max-width: 560px;
             color: var(--muted);
             font-size: clamp(1.22rem, 2.4vw, 1.55rem);
-            line-height: 1.55;
+            line-height: 1.42;
         }
 
         .button-row {
-            margin-top: 34px;
+            margin-top: 22px;
             display: flex;
             justify-content: flex-end;
         }
@@ -227,17 +227,17 @@
         }
 
         .person-row {
-            margin-top: 24px;
+            margin-top: 14px;
             display: flex;
             align-items: center;
-            gap: 34px;
+            gap: 24px;
             flex-wrap: wrap;
         }
 
         .person-counter {
             display: inline-flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .count-button {
@@ -275,7 +275,7 @@
         .optional-persons summary {
             cursor: pointer;
             color: var(--orange-dark);
-            font-size: 1.34rem;
+            font-size: 1.26rem;
             font-weight: 600;
             line-height: 1.25;
         }
@@ -362,86 +362,46 @@
             }
         }
 
+    
+.optional-toggle{
+    border:0;
+    background:none;
+    color:var(--orange-dark);
+    font:inherit;
+    font-size:1.26rem;
+    font-weight:600;
+    cursor:pointer;
+    padding:0;
+}
 
-        .optional-toggle {
-            border: 0;
-            background: transparent;
-            padding: 0;
-            color: var(--orange-dark);
-            font-family: inherit;
-            font-size: 1.26rem;
-            font-weight: 600;
-            line-height: 1.25;
-            cursor: pointer;
-        }
+.person-cards{
+    width:min(100%, clamp(720px,64vw,790px));
+    margin-top:28px;
+    display:grid;
+    gap:24px;
+}
 
-        .person-cards-area {
-            position: relative;
-            z-index: 3;
-            width: min(100%, clamp(720px, 64vw, 790px));
-            display: grid;
-            gap: 24px;
-            margin-top: 28px;
-        }
+.person-sheet{
+    background:var(--card);
+    border:2px solid rgba(245,166,35,.42);
+    border-radius:30px;
+    padding:clamp(42px,4vw,50px) clamp(46px,4.5vw,56px);
+    box-shadow:var(--shadow);
+}
 
-        .person-big-card {
-            background: var(--card);
-            border: 2px solid rgba(245, 166, 35, 0.42);
-            border-radius: 30px;
-            padding: clamp(34px, 3.4vw, 42px) clamp(46px, 4.5vw, 56px);
-            box-shadow: var(--shadow);
-        }
+.person-sheet h2{margin:0 0 18px;color:var(--orange-dark);}
+.person-sheet label{display:block;margin-top:12px;}
+.person-sheet input,.person-sheet textarea{
+ width:100%;
+ margin-top:6px;
+ padding:10px 12px;
+ border:2px solid rgba(245,166,35,.25);
+ border-radius:14px;
+ font:inherit;
+}
+.person-sheet textarea{min-height:58px;}
 
-        .person-big-card h2 {
-            margin: 0 0 18px;
-            font-size: clamp(1.7rem, 3vw, 2.2rem);
-            color: var(--orange-dark);
-        }
-
-        .person-big-card label {
-            display: block;
-            margin-top: 14px;
-            color: var(--muted);
-            font-size: 1.05rem;
-        }
-
-        .person-big-card input,
-        .person-big-card textarea {
-            width: 100%;
-            margin-top: 6px;
-            padding: 11px 13px;
-            border: 2px solid rgba(245, 166, 35, 0.25);
-            border-radius: 15px;
-            background: #fffdf8;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1.02rem;
-        }
-
-        .person-big-card textarea {
-            min-height: 62px;
-            resize: vertical;
-        }
-
-        @media (max-width: 760px) {
-            .optional-toggle {
-                text-align: left;
-                font-size: 1.18rem;
-            }
-
-            .person-cards-area {
-                width: 100%;
-                gap: 18px;
-                margin-top: 22px;
-            }
-
-            .person-big-card {
-                padding: 28px 24px;
-                border-radius: 26px;
-            }
-        }
-
-    </style>
+</style>
 </head>
 <body>
 
@@ -465,7 +425,7 @@
                     <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
                 </div>
 
-                <button class="optional-toggle" type="button" onclick="togglePersonCards()">
+                <button class="optional-toggle" type="button" onclick="togglePersons()">
                     Optionale Angaben ergänzen
                 </button>
             </div>
@@ -483,63 +443,57 @@
             </div>
         </section>
 
-        <section class="person-cards-area" id="personCards" hidden></section>
+        <section id="personCards" class="person-cards" hidden></section>
     </main>
 
-    <script>
-        let personCount = 2;
-        let personCardsVisible = false;
+    
+<script>
+let personCount=2;
+let openPersons=false;
 
-        function changePersons(amount) {
-            personCount = Math.max(1, personCount + amount);
-            document.getElementById("personCount").textContent = personCount;
-            renderPersons();
-        }
+function changePersons(a){
+ personCount=Math.max(1,personCount+a);
+ document.getElementById('personCount').textContent=personCount;
+ renderPersonCards();
+}
 
-        function togglePersonCards() {
-            personCardsVisible = !personCardsVisible;
-            renderPersons();
-        }
+function togglePersons(){
+ openPersons=!openPersons;
+ renderPersonCards();
+}
 
-        function renderPersons() {
-            const area = document.getElementById("personCards");
-            area.innerHTML = "";
+function renderPersonCards(){
+ const wrap=document.getElementById('personCards');
+ wrap.innerHTML='';
+ wrap.hidden=!openPersons;
+ if(!openPersons) return;
 
-            if (!personCardsVisible) {
-                area.hidden = true;
-                return;
-            }
+ for(let i=1;i<=personCount;i++){
+   wrap.insertAdjacentHTML('beforeend',`
+   <section class="person-sheet">
+     <h2>Person ${i}</h2>
 
-            area.hidden = false;
+     <label>Name
+       <input type="text">
+     </label>
 
-            for (let i = 1; i <= personCount; i++) {
-                const card = document.createElement("section");
-                card.className = "person-big-card";
-                card.innerHTML = `
-                    <h2>Person ${i}</h2>
+     <label>Vorlieben
+       <textarea></textarea>
+     </label>
 
-                    <label>Name
-                        <input type="text" placeholder="z. B. Manuela">
-                    </label>
+     <label>Mag ich nicht
+       <textarea></textarea>
+     </label>
 
-                    <label>Vorlieben
-                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
-                    </label>
+     <label>Allergien / Unverträglichkeiten
+       <textarea></textarea>
+     </label>
+   </section>`);
+ }
+}
+renderPersonCards();
+</script>
 
-                    <label>Mag ich nicht
-                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
-                    </label>
-
-                    <label>Allergien / Unverträglichkeiten
-                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
-                    </label>
-                `;
-                area.appendChild(card);
-            }
-        }
-
-        renderPersons();
-    </script>
 
 </body>
 </html>
