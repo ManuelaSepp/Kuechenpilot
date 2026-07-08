@@ -225,19 +225,6 @@
                 padding: 40px 20px 24px;
             }
         }
-    
-
-        .person-page .welcome-card {
-            min-height: 0;
-        }
-
-        .person-page h1 {
-            margin-bottom: 14px;
-        }
-
-        .person-page .intro-text {
-            max-width: 620px;
-        }
 
         .person-row {
             margin-top: 24px;
@@ -291,7 +278,6 @@
             font-size: 1.34rem;
             font-weight: 600;
             line-height: 1.25;
-            list-style-position: outside;
         }
 
         .person-list {
@@ -311,7 +297,6 @@
         .person-card h2 {
             margin: 0 0 8px;
             font-size: 1.24rem;
-            color: var(--text);
         }
 
         .person-card label {
@@ -342,7 +327,6 @@
         .button-row.double {
             justify-content: space-between;
             gap: 18px;
-            flex-wrap: wrap;
         }
 
         .button-row.double .next-button {
@@ -377,11 +361,12 @@
                 gap: 8px;
             }
         }
-</style>
+
+    </style>
 </head>
 <body>
 
-    <main class="start-page person-page" aria-label="Küchenpilot Personenseite">
+    <main class="start-page" aria-label="Küchenpilot Personenseite">
         <div class="pilot-card pilot-desktop">
             <img src="assets/figuren/pilot-mauer-schraeg.png" alt="Küchenpilot">
         </div>
@@ -392,7 +377,7 @@
 
         <section class="welcome-card">
             <h1>Wer <span>isst mit?</span></h1>
-            <p class="intro-text">Für wie viele Personen soll ich planen?<br>Optionales kannst du später ergänzen.</p>
+            <p>Für wie viele Personen soll ich planen?<br>Optionales kannst du später ergänzen.</p>
 
             <div class="person-row">
                 <div class="person-counter" aria-label="Personenanzahl auswählen">
@@ -439,22 +424,10 @@
                 card.className = "person-card";
                 card.innerHTML = `
                     <h2>Person ${i}</h2>
-
-                    <label>Name
-                        <input type="text" placeholder="z. B. Manuela">
-                    </label>
-
-                    <label>Vorlieben
-                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
-                    </label>
-
-                    <label>Mag ich nicht
-                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
-                    </label>
-
-                    <label>Allergien / Unverträglichkeiten
-                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
-                    </label>
+                    <label>Name<input type="text" placeholder="z. B. Manuela"></label>
+                    <label>Vorlieben<textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea></label>
+                    <label>Mag ich nicht<textarea placeholder="z. B. Paprika, Linsen"></textarea></label>
+                    <label>Allergien / Unverträglichkeiten<textarea placeholder="z. B. Laktose, Nüsse"></textarea></label>
                 `;
                 list.appendChild(card);
             }
