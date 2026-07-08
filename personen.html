@@ -40,28 +40,28 @@
         }
 
         .start-page {
-            width: min(100%, clamp(940px, 78vw, 1040px));
+            width: min(100%, 940px);
             position: relative;
-            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
+            padding: 48px 110px 48px 0;
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, clamp(720px, 64vw, 790px));
+            width: min(100%, 720px);
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
-            padding: clamp(42px, 4vw, 50px) clamp(46px, 4.5vw, 56px);
+            padding: 42px 46px;
             box-shadow: var(--shadow);
         }
 
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: clamp(105px, 9vw, 126px);
+            right: 105px;
             top: 50%;
-            width: clamp(190px, 17vw, 215px);
+            width: 190px;
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
@@ -99,11 +99,11 @@
             max-width: 560px;
             color: var(--muted);
             font-size: clamp(1.22rem, 2.4vw, 1.55rem);
-            line-height: 1.42;
+            line-height: 1.55;
         }
 
         .button-row {
-            margin-top: 22px;
+            margin-top: 34px;
             display: flex;
             justify-content: flex-end;
         }
@@ -153,84 +153,6 @@
             font-size: 1.45rem;
             line-height: 1;
             transform: translateY(-1px);
-        }
-
-
-        .optional-toggle {
-            border: none;
-            background: transparent;
-            padding: 0;
-            color: var(--orange-dark);
-            font-family: inherit;
-            font-size: 1.26rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .large-person-cards {
-            position: relative;
-            z-index: 3;
-            width: min(100%, clamp(720px, 64vw, 790px));
-            display: grid;
-            gap: 24px;
-            margin-top: 26px;
-        }
-
-        .large-person-card {
-            background: var(--card);
-            border: 2px solid rgba(245, 166, 35, 0.42);
-            border-radius: 30px;
-            padding: clamp(32px, 3.2vw, 42px) clamp(46px, 4.5vw, 56px);
-            box-shadow: var(--shadow);
-        }
-
-        .large-person-card h2 {
-            margin: 0 0 18px;
-            font-size: clamp(1.7rem, 3vw, 2.2rem);
-            color: var(--orange-dark);
-        }
-
-        .large-person-card label {
-            display: block;
-            margin-top: 14px;
-            color: var(--muted);
-            font-size: 1.05rem;
-        }
-
-        .large-person-card input,
-        .large-person-card textarea {
-            width: 100%;
-            margin-top: 6px;
-            padding: 11px 13px;
-            border: 2px solid rgba(245, 166, 35, 0.25);
-            border-radius: 15px;
-            background: #fffdf8;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1.02rem;
-        }
-
-        .large-person-card textarea {
-            min-height: 62px;
-            resize: vertical;
-        }
-
-        @media (max-width: 760px) {
-            .optional-toggle {
-                text-align: left;
-                font-size: 1.18rem;
-            }
-
-            .large-person-cards {
-                width: 100%;
-                gap: 18px;
-                margin-top: 22px;
-            }
-
-            .large-person-card {
-                padding: 28px 24px;
-                border-radius: 26px;
-            }
         }
 
         @media (max-width: 760px) {
@@ -305,17 +227,17 @@
         }
 
         .person-row {
-            margin-top: 14px;
+            margin-top: 24px;
             display: flex;
             align-items: center;
-            gap: 24px;
+            gap: 34px;
             flex-wrap: wrap;
         }
 
         .person-counter {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 16px;
         }
 
         .count-button {
@@ -353,7 +275,7 @@
         .optional-persons summary {
             cursor: pointer;
             color: var(--orange-dark);
-            font-size: 1.26rem;
+            font-size: 1.34rem;
             font-weight: 600;
             line-height: 1.25;
         }
@@ -440,6 +362,85 @@
             }
         }
 
+
+        .optional-toggle {
+            border: 0;
+            background: transparent;
+            padding: 0;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.26rem;
+            font-weight: 600;
+            line-height: 1.25;
+            cursor: pointer;
+        }
+
+        .person-cards-area {
+            position: relative;
+            z-index: 3;
+            width: min(100%, clamp(720px, 64vw, 790px));
+            display: grid;
+            gap: 24px;
+            margin-top: 28px;
+        }
+
+        .person-big-card {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: clamp(34px, 3.4vw, 42px) clamp(46px, 4.5vw, 56px);
+            box-shadow: var(--shadow);
+        }
+
+        .person-big-card h2 {
+            margin: 0 0 18px;
+            font-size: clamp(1.7rem, 3vw, 2.2rem);
+            color: var(--orange-dark);
+        }
+
+        .person-big-card label {
+            display: block;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .person-big-card input,
+        .person-big-card textarea {
+            width: 100%;
+            margin-top: 6px;
+            padding: 11px 13px;
+            border: 2px solid rgba(245, 166, 35, 0.25);
+            border-radius: 15px;
+            background: #fffdf8;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.02rem;
+        }
+
+        .person-big-card textarea {
+            min-height: 62px;
+            resize: vertical;
+        }
+
+        @media (max-width: 760px) {
+            .optional-toggle {
+                text-align: left;
+                font-size: 1.18rem;
+            }
+
+            .person-cards-area {
+                width: 100%;
+                gap: 18px;
+                margin-top: 22px;
+            }
+
+            .person-big-card {
+                padding: 28px 24px;
+                border-radius: 26px;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -482,13 +483,12 @@
             </div>
         </section>
 
-        <section class="large-person-cards" id="personCards" hidden></section>
+        <section class="person-cards-area" id="personCards" hidden></section>
     </main>
 
-    
     <script>
         let personCount = 2;
-        let showPersonCards = false;
+        let personCardsVisible = false;
 
         function changePersons(amount) {
             personCount = Math.max(1, personCount + amount);
@@ -497,24 +497,24 @@
         }
 
         function togglePersonCards() {
-            showPersonCards = !showPersonCards;
+            personCardsVisible = !personCardsVisible;
             renderPersons();
         }
 
         function renderPersons() {
-            const wrap = document.getElementById("personCards");
-            wrap.innerHTML = "";
+            const area = document.getElementById("personCards");
+            area.innerHTML = "";
 
-            if (!showPersonCards) {
-                wrap.hidden = true;
+            if (!personCardsVisible) {
+                area.hidden = true;
                 return;
             }
 
-            wrap.hidden = false;
+            area.hidden = false;
 
             for (let i = 1; i <= personCount; i++) {
                 const card = document.createElement("section");
-                card.className = "large-person-card";
+                card.className = "person-big-card";
                 card.innerHTML = `
                     <h2>Person ${i}</h2>
 
@@ -534,13 +534,12 @@
                         <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
                     </label>
                 `;
-                wrap.appendChild(card);
+                area.appendChild(card);
             }
         }
 
         renderPersons();
     </script>
-
 
 </body>
 </html>
