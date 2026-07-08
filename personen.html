@@ -263,12 +263,12 @@
             resize: vertical;
         }
 
-        .button-row-between {
+        .button-row-double {
             justify-content: space-between;
             gap: 18px;
         }
 
-        .secondary-button {
+        .button-row-double .next-button {
             min-width: 190px;
         }
 
@@ -326,6 +326,30 @@
                 min-height: 62px;
                 font-size: 1.28rem;
             }
+
+            .person-count-card {
+                padding: 22px;
+            }
+
+            .person-count-row {
+                justify-content: center;
+            }
+
+            .button-row-double {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                justify-content: stretch;
+            }
+
+            .button-row-double .next-button {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+                padding: 10px 12px;
+                font-size: 1.12rem;
+                gap: 8px;
+            }
         }
 
         @media (max-width: 420px) {
@@ -361,6 +385,7 @@
 
             <div class="person-count-card" aria-label="Personenanzahl auswählen">
                 <div class="person-count-title">Personenanzahl</div>
+
                 <div class="person-count-row">
                     <button class="count-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
                     <div class="count-value" id="personCount">2</div>
@@ -373,8 +398,8 @@
                 <div class="person-list" id="personList"></div>
             </details>
 
-            <div class="button-row button-row-between">
-                <button class="next-button secondary-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
+            <div class="button-row button-row-double">
+                <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
                     <span class="arrow" aria-hidden="true">←</span>
                     <span>Zurück</span>
                 </button>
@@ -405,10 +430,22 @@
                 card.className = "person-card";
                 card.innerHTML = `
                     <h2>Person ${i}</h2>
-                    <label>Name<input type="text" placeholder="z. B. Manuela"></label>
-                    <label>Vorlieben<textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea></label>
-                    <label>Mag ich nicht<textarea placeholder="z. B. Paprika, Linsen"></textarea></label>
-                    <label>Allergien / Unverträglichkeiten<textarea placeholder="z. B. Laktose, Nüsse"></textarea></label>
+
+                    <label>Name
+                        <input type="text" placeholder="z. B. Manuela">
+                    </label>
+
+                    <label>Vorlieben
+                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
+                    </label>
+
+                    <label>Mag ich nicht
+                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
+                    </label>
+
+                    <label>Allergien / Unverträglichkeiten
+                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
+                    </label>
                 `;
                 list.appendChild(card);
             }
