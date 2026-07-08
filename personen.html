@@ -42,13 +42,13 @@
         .start-page {
             width: min(100%, clamp(940px, 78vw, 1040px));
             position: relative;
-            padding: clamp(48px, 5vw, 58px);
+            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: 100%;
+            width: min(100%, clamp(720px, 64vw, 790px));
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
@@ -153,6 +153,84 @@
             font-size: 1.45rem;
             line-height: 1;
             transform: translateY(-1px);
+        }
+
+
+        .optional-toggle {
+            border: none;
+            background: transparent;
+            padding: 0;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.26rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .large-person-cards {
+            position: relative;
+            z-index: 3;
+            width: min(100%, clamp(720px, 64vw, 790px));
+            display: grid;
+            gap: 24px;
+            margin-top: 26px;
+        }
+
+        .large-person-card {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: clamp(32px, 3.2vw, 42px) clamp(46px, 4.5vw, 56px);
+            box-shadow: var(--shadow);
+        }
+
+        .large-person-card h2 {
+            margin: 0 0 18px;
+            font-size: clamp(1.7rem, 3vw, 2.2rem);
+            color: var(--orange-dark);
+        }
+
+        .large-person-card label {
+            display: block;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .large-person-card input,
+        .large-person-card textarea {
+            width: 100%;
+            margin-top: 6px;
+            padding: 11px 13px;
+            border: 2px solid rgba(245, 166, 35, 0.25);
+            border-radius: 15px;
+            background: #fffdf8;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1.02rem;
+        }
+
+        .large-person-card textarea {
+            min-height: 62px;
+            resize: vertical;
+        }
+
+        @media (max-width: 760px) {
+            .optional-toggle {
+                text-align: left;
+                font-size: 1.18rem;
+            }
+
+            .large-person-cards {
+                width: 100%;
+                gap: 18px;
+                margin-top: 22px;
+            }
+
+            .large-person-card {
+                padding: 28px 24px;
+                border-radius: 26px;
+            }
         }
 
         @media (max-width: 760px) {
@@ -362,39 +440,18 @@
             }
         }
 
-    
-.person-template{
-    margin-top:32px;
-    background:var(--card);
-    border:2px solid rgba(245,166,35,.42);
-    border-radius:30px;
-    padding:42px 46px;
-    box-shadow:var(--shadow);
-}
-.person-template h2{
-    margin:0 0 18px;
-    color:var(--orange-dark);
-}
-.person-template label{
-    display:block;
-    margin-top:14px;
-}
-.person-template input,
-.person-template textarea{
-    width:100%;
-    margin-top:6px;
-    padding:10px 12px;
-    border:2px solid rgba(245,166,35,.25);
-    border-radius:14px;
-    font:inherit;
-}
-.person-template textarea{min-height:56px;}
-
-</style>
+    </style>
 </head>
 <body>
 
     <main class="start-page" aria-label="Küchenpilot Personenseite">
+        <div class="pilot-card pilot-desktop">
+            <img src="assets/figuren/pilot-mauer-schraeg.png" alt="Küchenpilot">
+        </div>
+
+        <div class="pilot-card pilot-mobile">
+            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
+        </div>
 
         <section class="welcome-card">
             <h1>Wer <span>isst mit?</span></h1>
@@ -407,10 +464,9 @@
                     <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
                 </div>
 
-                <details class="optional-persons">
-                    <summary>Optionale Angaben ergänzen</summary>
-                    <div class="person-list" id="personList"></div>
-                </details>
+                <button class="optional-toggle" type="button" onclick="togglePersonCards()">
+                    Optionale Angaben ergänzen
+                </button>
             </div>
 
             <div class="button-row double">
@@ -424,15 +480,15 @@
                     <span class="arrow" aria-hidden="true">→</span>
                 </button>
             </div>
-        
         </section>
 
-        <section id="personCards"></section>
-
+        <section class="large-person-cards" id="personCards" hidden></section>
     </main>
 
+    
     <script>
         let personCount = 2;
+        let showPersonCards = false;
 
         function changePersons(amount) {
             personCount = Math.max(1, personCount + amount);
@@ -440,63 +496,51 @@
             renderPersons();
         }
 
+        function togglePersonCards() {
+            showPersonCards = !showPersonCards;
+            renderPersons();
+        }
+
         function renderPersons() {
-            const list = document.getElementById("personList");
-            list.innerHTML = "";
+            const wrap = document.getElementById("personCards");
+            wrap.innerHTML = "";
+
+            if (!showPersonCards) {
+                wrap.hidden = true;
+                return;
+            }
+
+            wrap.hidden = false;
 
             for (let i = 1; i <= personCount; i++) {
-                const card = document.createElement("div");
-                card.className = "person-card";
+                const card = document.createElement("section");
+                card.className = "large-person-card";
                 card.innerHTML = `
                     <h2>Person ${i}</h2>
-                    <label>Name<input type="text" placeholder="z. B. Manuela"></label>
-                    <label>Vorlieben<textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea></label>
-                    <label>Mag ich nicht<textarea placeholder="z. B. Paprika, Linsen"></textarea></label>
-                    <label>Allergien / Unverträglichkeiten<textarea placeholder="z. B. Laktose, Nüsse"></textarea></label>
+
+                    <label>Name
+                        <input type="text" placeholder="z. B. Manuela">
+                    </label>
+
+                    <label>Vorlieben
+                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
+                    </label>
+
+                    <label>Mag ich nicht
+                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
+                    </label>
+
+                    <label>Allergien / Unverträglichkeiten
+                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
+                    </label>
                 `;
-                list.appendChild(card);
+                wrap.appendChild(card);
             }
         }
 
         renderPersons();
     </script>
 
-
-<script>
-function renderPersons(){
- const wrap=document.getElementById('personCards');
- if(!wrap) return;
- wrap.innerHTML='';
- for(let i=1;i<=personCount;i++){
-   wrap.insertAdjacentHTML('beforeend',`
-   <section class="person-template">
-      <h2>👤 Person ${i}</h2>
-
-      <label>Name
-        <input type="text" placeholder="Name">
-      </label>
-
-      <label>Vorlieben
-        <textarea></textarea>
-      </label>
-
-      <label>Mag ich nicht
-        <textarea></textarea>
-      </label>
-
-      <label>Allergien / Unverträglichkeiten
-        <textarea></textarea>
-      </label>
-   </section>`);
- }
-}
-const oldChange=changePersons;
-changePersons=function(a){
- oldChange(a);
- renderPersons();
-}
-renderPersons();
-</script>
 
 </body>
 </html>
