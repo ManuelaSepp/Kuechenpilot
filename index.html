@@ -40,28 +40,28 @@
         }
 
         .start-page {
-            width: min(100%, 940px);
+            width: min(100%, clamp(940px, 78vw, 1040px));
             position: relative;
-            padding: 48px 110px 48px 0;
+            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
         }
 
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, 720px);
+            width: min(100%, clamp(720px, 64vw, 790px));
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
-            padding: 42px 46px;
+            padding: clamp(42px, 4vw, 50px) clamp(46px, 4.5vw, 56px);
             box-shadow: var(--shadow);
         }
 
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: 105px;
+            right: clamp(105px, 9vw, 126px);
             top: 50%;
-            width: 190px;
+            width: clamp(190px, 17vw, 215px);
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
