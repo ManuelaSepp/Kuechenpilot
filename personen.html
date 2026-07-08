@@ -35,12 +35,12 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content:flex-start;
+            justify-content: center;
             color: var(--text);
         }
 
         .start-page {
-            width: min(100%, clamp(940px, 76vw, 1000px));
+            width: min(100%, 940px);
             position: relative;
             padding: 48px 110px 48px 0;
         }
@@ -48,7 +48,7 @@
         .welcome-card {
             position: relative;
             z-index: 3;
-            width: min(100%, clamp(720px, 60vw, 760px));
+            width: min(100%, 720px);
             background: var(--card);
             border: 2px solid rgba(245, 166, 35, 0.42);
             border-radius: 30px;
@@ -59,9 +59,9 @@
         .pilot-card {
             position: absolute;
             z-index: 2;
-            right: clamp(105px, 8vw, 118px);
+            right: 105px;
             top: 50%;
-            width: clamp(190px, 15vw, 205px);
+            width: 190px;
             max-width: 32vw;
             transform: translateY(-50%);
             pointer-events: none;
@@ -84,7 +84,7 @@
         }
 
         h1 {
-            margin: 0 0 10px;
+            margin: 0 0 22px;
             font-size: clamp(2.1rem, 5vw, 3.5rem);
             line-height: 1.08;
             font-weight: 600;
@@ -112,12 +112,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 14px;
             min-width: 220px;
             min-height: 64px;
             padding: 12px 24px;
             border: 2px solid var(--orange);
-            border-radius: 0;
+            border-radius: 20px;
             background: #ffffff;
             color: var(--orange-dark);
             font-family: inherit;
@@ -153,135 +153,6 @@
             font-size: 1.45rem;
             line-height: 1;
             transform: translateY(-1px);
-        }
-
-
-        .person-main-row {
-            margin-top: 6px;
-            display: grid;
-            grid-template-columns: minmax(270px, 430px) minmax(220px, 1fr);
-            gap: 14px;
-            align-items: center;
-        }
-
-        .person-count-card {
-            background: transparent;
-            border: none;
-            border-radius: 0;
-            padding: 2px 0;
-        }
-
-        .person-count-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-        }
-
-        .count-button {
-            width: 42px;
-            height: 42px;
-            border: 2px solid var(--orange);
-            border-radius: 14px;
-            background: #ffffff;
-            color: var(--orange-dark);
-            font-family: inherit;
-            font-size: 1.48rem;
-            line-height: 1;
-            cursor: pointer;
-            box-shadow: 0 8px 18px rgba(166, 112, 34, 0.10);
-        }
-
-        .count-button:hover,
-        .count-button:focus-visible {
-            background: var(--orange);
-            color: #ffffff;
-            outline: none;
-        }
-
-        .count-value {
-            min-width: 50px;
-            text-align: center;
-            font-size: clamp(1.82rem, 2.8vw, 2.18rem);
-            color: var(--orange-dark);
-        }
-
-        .optional-persons {
-            margin: 0;
-        }
-
-        .optional-persons summary {
-            cursor: pointer;
-            color: var(--orange-dark);
-            font-size: clamp(1.18rem, 2vw, 1.34rem);
-            font-weight: 600;
-            line-height: 1.22;
-            list-style-position: outside;
-        }
-
-        .optional-hint {
-            margin: 2px 0 0;
-            font-size: clamp(1rem, 1.8vw, 1.12rem);
-            line-height: 1.25;
-            color: var(--muted);
-            max-width: 220px;
-        }
-
-        .person-list {
-            margin-top: 10px;
-            display: grid;
-            gap: 12px;
-            grid-column: 1 / -1;
-        }
-
-        .person-card {
-            background: #ffffff;
-            border: 2px solid rgba(245, 166, 35, 0.30);
-            border-radius: 22px;
-            padding: 14px;
-        }
-
-        .person-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.24rem;
-            color: var(--text);
-        }
-
-        label {
-            display: block;
-            margin-top: 7px;
-            font-size: 0.96rem;
-            color: var(--muted);
-        }
-
-        input,
-        textarea {
-            width: 100%;
-            margin-top: 5px;
-            padding: 8px 10px;
-            border: 2px solid rgba(245, 166, 35, 0.25);
-            border-radius: 14px;
-            background: #fffdf8;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1rem;
-        }
-
-        textarea {
-            min-height: 46px;
-            resize: vertical;
-        }
-
-        .button-row-double {
-            margin-top: 10px;
-            justify-content: space-between;
-            gap: 18px;
-        }
-
-        .button-row-double .next-button {
-            min-width: 185px;
-            min-height: 52px;
-            font-size: 1.16rem;
         }
 
         @media (max-width: 760px) {
@@ -328,7 +199,7 @@
             }
 
             .button-row {
-                margin-top: 16px;
+                margin-top: 28px;
                 justify-content: center;
             }
 
@@ -337,41 +208,6 @@
                 max-width: 340px;
                 min-height: 62px;
                 font-size: 1.28rem;
-            }
-
-            .person-main-row {
-                margin-top: 30px;
-                grid-template-columns: 1fr;
-                gap: 18px;
-            }
-
-            .person-count-card {
-                padding: 18px;
-            }
-
-            .person-count-row {
-                justify-content: center;
-                gap: 28px;
-            }
-
-            .optional-hint {
-                max-width: none;
-            }
-
-            .button-row-double {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-                justify-content: stretch;
-            }
-
-            .button-row-double .next-button {
-                width: 100%;
-                min-width: 0;
-                max-width: none;
-                padding: 8px 10px;
-                font-size: 1.12rem;
-                gap: 8px;
             }
         }
 
@@ -389,11 +225,53 @@
                 padding: 40px 20px 24px;
             }
         }
-    </style>
+    
+.person-inline{
+    display:flex;
+    align-items:center;
+    gap:34px;
+    margin:18px 0 18px;
+}
+.person-counter{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+.person-counter button{
+    width:42px;
+    height:42px;
+    border:2px solid #f5a623;
+    border-radius:14px;
+    background:#fff;
+    font-size:28px;
+    color:#df8f12;
+    cursor:pointer;
+}
+.person-counter span{
+    min-width:36px;
+    text-align:center;
+    font-size:42px;
+    color:#df8f12;
+}
+.person-inline details summary{
+    cursor:pointer;
+    color:#df8f12;
+    font-size:1.35rem;
+    font-weight:600;
+}
+@media (max-width:760px){
+    .person-inline{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:18px;
+    }
+}
+
+</style>
 </head>
 <body>
 
-    <main class="start-page" aria-label="Küchenpilot Personenseite">
+    <main class="start-page" aria-label="Küchenpilot Startseite">
         <div class="pilot-card pilot-desktop">
             <img src="assets/figuren/pilot-hinweis-halb.png" alt="Küchenpilot">
         </div>
@@ -404,79 +282,24 @@
 
         <section class="welcome-card">
             <h1>Wer <span>isst mit?</span></h1>
-            <p>Für wie viele Personen soll der Küchenpilot planen?<br>Optionale Angaben kannst du jederzeit ergänzen.</p>
+            <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
 
-            <div class="person-main-row">
-                <div class="person-count-card" aria-label="Personenanzahl auswählen">
-                    <div class="person-count-row">
-                        <button class="count-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
-                        <div class="count-value" id="personCount">2</div>
-                        <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
-                    </div>
-                </div>
+            <div class="person-inline">
+<div class="person-counter">
+<button>-</button><span>2</span><button>+</button>
+</div>
+<details><summary>Optionale Angaben ergänzen</summary></details>
+</div>
 
-                <details class="optional-persons">
-                    <summary>Optionale Angaben ergänzen</summary>
-                    <p class="optional-hint">Hier kannst du Namen, Vorlieben und Allergien hinterlegen.</p>
-                    <div class="person-list" id="personList"></div>
-                </details>
-            </div>
-
-            <div class="button-row button-row-double">
-                <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
-                    <span class="arrow" aria-hidden="true">←</span>
-                    <span>Zurück</span>
-                </button>
-
-                <button class="next-button" type="button" onclick="location.href='heute.html'" aria-label="Weiter zur Heute-Seite">
+<div class="button-row">
+                <button class="next-button" onclick="location.href='personen.html'" aria-label="Weiter zur nächsten Seite">
+                    <img src="assets/icons/schneebesen.png" alt="">
                     <span>Weiter</span>
                     <span class="arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         </section>
     </main>
-
-    <script>
-        let personCount = 2;
-
-        function changePersons(amount) {
-            personCount = Math.max(1, personCount + amount);
-            document.getElementById("personCount").textContent = personCount;
-            renderPersons();
-        }
-
-        function renderPersons() {
-            const list = document.getElementById("personList");
-            list.innerHTML = "";
-
-            for (let i = 1; i <= personCount; i++) {
-                const card = document.createElement("div");
-                card.className = "person-card";
-                card.innerHTML = `
-                    <h2>Person ${i}</h2>
-
-                    <label>Name
-                        <input type="text" placeholder="z. B. Manuela">
-                    </label>
-
-                    <label>Vorlieben
-                        <textarea placeholder="z. B. Kartoffeln, Reis, Fisch"></textarea>
-                    </label>
-
-                    <label>Mag ich nicht
-                        <textarea placeholder="z. B. Paprika, Linsen"></textarea>
-                    </label>
-
-                    <label>Allergien / Unverträglichkeiten
-                        <textarea placeholder="z. B. Laktose, Nüsse"></textarea>
-                    </label>
-                `;
-                list.appendChild(card);
-            }
-        }
-
-        renderPersons();
-    </script>
 
 </body>
 </html>
