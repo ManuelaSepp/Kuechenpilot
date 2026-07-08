@@ -35,7 +35,7 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content:flex-start;
             color: var(--text);
         }
 
@@ -112,12 +112,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: 10px;
             min-width: 220px;
             min-height: 64px;
             padding: 12px 24px;
             border: 2px solid var(--orange);
-            border-radius: 20px;
+            border-radius: 0;
             background: #ffffff;
             color: var(--orange-dark);
             font-family: inherit;
@@ -157,7 +157,7 @@
 
 
         .person-main-row {
-            margin-top: 12px;
+            margin-top: 6px;
             display: grid;
             grid-template-columns: minmax(270px, 430px) minmax(220px, 1fr);
             gap: 14px;
@@ -165,10 +165,10 @@
         }
 
         .person-count-card {
-            background: #fffaf0;
-            border: 2px dashed rgba(245, 166, 35, 0.58);
-            border-radius: 20px;
-            padding: 9px 14px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 2px 0;
         }
 
         .person-count-row {
@@ -220,11 +220,11 @@
         }
 
         .optional-hint {
-            margin: 4px 0 0;
+            margin: 2px 0 0;
             font-size: clamp(1rem, 1.8vw, 1.12rem);
             line-height: 1.25;
             color: var(--muted);
-            max-width: 260px;
+            max-width: 220px;
         }
 
         .person-list {
@@ -273,7 +273,7 @@
         }
 
         .button-row-double {
-            margin-top: 16px;
+            margin-top: 10px;
             justify-content: space-between;
             gap: 18px;
         }
@@ -404,7 +404,7 @@
 
         <section class="welcome-card">
             <h1>Wer <span>isst mit?</span></h1>
-            <p>Für wie viele Personen soll der Küchenpilot planen? Weitere Angaben kannst du jederzeit ergänzen.</p>
+            <p>Für wie viele Personen soll der Küchenpilot planen?<br>Optionale Angaben kannst du jederzeit ergänzen.</p>
 
             <div class="person-main-row">
                 <div class="person-count-card" aria-label="Personenanzahl auswählen">
