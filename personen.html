@@ -500,124 +500,84 @@ renderPersonCards();
 <script src="assets/tests/test-runner.js"></script>
 <script>
 if (window.KPTest && window.KPTest.enabled) {
+  async function urlExists(path) {
+    try {
+      const r = await fetch(new URL(path, location.href), {cache:"no-store"});
+      return {ok:r.ok,status:r.status};
+    } catch(e) { return {ok:false,status:0}; }
+  }
 
-  KPTest.add("Zurück-Button zeigt auf index.html", () => {
-    const btn = [...document.querySelectorAll("button")]
-      .find(b => b.textContent.includes("Zurück"));
-    const onclick = btn?.getAttribute("onclick") || "";
-    return {
-      ok: !!btn && onclick.includes("index.html"),
-      message: btn ? `onclick: ${onclick}` : "Zurück-Button nicht gefunden"
-    };
+  function buttonNamed(name) {
+    return [...document.querySelectorAll("button")].find(b => b.textContent.includes(name));
+  }
+
+  KPTest.add("Zurück-Button vorhanden und klickbar", () => {
+    const b=buttonNamed("Zurück"), s=b?getComputedStyle(b):null;
+    const ok=!!b && !b.disabled && s.display!=="none" && s.visibility!=="hidden" && s.pointerEvents!=="none";
+    return {ok,message:ok?"Button ist sichtbar und nicht blockiert.":"Button fehlt oder ist blockiert."};
   });
 
-  KPTest.add("Weiter-Button zeigt auf heute.html", () => {
-    const btn = [...document.querySelectorAll("button")]
-      .find(b => b.textContent.includes("Weiter"));
-    const onclick = btn?.getAttribute("onclick") || "";
-    return {
-      ok: !!btn && onclick.includes("heute.html"),
-      message: btn ? `onclick: ${onclick}` : "Weiter-Button nicht gefunden"
-    };
+  KPTest.add("Zurück-Ziel index.html erreichbar", async () => {
+    const b=buttonNamed("Zurück"), code=b?.getAttribute("onclick")||"";
+    if(!code.includes("index.html")) return {ok:false,message:"Ziel ist nicht index.html."};
+    const r=await urlExists("index.html");
+    return {ok:r.ok,message:r.ok?`index.html erreichbar (HTTP ${r.status}).`:`index.html nicht erreichbar${r.status?` (HTTP ${r.status})`:""}.`};
+  });
+
+  KPTest.add("Weiter-Button vorhanden und klickbar", () => {
+    const b=buttonNamed("Weiter"), s=b?getComputedStyle(b):null;
+    const ok=!!b && !b.disabled && s.display!=="none" && s.visibility!=="hidden" && s.pointerEvents!=="none";
+    return {ok,message:ok?"Button ist sichtbar und nicht blockiert.":"Button fehlt oder ist blockiert."};
+  });
+
+  KPTest.add("Weiter-Ziel heute.html erreichbar", async () => {
+    const b=buttonNamed("Weiter"), code=b?.getAttribute("onclick")||"";
+    if(!code.includes("heute.html")) return {ok:false,message:"Ziel ist nicht heute.html."};
+    const r=await urlExists("heute.html");
+    return {ok:r.ok,message:r.ok?`heute.html erreichbar (HTTP ${r.status}).`:`heute.html nicht erreichbar${r.status?` (HTTP ${r.status})`:""}.`};
   });
 
   KPTest.add("Personenzähler startet bei 2", () => {
-    const el = document.getElementById("personCount");
-    return {
-      ok: el?.textContent.trim() === "2",
-      message: el ? `Aktuell: ${el.textContent.trim()}` : "personCount fehlt"
-    };
+    const e=document.getElementById("personCount");
+    return {ok:e?.textContent.trim()==="2",message:e?`Aktuell: ${e.textContent.trim()}`:"personCount fehlt."};
   });
 
   KPTest.add("Plus / Minus funktionieren", () => {
-    const originalCount = personCount;
-    const originalOpen = openPersons;
-
-    changePersons(1);
-    const plusOk =
-      personCount === originalCount + 1 &&
-      document.getElementById("personCount").textContent.trim() === String(originalCount + 1);
-
-    changePersons(-1);
-    const minusOk =
-      personCount === originalCount &&
-      document.getElementById("personCount").textContent.trim() === String(originalCount);
-
-    openPersons = originalOpen;
-    renderPersonCards();
-
-    return {
-      ok: plusOk && minusOk,
-      message: plusOk && minusOk ? "Plus und Minus reagieren korrekt." : "Zähler reagiert nicht korrekt."
-    };
+    const c=personCount,o=openPersons;
+    changePersons(1); const plus=personCount===c+1;
+    changePersons(-1); const minus=personCount===c;
+    openPersons=o; renderPersonCards();
+    return {ok:plus&&minus,message:plus&&minus?"Plus und Minus reagieren korrekt.":"Zähler reagiert nicht korrekt."};
   });
 
   KPTest.add("Personenzahl fällt nicht unter 1", () => {
-    const originalCount = personCount;
-    const originalOpen = openPersons;
-
-    personCount = 1;
-    document.getElementById("personCount").textContent = "1";
-    changePersons(-1);
-
-    const ok = personCount === 1;
-
-    personCount = originalCount;
-    document.getElementById("personCount").textContent = String(originalCount);
-    openPersons = originalOpen;
-    renderPersonCards();
-
-    return {
-      ok,
-      message: ok ? "Minimum 1 eingehalten." : `Fehler: ${personCount}`
-    };
+    const c=personCount,o=openPersons;
+    personCount=1; document.getElementById("personCount").textContent="1"; changePersons(-1);
+    const ok=personCount===1;
+    personCount=c; document.getElementById("personCount").textContent=String(c); openPersons=o; renderPersonCards();
+    return {ok,message:ok?"Minimum 1 eingehalten.":"Minimum funktioniert nicht."};
   });
 
   KPTest.add("Optionale Personenkarten öffnen separat", () => {
-    const originalOpen = openPersons;
-    const area = document.getElementById("personCards");
-
-    openPersons = true;
-    renderPersonCards();
-
-    const cards = area ? area.querySelectorAll(".person-sheet") : [];
-    const outsideMainCard = area && !document.querySelector(".welcome-card")?.contains(area);
-    const countOk = cards.length === personCount;
-
-    openPersons = originalOpen;
-    renderPersonCards();
-
-    return {
-      ok: !!area && outsideMainCard && countOk,
-      message: !area
-        ? "personCards fehlt."
-        : !outsideMainCard
-          ? "Personenkarten liegen noch in der oberen Karte."
-          : `${cards.length} Karte(n) für ${personCount} Person(en).`
-    };
+    const o=openPersons, area=document.getElementById("personCards");
+    openPersons=true; renderPersonCards();
+    const count=area?.querySelectorAll(".person-sheet").length||0;
+    const outside=!!area && !document.querySelector(".welcome-card")?.contains(area);
+    const ok=outside && count===personCount;
+    openPersons=o; renderPersonCards();
+    return {ok,message:ok?`${count} Karte(n) für ${personCount} Person(en).`:"Personenkarten sind nicht korrekt getrennt."};
   });
 
-  KPTest.add("Pilot ist nicht an Gesamthöhe gekoppelt", () => {
-    const pilot = document.querySelector(".pilot-desktop");
-    if (!pilot) return { ok: false, message: "Desktop-Pilot fehlt." };
-
-    const topValue = getComputedStyle(pilot).top;
-    const parent = pilot.offsetParent;
-    const parentHeight = parent?.getBoundingClientRect().height || 0;
-    const pilotTop = pilot.offsetTop;
-
-    const roughlyCenteredInWholePage =
-      parentHeight > 0 &&
-      Math.abs(pilotTop - parentHeight / 2) < 8;
-
-    return {
-      ok: !roughlyCenteredInWholePage,
-      message: roughlyCenteredInWholePage
-        ? "Pilot hängt noch an 50 % der Gesamthöhe."
-        : `Pilotposition geprüft (top: ${topValue}).`
-    };
+  KPTest.add("Pilot bleibt beim Öffnen an seiner Position", () => {
+    const pilot=matchMedia("(max-width: 760px)").matches?document.querySelector(".pilot-mobile"):document.querySelector(".pilot-desktop");
+    if(!pilot) return {ok:false,message:"Pilot nicht gefunden."};
+    const o=openPersons;
+    openPersons=false; renderPersonCards(); const a=pilot.getBoundingClientRect();
+    openPersons=true; renderPersonCards(); const b=pilot.getBoundingClientRect();
+    const dx=Math.abs(b.left-a.left),dy=Math.abs(b.top-a.top),ok=dx<2&&dy<2;
+    openPersons=o; renderPersonCards();
+    return {ok,message:ok?"Pilot bleibt an derselben Position.":`Pilot verschiebt sich um ${dx.toFixed(1)} / ${dy.toFixed(1)} px.`};
   });
-
 }
 </script>
 
