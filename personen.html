@@ -402,6 +402,7 @@
 .person-sheet textarea{min-height:58px;}
 
 </style>
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body>
 
@@ -494,6 +495,131 @@ function renderPersonCards(){
 renderPersonCards();
 </script>
 
+
+
+<script src="assets/tests/test-runner.js"></script>
+<script>
+if (window.KPTest && window.KPTest.enabled) {
+
+  KPTest.add("Zurück-Button zeigt auf index.html", () => {
+    const btn = [...document.querySelectorAll("button")]
+      .find(b => b.textContent.includes("Zurück"));
+    const onclick = btn?.getAttribute("onclick") || "";
+    return {
+      ok: !!btn && onclick.includes("index.html"),
+      message: btn ? `onclick: ${onclick}` : "Zurück-Button nicht gefunden"
+    };
+  });
+
+  KPTest.add("Weiter-Button zeigt auf heute.html", () => {
+    const btn = [...document.querySelectorAll("button")]
+      .find(b => b.textContent.includes("Weiter"));
+    const onclick = btn?.getAttribute("onclick") || "";
+    return {
+      ok: !!btn && onclick.includes("heute.html"),
+      message: btn ? `onclick: ${onclick}` : "Weiter-Button nicht gefunden"
+    };
+  });
+
+  KPTest.add("Personenzähler startet bei 2", () => {
+    const el = document.getElementById("personCount");
+    return {
+      ok: el?.textContent.trim() === "2",
+      message: el ? `Aktuell: ${el.textContent.trim()}` : "personCount fehlt"
+    };
+  });
+
+  KPTest.add("Plus / Minus funktionieren", () => {
+    const originalCount = personCount;
+    const originalOpen = openPersons;
+
+    changePersons(1);
+    const plusOk =
+      personCount === originalCount + 1 &&
+      document.getElementById("personCount").textContent.trim() === String(originalCount + 1);
+
+    changePersons(-1);
+    const minusOk =
+      personCount === originalCount &&
+      document.getElementById("personCount").textContent.trim() === String(originalCount);
+
+    openPersons = originalOpen;
+    renderPersonCards();
+
+    return {
+      ok: plusOk && minusOk,
+      message: plusOk && minusOk ? "Plus und Minus reagieren korrekt." : "Zähler reagiert nicht korrekt."
+    };
+  });
+
+  KPTest.add("Personenzahl fällt nicht unter 1", () => {
+    const originalCount = personCount;
+    const originalOpen = openPersons;
+
+    personCount = 1;
+    document.getElementById("personCount").textContent = "1";
+    changePersons(-1);
+
+    const ok = personCount === 1;
+
+    personCount = originalCount;
+    document.getElementById("personCount").textContent = String(originalCount);
+    openPersons = originalOpen;
+    renderPersonCards();
+
+    return {
+      ok,
+      message: ok ? "Minimum 1 eingehalten." : `Fehler: ${personCount}`
+    };
+  });
+
+  KPTest.add("Optionale Personenkarten öffnen separat", () => {
+    const originalOpen = openPersons;
+    const area = document.getElementById("personCards");
+
+    openPersons = true;
+    renderPersonCards();
+
+    const cards = area ? area.querySelectorAll(".person-sheet") : [];
+    const outsideMainCard = area && !document.querySelector(".welcome-card")?.contains(area);
+    const countOk = cards.length === personCount;
+
+    openPersons = originalOpen;
+    renderPersonCards();
+
+    return {
+      ok: !!area && outsideMainCard && countOk,
+      message: !area
+        ? "personCards fehlt."
+        : !outsideMainCard
+          ? "Personenkarten liegen noch in der oberen Karte."
+          : `${cards.length} Karte(n) für ${personCount} Person(en).`
+    };
+  });
+
+  KPTest.add("Pilot ist nicht an Gesamthöhe gekoppelt", () => {
+    const pilot = document.querySelector(".pilot-desktop");
+    if (!pilot) return { ok: false, message: "Desktop-Pilot fehlt." };
+
+    const topValue = getComputedStyle(pilot).top;
+    const parent = pilot.offsetParent;
+    const parentHeight = parent?.getBoundingClientRect().height || 0;
+    const pilotTop = pilot.offsetTop;
+
+    const roughlyCenteredInWholePage =
+      parentHeight > 0 &&
+      Math.abs(pilotTop - parentHeight / 2) < 8;
+
+    return {
+      ok: !roughlyCenteredInWholePage,
+      message: roughlyCenteredInWholePage
+        ? "Pilot hängt noch an 50 % der Gesamthöhe."
+        : `Pilotposition geprüft (top: ${topValue}).`
+    };
+  });
+
+}
+</script>
 
 </body>
 </html>
