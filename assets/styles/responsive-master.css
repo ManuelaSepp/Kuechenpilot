@@ -1,0 +1,164 @@
+/* Gemeinsamer Responsive-Master fuer alle Kuechenpilot-Seiten. */
+:root {
+    --kp-page-max: 1040px;
+    --kp-hero-max: 922px;
+    --kp-card-max: 790px;
+    --kp-pilot-width: clamp(190px, 17vw, 215px);
+    --kp-pilot-overlap: clamp(58px, 7vw, 82px);
+    --kp-card-radius: 30px;
+    --kp-card-pad-y: clamp(42px, 4vw, 50px);
+    --kp-card-pad-x: clamp(46px, 4.5vw, 56px);
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+body {
+    padding: clamp(20px, 2.5vw, 32px);
+}
+
+.start-page {
+    width: min(100%, var(--kp-page-max));
+    padding: clamp(32px, 5vw, 58px) 0;
+}
+
+.hero-shell {
+    position: relative;
+    width: min(100%, var(--kp-hero-max));
+}
+
+.welcome-card,
+.person-cards {
+    width: min(calc(100% - var(--kp-pilot-width) + var(--kp-pilot-overlap)), var(--kp-card-max));
+}
+
+.welcome-card,
+.person-sheet {
+    border-radius: var(--kp-card-radius);
+    padding: var(--kp-card-pad-y) var(--kp-card-pad-x);
+}
+
+.hero-shell > .pilot-card {
+    right: 0;
+    top: 50%;
+    width: var(--kp-pilot-width);
+    max-width: none;
+    transform: translateY(-50%);
+}
+
+h1 {
+    font-size: clamp(2.1rem, 4.2vw, 3.5rem);
+}
+
+p {
+    font-size: clamp(1.22rem, 2vw, 1.55rem);
+}
+
+.next-button {
+    min-height: clamp(60px, 5vw, 64px);
+    font-size: clamp(1.22rem, 1.6vw, 1.35rem);
+}
+
+.person-cards {
+    margin-top: 28px;
+}
+
+/* Zusatzkarten duerfen den bereits sichtbaren Kopfbereich nicht verschieben. */
+@media (min-width: 761px) {
+    body.persons-page {
+        align-items: flex-start;
+    }
+
+    body.persons-page .start-page {
+        margin-top: max(0px, calc((100vh - 530px) / 2));
+    }
+}
+
+/* Tablet und kleine Browserfenster: kompakter, Pilot bleibt im Viewport. */
+@media (min-width: 761px) and (max-width: 1050px) {
+    :root {
+        --kp-pilot-width: clamp(178px, 23vw, 205px);
+        --kp-pilot-overlap: clamp(62px, 9vw, 76px);
+        --kp-card-pad-y: clamp(34px, 4.5vw, 44px);
+        --kp-card-pad-x: clamp(34px, 5vw, 48px);
+    }
+
+    .start-page {
+        padding-block: clamp(24px, 4vw, 42px);
+    }
+
+    .button-row.double .next-button {
+        min-width: 170px;
+    }
+}
+
+/* Mobile: der Pilot steht wie bisher oberhalb der Karte. */
+@media (max-width: 760px) {
+    body {
+        padding: 18px;
+        align-items: flex-start;
+    }
+
+    .start-page {
+        width: 100%;
+        padding: 0;
+        margin-top: 14px;
+    }
+
+    .hero-shell {
+        width: 100%;
+        padding-top: 138px;
+    }
+
+    .welcome-card,
+    .person-cards {
+        width: 100%;
+    }
+
+    .welcome-card {
+        padding: 40px 24px 26px;
+        border-radius: 26px;
+    }
+
+    .hero-shell > .pilot-card {
+        left: 50%;
+        right: auto;
+        top: 28px;
+        width: 225px;
+        max-width: 68vw;
+        transform: translateX(-50%);
+    }
+
+    .person-cards {
+        margin-top: 24px;
+    }
+
+    .person-sheet {
+        padding: 32px 24px;
+        border-radius: 26px;
+    }
+
+    .next-button {
+        font-size: 1.28rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .hero-shell {
+        padding-top: 128px;
+    }
+
+    .hero-shell > .pilot-card {
+        top: 30px;
+        width: 188px;
+    }
+
+    .welcome-card {
+        padding: 40px 20px 24px;
+    }
+
+    .person-sheet {
+        padding: 28px 20px;
+    }
+}

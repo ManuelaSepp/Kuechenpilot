@@ -52,7 +52,9 @@
     add("Bilder geladen",()=>{const bad=[...document.images].filter(i=>!i.complete||!i.naturalWidth); return {ok:!bad.length,message:bad.length?bad.map(i=>i.src).join(", "):`${document.images.length} Bild(er) geprüft`}});
     add("Keine doppelten IDs",()=>{const ids=[...document.querySelectorAll("[id]")].map(x=>x.id); const d=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))]; return {ok:!d.length,message:d.length?`Doppelt: ${d.join(", ")}`:"Alle IDs eindeutig"}});
     add("Buttons beschriftet",()=>{const bad=[...document.querySelectorAll("button")].filter(b=>!b.textContent.trim()&&!b.getAttribute("aria-label")); return {ok:!bad.length,message:bad.length?`${bad.length} ohne Beschriftung`:`${document.querySelectorAll("button").length} Button(s) geprüft`}});
-    add("Zurück-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Zurück")); return {ok:!!b,message:b?"Zurück-Button gefunden":"Kein Zurück-Button"}});
+    if(!document.body.classList.contains("welcome-page")){
+      add("Zurück-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Zurück")); return {ok:!!b,message:b?"Zurück-Button gefunden":"Kein Zurück-Button"}});
+    }
     add("Weiter-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Weiter")); return {ok:!!b,message:b?"Weiter-Button gefunden":"Kein Weiter-Button"}});
     window.addEventListener("load",()=>setTimeout(run,100));
   }
