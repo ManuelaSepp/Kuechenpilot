@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Küchenpilot - Wer isst mit?</title>
+    <title>Küchenpilot - Startseite</title>
     <style>
         @font-face {
             font-family: "Architects Daughter";
@@ -60,7 +60,7 @@
             position: absolute;
             z-index: 2;
             right: clamp(105px, 9vw, 126px);
-            top: clamp(205px, 22vw, 235px);
+            top: 50%;
             width: clamp(190px, 17vw, 215px);
             max-width: 32vw;
             transform: translateY(-50%);
@@ -225,189 +225,14 @@
                 padding: 40px 20px 24px;
             }
         }
-
-        .person-row {
-            margin-top: 14px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .person-counter {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .count-button {
-            width: 42px;
-            height: 42px;
-            border: 2px solid var(--orange);
-            border-radius: 14px;
-            background: #ffffff;
-            color: var(--orange-dark);
-            font-family: inherit;
-            font-size: 1.5rem;
-            line-height: 1;
-            cursor: pointer;
-            box-shadow: 0 8px 18px rgba(166, 112, 34, 0.10);
-        }
-
-        .count-button:hover,
-        .count-button:focus-visible {
-            background: var(--orange);
-            color: #ffffff;
-            outline: none;
-        }
-
-        .count-value {
-            min-width: 46px;
-            text-align: center;
-            font-size: 2.25rem;
-            color: var(--orange-dark);
-        }
-
-        .optional-persons {
-            margin: 0;
-        }
-
-        .optional-persons summary {
-            cursor: pointer;
-            color: var(--orange-dark);
-            font-size: 1.26rem;
-            font-weight: 600;
-            line-height: 1.25;
-        }
-
-        .person-list {
-            margin-top: 16px;
-            display: grid;
-            gap: 14px;
-            width: 100%;
-        }
-
-        .person-card {
-            background: #ffffff;
-            border: 2px solid rgba(245, 166, 35, 0.30);
-            border-radius: 20px;
-            padding: 14px;
-        }
-
-        .person-card h2 {
-            margin: 0 0 8px;
-            font-size: 1.24rem;
-        }
-
-        .person-card label {
-            display: block;
-            margin-top: 7px;
-            font-size: 0.96rem;
-            color: var(--muted);
-        }
-
-        .person-card input,
-        .person-card textarea {
-            width: 100%;
-            margin-top: 5px;
-            padding: 8px 10px;
-            border: 2px solid rgba(245, 166, 35, 0.25);
-            border-radius: 14px;
-            background: #fffdf8;
-            color: var(--text);
-            font-family: inherit;
-            font-size: 1rem;
-        }
-
-        .person-card textarea {
-            min-height: 46px;
-            resize: vertical;
-        }
-
-        .button-row.double {
-            justify-content: space-between;
-            gap: 18px;
-        }
-
-        .button-row.double .next-button {
-            min-width: 190px;
-        }
-
-        @media (max-width: 760px) {
-            .person-row {
-                margin-top: 28px;
-                flex-direction: column;
-                align-items: stretch;
-                gap: 18px;
-            }
-
-            .person-counter {
-                justify-content: center;
-            }
-
-            .button-row.double {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-                justify-content: stretch;
-            }
-
-            .button-row.double .next-button {
-                width: 100%;
-                min-width: 0;
-                max-width: none;
-                padding: 10px 12px;
-                font-size: 1.12rem;
-                gap: 8px;
-            }
-        }
-
-    
-.optional-toggle{
-    border:0;
-    background:none;
-    color:var(--orange-dark);
-    font:inherit;
-    font-size:1.26rem;
-    font-weight:600;
-    cursor:pointer;
-    padding:0;
-}
-
-.person-cards{
-    width:min(100%, clamp(720px,64vw,790px));
-    margin-top:28px;
-    display:grid;
-    gap:24px;
-}
-
-.person-sheet{
-    background:var(--card);
-    border:2px solid rgba(245,166,35,.42);
-    border-radius:30px;
-    padding:clamp(42px,4vw,50px) clamp(46px,4.5vw,56px);
-    box-shadow:var(--shadow);
-}
-
-.person-sheet h2{margin:0 0 18px;color:var(--orange-dark);}
-.person-sheet label{display:block;margin-top:12px;}
-.person-sheet input,.person-sheet textarea{
- width:100%;
- margin-top:6px;
- padding:10px 12px;
- border:2px solid rgba(245,166,35,.25);
- border-radius:14px;
- font:inherit;
-}
-.person-sheet textarea{min-height:58px;}
-
-</style>
+    </style>
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body>
 
-    <main class="start-page" aria-label="Küchenpilot Personenseite">
+    <main class="start-page" aria-label="Küchenpilot Startseite">
         <div class="pilot-card pilot-desktop">
-            <img src="assets/figuren/pilot-mauer-schraeg.png" alt="Küchenpilot">
+            <img src="assets/figuren/pilot-freude-schraeg.png" alt="Küchenpilot">
         </div>
 
         <div class="pilot-card pilot-mobile">
@@ -415,85 +240,19 @@
         </div>
 
         <section class="welcome-card">
-            <h1>Wer <span>isst mit?</span></h1>
-            <p>Für wie viele Personen soll ich planen?<br>Optionales kannst du später ergänzen.</p>
+            <h1>Ich bin dein <span>Küchenpilot.</span></h1>
+            <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
 
-            <div class="person-row">
-                <div class="person-counter" aria-label="Personenanzahl auswählen">
-                    <button class="count-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
-                    <div class="count-value" id="personCount">2</div>
-                    <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
-                </div>
-
-                <button class="optional-toggle" type="button" onclick="togglePersons()">
-                    Optionale Angaben ergänzen
-                </button>
-            </div>
-
-            <div class="button-row double">
-                <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
-                    <span class="arrow" aria-hidden="true">←</span>
-                    <span>Zurück</span>
-                </button>
-
-                <button class="next-button" type="button" onclick="location.href='heute.html'" aria-label="Weiter zur Heute-Seite">
+            <div class="button-row">
+                <button class="next-button" onclick="location.href='personen.html'" aria-label="Weiter zur nächsten Seite">
+                    <img src="assets/icons/schneebesen.png" alt="">
                     <span>Weiter</span>
                     <span class="arrow" aria-hidden="true">→</span>
                 </button>
             </div>
         </section>
-
-        <section id="personCards" class="person-cards" hidden></section>
     </main>
 
-    
-<script>
-let personCount=2;
-let openPersons=false;
-
-function changePersons(a){
- personCount=Math.max(1,personCount+a);
- document.getElementById('personCount').textContent=personCount;
- renderPersonCards();
-}
-
-function togglePersons(){
- openPersons=!openPersons;
- renderPersonCards();
-}
-
-function renderPersonCards(){
- const wrap=document.getElementById('personCards');
- wrap.innerHTML='';
- wrap.hidden=!openPersons;
- if(!openPersons) return;
-
- for(let i=1;i<=personCount;i++){
-   wrap.insertAdjacentHTML('beforeend',`
-   <section class="person-sheet">
-     <h2>Person ${i}</h2>
-
-     <label>Name
-       <input type="text">
-     </label>
-
-     <label>Vorlieben
-       <textarea></textarea>
-     </label>
-
-     <label>Mag ich nicht
-       <textarea></textarea>
-     </label>
-
-     <label>Allergien / Unverträglichkeiten
-       <textarea></textarea>
-     </label>
-   </section>`);
- }
-}
-renderPersonCards();
-</script>
-
-
+    <script src="assets/tests/test-runner.js"></script>
 </body>
 </html>
