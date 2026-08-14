@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Grundvorrat auswählen</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+        }
+
+        .start-page {
+            width: min(100%, clamp(940px, 78vw, 1040px));
+            position: relative;
+            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+            width: min(100%, clamp(720px, 64vw, 790px));
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: clamp(42px, 4vw, 50px) clamp(46px, 4.5vw, 56px);
+            box-shadow: var(--shadow);
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            right: clamp(105px, 9vw, 126px);
+            top: 50%;
+            width: clamp(190px, 17vw, 215px);
+            max-width: 32vw;
+            transform: translateY(-50%);
+            pointer-events: none;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 6px;
+            overflow: hidden;
+        }
+
+        .pilot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 22px;
+            text-align: center;
+            font-size: clamp(2.1rem, 5vw, 3.5rem);
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            font-size: clamp(1.22rem, 2.4vw, 1.55rem);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-width: 220px;
+            min-height: 64px;
+            padding: 12px 24px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.35rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(166, 112, 34, 0.12);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(166, 112, 34, 0.20);
+            outline: none;
+        }
+
+        .next-button img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            transition: filter 0.18s ease;
+        }
+
+        .next-button:hover img,
+        .next-button:focus-visible img {
+            filter: brightness(0) invert(1);
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
+        .setup-row {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .setup-row .next-button {
+            min-width: 250px;
+        }
+
+        .button-row.double {
+            margin-top: 26px;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        @media (min-width: 761px) {
+            .stock-page .button-row.double .next-button {
+                min-width: 170px;
+                min-height: 56px;
+                padding: 10px 20px;
+                font-size: 1.18rem;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px;
+                align-items: flex-start;
+            }
+
+            .start-page {
+                width: 100%;
+                padding: 138px 0 0;
+                margin-top: 14px;
+            }
+
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+            }
+
+            .pilot-card {
+                left: 50%;
+                right: auto;
+                top: 28px;
+                width: 225px;
+                max-width: 68vw;
+                transform: translateX(-50%);
+                z-index: 2;
+                border-radius: 28px;
+                padding: 10px;
+            }
+
+            .welcome-card {
+                width: 100%;
+                z-index: 3;
+                padding: 40px 24px 26px;
+                border-radius: 26px;
+            }
+
+            h1 {
+                margin-bottom: 18px;
+            }
+
+            .button-row {
+                margin-top: 28px;
+                justify-content: center;
+            }
+
+            .next-button {
+                width: 100%;
+                max-width: 340px;
+                min-height: 62px;
+                font-size: 1.28rem;
+            }
+
+            .setup-row {
+                margin-top: 26px;
+            }
+
+            .setup-row .next-button {
+                min-width: 0;
+            }
+
+            .button-row.double {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                justify-content: stretch;
+            }
+
+            .button-row.double .next-button {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+                padding: 10px 12px;
+                font-size: 1.08rem;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .start-page {
+                padding-top: 128px;
+            }
+
+            .pilot-card {
+                width: 188px;
+                top: 30px;
+            }
+
+            .welcome-card {
+                padding: 40px 20px 24px;
+            }
+        }
+    
+        .stock-form {
+            width: min(calc(100% - var(--kp-pilot-width) + var(--kp-pilot-overlap)), var(--kp-card-max));
+            margin-top: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .stock-sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: 30px 34px;
+            box-shadow: var(--shadow);
+        }
+
+        .stock-sheet h2 {
+            margin: 0 0 8px;
+            color: var(--orange-dark);
+            font-size: 1.55rem;
+        }
+
+        .stock-sheet > p {
+            margin: 0 0 20px;
+            max-width: none;
+            text-align: left;
+            font-size: 1.08rem;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 18px;
+        }
+
+        .stock-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 42px;
+            padding: 7px 10px;
+            border: 2px solid rgba(245, 166, 35, 0.20);
+            border-radius: 13px;
+            background: #ffffff;
+            cursor: pointer;
+            font-size: 1.08rem;
+        }
+
+        .stock-option:has(input:checked) {
+            border-color: rgba(245, 166, 35, 0.55);
+            background: #fff8eb;
+        }
+
+        .stock-option input {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            accent-color: var(--orange);
+            flex: 0 0 auto;
+        }
+
+        .stock-tools {
+            display: flex;
+            justify-content: center;
+        }
+
+        .stock-tools button {
+            border: 0;
+            background: none;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 12px;
+        }
+
+        .stock-actions {
+            margin-top: 2px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .stock-actions .next-button {
+            min-width: 190px;
+        }
+
+        @media (max-width: 760px) {
+            .stock-form {
+                width: 100%;
+                margin-top: 24px;
+            }
+
+            .stock-sheet {
+                padding: 26px 20px;
+                border-radius: 26px;
+            }
+
+            .stock-grid {
+                grid-template-columns: 1fr;
+                gap: 9px;
+            }
+
+            .stock-actions {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .stock-actions .next-button {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+                padding: 10px 12px;
+                font-size: 1.08rem;
+                gap: 8px;
+            }
+        }
+
+</style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="stock-select-page">
+
+    <main class="start-page" aria-label="Küchenpilot Grundvorrat auswählen">
+        <div class="hero-shell">
+        <div class="pilot-card pilot-desktop">
+            <img src="assets/figuren/pilot-vorrat.png" alt="Küchenpilot">
+        </div>
+
+        <div class="pilot-card pilot-mobile">
+            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
+        </div>
+
+        <section class="welcome-card">
+            <h1>Was habt ihr schon <span>zu Hause?</span></h1>
+            <p>Ein typischer Grundvorrat ist bereits ausgewählt. Entferne einfach, was bei euch nicht vorhanden ist.</p>
+        </section>
+        </div>
+
+        <form id="stockForm" class="stock-form">
+            <section class="stock-sheet">
+                <h2>Vorratsschrank</h2>
+                <p>Haltbare Grundlagen, die in vielen Haushalten regelmäßig verwendet werden.</p>
+                <div class="stock-grid">
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Salz" checked><span>Salz</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Pfeffer" checked><span>Pfeffer</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Zucker" checked><span>Zucker</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Mehl" checked><span>Mehl</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Haferflocken" checked><span>Haferflocken</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Nudeln" checked><span>Nudeln</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Reis" checked><span>Reis</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kartoffeln" checked><span>Kartoffeln</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Zwiebeln" checked><span>Zwiebeln</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Knoblauch" checked><span>Knoblauch</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Speiseöl" checked><span>Speiseöl</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Essig" checked><span>Essig</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Gemüsebrühe" checked><span>Gemüsebrühe</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Dosentomaten" checked><span>Dosentomaten</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Tomatenmark" checked><span>Tomatenmark</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Hülsenfrüchte" checked><span>Hülsenfrüchte</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Paniermehl" checked><span>Paniermehl</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Backpulver" checked><span>Backpulver</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Honig" checked><span>Honig</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kräuter und Gewürze" checked><span>Kräuter und Gewürze</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Sojasauce" checked><span>Sojasauce</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kaffee oder Tee" checked><span>Kaffee oder Tee</span></label>
+                </div>
+            </section>
+
+            <section class="stock-sheet">
+                <h2>Kühlschrank</h2>
+                <p>Lebensmittel, die häufig als Grundlage oder zum Abschmecken gebraucht werden.</p>
+                <div class="stock-grid">
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Milch oder Pflanzendrink" checked><span>Milch oder Pflanzendrink</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Butter oder Margarine" checked><span>Butter oder Margarine</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Eier" checked><span>Eier</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Käse" checked><span>Käse</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Joghurt" checked><span>Joghurt</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Quark" checked><span>Quark</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Sahne oder Kochcreme" checked><span>Sahne oder Kochcreme</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Senf" checked><span>Senf</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Ketchup" checked><span>Ketchup</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Mayonnaise" checked><span>Mayonnaise</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Marmelade" checked><span>Marmelade</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Zitronensaft" checked><span>Zitronensaft</span></label>
+                </div>
+            </section>
+
+            <section class="stock-sheet">
+                <h2>Gefrierschrank</h2>
+                <p>Praktische Reserven für schnelle Gerichte und Tage ohne frischen Einkauf.</p>
+                <div class="stock-grid">
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Gemüsemischung" checked><span>Gemüsemischung</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Erbsen" checked><span>Erbsen</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Spinat" checked><span>Spinat</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Beeren" checked><span>Beeren</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Tiefgekühlte Kräuter" checked><span>Tiefgekühlte Kräuter</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Brot oder Brötchen" checked><span>Brot oder Brötchen</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Fisch" checked><span>Fisch</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Fleisch oder Geflügel" checked><span>Fleisch oder Geflügel</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Vorgekochte Reste" checked><span>Vorgekochte Reste</span></label>
+                </div>
+            </section>
+
+            <div class="stock-tools">
+                <button type="button" id="toggleStock">Alles abwählen</button>
+            </div>
+
+            <div class="stock-actions">
+                <button class="next-button" type="button" onclick="location.href='grundvorrat.html'">
+                    <span class="arrow" aria-hidden="true">←</span>
+                    <span>Zurück</span>
+                </button>
+                <button class="next-button" type="submit">
+                    <span>Speichern &amp; weiter</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </button>
+            </div>
+        </form>
+    </main>
+
+
+    <script>
+        const stockBoxes = [...document.querySelectorAll('input[name="stock"]')];
+        const toggleStock = document.getElementById('toggleStock');
+        const savedStock = localStorage.getItem('kuechenpilotGrundvorrat');
+
+        if (savedStock) {
+            try {
+                const selected = new Set(JSON.parse(savedStock));
+                stockBoxes.forEach(box => {
+                    box.checked = selected.has(box.value);
+                });
+            } catch (_) {
+                localStorage.removeItem('kuechenpilotGrundvorrat');
+            }
+        }
+
+        function updateToggleLabel() {
+            toggleStock.textContent = stockBoxes.some(box => box.checked)
+                ? 'Alles abwählen'
+                : 'Typischen Grundvorrat auswählen';
+        }
+
+        toggleStock.addEventListener('click', () => {
+            const shouldSelect = !stockBoxes.some(box => box.checked);
+            stockBoxes.forEach(box => {
+                box.checked = shouldSelect;
+            });
+            updateToggleLabel();
+        });
+
+        stockBoxes.forEach(box => box.addEventListener('change', updateToggleLabel));
+
+        document.getElementById('stockForm').addEventListener('submit', event => {
+            event.preventDefault();
+            const selected = stockBoxes.filter(box => box.checked).map(box => box.value);
+            localStorage.setItem('kuechenpilotGrundvorrat', JSON.stringify(selected));
+            location.href = 'heute.html';
+        });
+
+        updateToggleLabel();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+</body>
+</html>
+
+
