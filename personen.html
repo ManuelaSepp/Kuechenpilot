@@ -432,15 +432,79 @@
 
 .person-sheet h2{margin:0 0 18px;color:var(--orange-dark);}
 .person-sheet label{display:block;margin-top:12px;}
-.person-sheet input,.person-sheet textarea{
+.person-sheet input:not([type="checkbox"]),
+.person-sheet textarea,
+.person-sheet select{
  width:100%;
  margin-top:6px;
  padding:10px 12px;
  border:2px solid rgba(245,166,35,.25);
  border-radius:14px;
  font:inherit;
+ background:#fff;
+ color:var(--text);
 }
 .person-sheet textarea{min-height:58px;}
+
+.person-options-grid{
+ margin-top:22px;
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ gap:16px 18px;
+}
+
+.person-options-grid label{margin-top:0;}
+.shake-details{grid-column:1/-1;}
+.shake-details[hidden]{display:none;}
+
+.allergy-fieldset{
+ margin:22px 0 0;
+ padding:0;
+ border:0;
+}
+
+.allergy-fieldset legend{
+ margin-bottom:10px;
+ color:var(--text);
+ font-size:1rem;
+}
+
+.allergy-options{
+ display:flex;
+ flex-wrap:wrap;
+ gap:8px;
+}
+
+.allergy-chip{
+ display:inline-flex!important;
+ align-items:center;
+ gap:8px;
+ margin:0!important;
+ padding:8px 11px;
+ border:2px solid rgba(245,166,35,.25);
+ border-radius:999px;
+ background:#fff;
+ cursor:pointer;
+}
+
+.allergy-chip input{
+ width:18px;
+ height:18px;
+ margin:0;
+ accent-color:var(--orange);
+}
+
+.allergy-chip:has(input:checked){
+ border-color:rgba(245,166,35,.65);
+ background:#fff7e6;
+}
+
+.allergy-details{margin-top:14px!important;}
+
+@media (max-width:760px){
+ .person-options-grid{grid-template-columns:1fr;}
+ .shake-details{grid-column:auto;}
+}
 
 </style>
     <link rel="stylesheet" href="assets/styles/responsive-master.css">
@@ -509,6 +573,11 @@ function togglePersons(){
  renderPersonCards();
 }
 
+function toggleShakeDetails(select){
+ const details=select.closest('.person-options-grid')?.querySelector('.shake-details');
+ if(details) details.hidden=select.value==='none';
+}
+
 function renderPersonCards(){
  const wrap=document.getElementById('personCards');
  wrap.innerHTML='';
@@ -524,6 +593,53 @@ function renderPersonCards(){
        <input type="text">
      </label>
 
+     <div class="person-options-grid">
+       <label>Altersgruppe
+         <select>
+           <option value="">Keine Angabe</option>
+           <option>Kind</option>
+           <option>Jugendliche Person</option>
+           <option>Erwachsene Person</option>
+         </select>
+       </label>
+
+       <label>Ernährungsweise
+         <select>
+           <option value="">Keine Angabe</option>
+           <option>Alles</option>
+           <option>Flexitarisch</option>
+           <option>Vegetarisch</option>
+           <option>Vegan</option>
+           <option>Pescetarisch</option>
+         </select>
+       </label>
+
+       <label>Portionsgröße
+         <select>
+           <option value="">Keine Angabe</option>
+           <option>Klein</option>
+           <option>Normal</option>
+           <option>Groß</option>
+         </select>
+       </label>
+
+       <label>Shake-Nutzung
+         <select class="shake-frequency" onchange="toggleShakeDetails(this)">
+           <option value="none">Keine Shakes</option>
+           <option value="occasionally">Gelegentlich</option>
+           <option value="regularly">Regelmäßig</option>
+         </select>
+       </label>
+
+       <label class="shake-details" hidden>Shake einplanen als
+         <select>
+           <option>Frühstück</option>
+           <option>Snack</option>
+           <option>Mahlzeitenersatz</option>
+         </select>
+       </label>
+     </div>
+
      <label>Vorlieben
        <textarea></textarea>
      </label>
@@ -532,9 +648,25 @@ function renderPersonCards(){
        <textarea></textarea>
      </label>
 
-     <label>Allergien / Unverträglichkeiten
-       <textarea></textarea>
-     </label>
+     <fieldset class="allergy-fieldset">
+       <legend>Allergien / Unverträglichkeiten</legend>
+       <div class="allergy-options">
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Gluten"> Gluten</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Milch/Laktose"> Milch/Laktose</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Ei"> Ei</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Erdnüsse/Nüsse"> Erdnüsse/Nüsse</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Soja"> Soja</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Fisch/Meeresfrüchte"> Fisch/Meeresfrüchte</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sellerie"> Sellerie</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Senf"> Senf</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sesam"> Sesam</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sonstige"> Sonstige</label>
+       </div>
+
+       <label class="allergy-details">Weitere oder genaue Angaben
+         <textarea></textarea>
+       </label>
+     </fieldset>
    </section>`);
  }
 }
