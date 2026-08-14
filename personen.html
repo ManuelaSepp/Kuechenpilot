@@ -447,7 +447,7 @@
                     <span>Zurück</span>
                 </button>
 
-                <button class="next-button" type="button" onclick="location.href='heute.html'" aria-label="Weiter zur Heute-Seite">
+                <button class="next-button" type="button" onclick="location.href='grundvorrat.html'" aria-label="Weiter zum Grundvorrat">
                     <span>Weiter</span>
                     <span class="arrow" aria-hidden="true">→</span>
                 </button>
@@ -541,11 +541,11 @@ if (window.KPTest && window.KPTest.enabled) {
     return {ok,message:ok?"Button ist sichtbar und nicht blockiert.":"Button fehlt oder ist blockiert."};
   });
 
-  KPTest.add("Weiter-Ziel heute.html erreichbar", async () => {
+  KPTest.add("Weiter-Ziel grundvorrat.html erreichbar", async () => {
     const b=buttonNamed("Weiter"), code=b?.getAttribute("onclick")||"";
-    if(!code.includes("heute.html")) return {ok:false,message:"Ziel ist nicht heute.html."};
-    const r=await urlExists("heute.html");
-    return {ok:r.ok,message:r.ok?`heute.html erreichbar (HTTP ${r.status}).`:`heute.html nicht erreichbar${r.status?` (HTTP ${r.status})`:""}.`};
+    if(!code.includes("grundvorrat.html")) return {ok:false,message:"Ziel ist nicht grundvorrat.html."};
+    const r=await urlExists("grundvorrat.html");
+    return {ok:r.ok,message:r.ok?`grundvorrat.html erreichbar (HTTP ${r.status}).`:`grundvorrat.html nicht erreichbar${r.status?` (HTTP ${r.status})`:""}.`};
   });
 
   KPTest.add("Personenzähler startet bei 2", () => {
