@@ -160,6 +160,7 @@
         @media (min-width: 761px) {
             html body.persons-page .start-page {
                 margin-top: max(0px, calc((100vh - 500px) / 2 - clamp(20px, 2.5vw, 32px) - clamp(32px, 5vw, 58px)));
+                transform: translateY(clamp(-32px, -4vh, -20px));
             }
 
             body.persons-page .welcome-card {
@@ -167,6 +168,15 @@
                 height: 500px;
                 display: flex;
                 flex-direction: column;
+            }
+
+            body.persons-page .card-main {
+                width: 100%;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                transform: translateY(-8px);
             }
 
             body.persons-page .button-row.double {
@@ -449,19 +459,21 @@
         </div>
 
         <section class="welcome-card">
-            <h1>Wer <span>isst mit?</span></h1>
-            <p>Für wie viele Personen soll ich planen?<br>Optionales kannst du später ergänzen.</p>
+            <div class="card-main">
+                <h1>Wer <span>isst mit?</span></h1>
+                <p>Für wie viele Personen soll ich planen?<br>Optionales kannst du später ergänzen.</p>
 
-            <div class="person-row">
-                <div class="person-counter" aria-label="Personenanzahl auswählen">
-                    <button class="count-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
-                    <div class="count-value" id="personCount">2</div>
-                    <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
+                <div class="person-row">
+                    <div class="person-counter" aria-label="Personenanzahl auswählen">
+                        <button class="count-button" type="button" onclick="changePersons(-1)" aria-label="Eine Person weniger">−</button>
+                        <div class="count-value" id="personCount">2</div>
+                        <button class="count-button" type="button" onclick="changePersons(1)" aria-label="Eine Person mehr">+</button>
+                    </div>
+
+                    <button class="optional-toggle" type="button" onclick="togglePersons()">
+                        Optionale Angaben ergänzen
+                    </button>
                 </div>
-
-                <button class="optional-toggle" type="button" onclick="togglePersons()">
-                    Optionale Angaben ergänzen
-                </button>
             </div>
 
             <div class="button-row double">
