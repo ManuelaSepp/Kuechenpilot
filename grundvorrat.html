@@ -174,8 +174,8 @@
         }
 
         @media (min-width: 761px) {
-            .stock-page .pilot-card {
-                right: 0;
+            body.stock-page .hero-shell {
+                width: min(100%, calc(var(--kp-hero-max) + var(--kp-pilot-overlap)));
             }
 
             .stock-page .button-row.double .next-button {
@@ -184,6 +184,12 @@
                 padding: 10px 20px;
                 font-size: 1.18rem;
                 gap: 10px;
+            }
+        }
+
+        @media (min-width: 761px) and (max-width: 1050px) {
+            body.stock-page .welcome-card {
+                width: calc(100% - var(--kp-pilot-width));
             }
         }
 
