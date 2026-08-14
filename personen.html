@@ -158,6 +158,10 @@
         }
 
         @media (min-width: 761px) {
+            html body.persons-page .start-page {
+                margin-top: max(0px, calc((100vh - 500px) / 2 - clamp(20px, 2.5vw, 32px) - clamp(32px, 5vw, 58px)));
+            }
+
             body.persons-page .welcome-card {
                 width: min(100%, 790px);
                 height: 500px;
@@ -167,6 +171,12 @@
 
             body.persons-page .button-row.double {
                 margin-top: auto;
+            }
+        }
+
+        @media (min-width: 761px) and (max-width: 1050px) {
+            html body.persons-page .start-page {
+                margin-top: max(0px, calc((100vh - 500px) / 2 - clamp(20px, 2.5vw, 32px) - clamp(24px, 4vw, 42px)));
             }
         }
 
