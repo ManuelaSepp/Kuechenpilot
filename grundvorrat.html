@@ -174,11 +174,24 @@
         }
 
         @media (min-width: 761px) {
+            body.stock-page .start-page {
+                transform: translateY(clamp(-32px, -4vh, -20px));
+            }
+
             body.stock-page .welcome-card {
                 width: min(100%, 790px);
                 height: 500px;
                 display: flex;
                 flex-direction: column;
+            }
+
+            body.stock-page .card-main {
+                width: 100%;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                transform: translateY(-8px);
             }
 
             body.stock-page .button-row.double {
@@ -309,14 +322,16 @@
         </div>
 
         <section class="welcome-card">
-            <h1>Was ist schon <span>an Bord?</span></h1>
-            <p>Wenn du magst, legen wir gemeinsam deinen Grundvorrat an. So weiß ich später besser, was bereits da ist. Du kannst diesen Schritt auch überspringen.</p>
+            <div class="card-main">
+                <h1>Was ist schon <span>an Bord?</span></h1>
+                <p>Wenn du magst, legen wir gemeinsam deinen Grundvorrat an. So weiß ich später besser, was bereits da ist. Du kannst diesen Schritt auch überspringen.</p>
 
-            <div class="setup-row">
-                <button class="next-button" type="button" onclick="location.href='vorrat.html'" aria-label="Grundvorrat anlegen">
-                    <span>Grundvorrat anlegen</span>
-                    <span class="arrow" aria-hidden="true">→</span>
-                </button>
+                <div class="setup-row">
+                    <button class="next-button" type="button" onclick="location.href='vorrat.html'" aria-label="Grundvorrat anlegen">
+                        <span>Grundvorrat anlegen</span>
+                        <span class="arrow" aria-hidden="true">→</span>
+                    </button>
+                </div>
             </div>
 
             <div class="button-row double">
