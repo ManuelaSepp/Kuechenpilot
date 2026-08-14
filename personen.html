@@ -157,6 +157,19 @@
             transform: translateY(-1px);
         }
 
+        @media (min-width: 761px) {
+            body.persons-page .welcome-card {
+                width: min(100%, 790px);
+                height: 500px;
+                display: flex;
+                flex-direction: column;
+            }
+
+            body.persons-page .button-row.double {
+                margin-top: auto;
+            }
+        }
+
         @media (max-width: 760px) {
             body {
                 padding: 18px;
