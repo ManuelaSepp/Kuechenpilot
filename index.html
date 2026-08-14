@@ -158,11 +158,24 @@
         }
 
         @media (min-width: 761px) {
+            body.welcome-page .start-page {
+                transform: translateY(clamp(-32px, -4vh, -20px));
+            }
+
             body.welcome-page .welcome-card {
                 width: min(100%, 790px);
                 height: 500px;
                 display: flex;
                 flex-direction: column;
+            }
+
+            body.welcome-page .card-main {
+                width: 100%;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                transform: translateY(-8px);
             }
 
             body.welcome-page .button-row {
@@ -263,8 +276,10 @@
         </div>
 
         <section class="welcome-card">
-            <h1>Ich bin dein <span>Küchenpilot.</span></h1>
-            <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
+            <div class="card-main">
+                <h1>Ich bin dein <span>Küchenpilot.</span></h1>
+                <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
+            </div>
 
             <div class="button-row">
                 <button class="next-button" onclick="location.href='personen.html'" aria-label="Weiter zur nächsten Seite">
