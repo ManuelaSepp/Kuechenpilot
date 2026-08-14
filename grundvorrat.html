@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Grundvorrat</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+        }
+
+        .start-page {
+            width: min(100%, clamp(940px, 78vw, 1040px));
+            position: relative;
+            padding: clamp(48px, 5vw, 58px) clamp(110px, 10vw, 132px) clamp(48px, 5vw, 58px) 0;
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+            width: min(100%, clamp(720px, 64vw, 790px));
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            padding: clamp(42px, 4vw, 50px) clamp(46px, 4.5vw, 56px);
+            box-shadow: var(--shadow);
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            right: clamp(105px, 9vw, 126px);
+            top: 50%;
+            width: clamp(190px, 17vw, 215px);
+            max-width: 32vw;
+            transform: translateY(-50%);
+            pointer-events: none;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            padding: 6px;
+            overflow: hidden;
+        }
+
+        .pilot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 22px;
+            text-align: center;
+            font-size: clamp(2.1rem, 5vw, 3.5rem);
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            font-size: clamp(1.22rem, 2.4vw, 1.55rem);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-width: 220px;
+            min-height: 64px;
+            padding: 12px 24px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.35rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 10px 22px rgba(166, 112, 34, 0.12);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(166, 112, 34, 0.20);
+            outline: none;
+        }
+
+        .next-button img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            transition: filter 0.18s ease;
+        }
+
+        .next-button:hover img,
+        .next-button:focus-visible img {
+            filter: brightness(0) invert(1);
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
+        .setup-row {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .setup-row .next-button {
+            min-width: 250px;
+        }
+
+        .button-row.double {
+            margin-top: 26px;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        @media (min-width: 761px) {
+            .stock-page .button-row.double .next-button {
+                min-width: 170px;
+                min-height: 56px;
+                padding: 10px 20px;
+                font-size: 1.18rem;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px;
+                align-items: flex-start;
+            }
+
+            .start-page {
+                width: 100%;
+                padding: 138px 0 0;
+                margin-top: 14px;
+            }
+
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+            }
+
+            .pilot-card {
+                left: 50%;
+                right: auto;
+                top: 28px;
+                width: 225px;
+                max-width: 68vw;
+                transform: translateX(-50%);
+                z-index: 2;
+                border-radius: 28px;
+                padding: 10px;
+            }
+
+            .welcome-card {
+                width: 100%;
+                z-index: 3;
+                padding: 40px 24px 26px;
+                border-radius: 26px;
+            }
+
+            h1 {
+                margin-bottom: 18px;
+            }
+
+            .button-row {
+                margin-top: 28px;
+                justify-content: center;
+            }
+
+            .next-button {
+                width: 100%;
+                max-width: 340px;
+                min-height: 62px;
+                font-size: 1.28rem;
+            }
+
+            .setup-row {
+                margin-top: 26px;
+            }
+
+            .setup-row .next-button {
+                min-width: 0;
+            }
+
+            .button-row.double {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                justify-content: stretch;
+            }
+
+            .button-row.double .next-button {
+                width: 100%;
+                min-width: 0;
+                max-width: none;
+                padding: 10px 12px;
+                font-size: 1.08rem;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .start-page {
+                padding-top: 128px;
+            }
+
+            .pilot-card {
+                width: 188px;
+                top: 30px;
+            }
+
+            .welcome-card {
+                padding: 40px 20px 24px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="stock-page">
+
+    <main class="start-page" aria-label="Küchenpilot Grundvorrat">
+        <div class="hero-shell">
+        <div class="pilot-card pilot-desktop">
+            <img src="assets/figuren/pilot-vorrat.png" alt="Küchenpilot">
+        </div>
+
+        <div class="pilot-card pilot-mobile">
+            <img src="assets/figuren/pilot-megafreu.png" alt="Küchenpilot">
+        </div>
+
+        <section class="welcome-card">
+            <h1>Was ist schon <span>an Bord?</span></h1>
+            <p>Wenn du magst, legen wir gemeinsam deinen Grundvorrat an. So weiß ich später besser, was bereits da ist. Du kannst diesen Schritt auch überspringen.</p>
+
+            <div class="setup-row">
+                <button class="next-button" type="button" onclick="location.href='vorrat.html'" aria-label="Grundvorrat anlegen">
+                    <span>Grundvorrat anlegen</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </button>
+            </div>
+
+            <div class="button-row double">
+                <button class="next-button" type="button" onclick="location.href='personen.html'" aria-label="Zurück zur Personenseite">
+                    <span class="arrow" aria-hidden="true">←</span>
+                    <span>Zurück</span>
+                </button>
+
+                <button class="next-button" type="button" onclick="location.href='heute.html'" aria-label="Grundvorrat vorerst überspringen">
+                    <span>Vorerst überspringen</span>
+                    <span class="arrow" aria-hidden="true">→</span>
+                </button>
+            </div>
+        </section>
+        </div>
+    </main>
+
+    <script src="assets/tests/test-runner.js"></script>
+</body>
+</html>
+
