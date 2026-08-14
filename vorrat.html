@@ -174,6 +174,10 @@
         }
 
         @media (min-width: 761px) {
+            .stock-select-page .pilot-card {
+                right: 0;
+            }
+
             .stock-page .button-row.double .next-button {
                 min-width: 170px;
                 min-height: 56px;
@@ -313,15 +317,15 @@
         }
 
         .stock-option {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: center;
-            gap: 10px;
-            min-height: 42px;
+            gap: 8px;
+            min-height: 54px;
             padding: 7px 10px;
             border: 2px solid rgba(245, 166, 35, 0.20);
             border-radius: 13px;
             background: #ffffff;
-            cursor: pointer;
             font-size: 1.08rem;
         }
 
@@ -330,12 +334,127 @@
             background: #fff8eb;
         }
 
-        .stock-option input {
+        .stock-item-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .stock-item-check span {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .stock-item-check input {
             width: 20px;
             height: 20px;
             margin: 0;
             accent-color: var(--orange);
             flex: 0 0 auto;
+        }
+
+        .stock-quantity {
+            display: grid;
+            grid-template-columns: 66px 92px;
+            gap: 6px;
+        }
+
+        .stock-quantity input,
+        .stock-quantity select,
+        .custom-field input,
+        .custom-field select {
+            width: 100%;
+            height: 38px;
+            min-width: 0;
+            border: 2px solid rgba(245, 166, 35, 0.34);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 0.92rem;
+            padding: 5px 7px;
+        }
+
+        .stock-quantity input:focus,
+        .stock-quantity select:focus,
+        .custom-field input:focus,
+        .custom-field select:focus {
+            border-color: var(--orange);
+            outline: 3px solid rgba(245, 166, 35, 0.14);
+        }
+
+        .stock-option.is-inactive {
+            opacity: 0.58;
+        }
+
+        .custom-stock-entry {
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) 90px 120px auto;
+            align-items: end;
+            gap: 10px;
+        }
+
+        .custom-field {
+            display: grid;
+            gap: 5px;
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        .add-stock-button {
+            min-height: 42px;
+            padding: 7px 18px;
+            border: 2px solid var(--orange);
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .add-stock-button:hover,
+        .add-stock-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .custom-stock-list {
+            margin-top: 18px;
+        }
+
+        .custom-empty,
+        .custom-message {
+            margin: 14px 0 0;
+            max-width: none;
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        .custom-message {
+            min-height: 1.4em;
+            color: var(--orange-dark);
+        }
+
+        .remove-stock {
+            width: 34px;
+            height: 34px;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        .custom-stock-option {
+            grid-template-columns: minmax(0, 1fr) auto auto;
         }
 
         .stock-tools {
@@ -381,6 +500,19 @@
                 gap: 9px;
             }
 
+            .custom-stock-entry {
+                grid-template-columns: minmax(0, 1fr) 82px 105px;
+            }
+
+            .custom-stock-entry .custom-name,
+            .custom-stock-entry .add-stock-button {
+                grid-column: 1 / -1;
+            }
+
+            .custom-stock-entry .add-stock-button {
+                width: 100%;
+            }
+
             .stock-actions {
                 display: grid;
                 grid-template-columns: 1fr 1fr;
@@ -394,6 +526,28 @@
                 padding: 10px 12px;
                 font-size: 1.08rem;
                 gap: 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .stock-option,
+            .custom-stock-option {
+                grid-template-columns: 1fr;
+            }
+
+            .stock-quantity {
+                grid-template-columns: minmax(66px, 90px) minmax(0, 1fr);
+                padding-left: 30px;
+            }
+
+            .custom-stock-option .remove-stock {
+                position: absolute;
+                right: 8px;
+                top: 8px;
+            }
+
+            .custom-stock-option {
+                position: relative;
             }
         }
 
@@ -415,7 +569,7 @@
 
         <section class="welcome-card">
             <h1>Was habt ihr schon <span>zu Hause?</span></h1>
-            <p>Ein typischer Grundvorrat ist bereits ausgewählt. Entferne einfach, was bei euch nicht vorhanden ist.</p>
+            <p>Ein typischer Grundvorrat ist bereits ausgewählt. Entferne einfach, was bei euch nicht vorhanden ist. Mengen kannst du angeben, musst du aber nicht.</p>
         </section>
         </div>
 
@@ -484,6 +638,42 @@
                 </div>
             </section>
 
+            <section class="stock-sheet">
+                <h2>Weitere Lebensmittel</h2>
+                <p>Fehlt etwas in der Liste? Ergänze hier deine eigenen Vorräte.</p>
+
+                <div class="custom-stock-entry">
+                    <label class="custom-field custom-name">
+                        <span>Lebensmittel</span>
+                        <input id="customStockName" type="text" autocomplete="off" placeholder="z. B. Couscous">
+                    </label>
+                    <label class="custom-field">
+                        <span>Menge</span>
+                        <input id="customStockAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="z. B. 2">
+                    </label>
+                    <label class="custom-field">
+                        <span>Einheit</span>
+                        <select id="customStockUnit" aria-label="Einheit für weiteres Lebensmittel">
+                            <option value="Stück">Stück</option>
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="l">l</option>
+                            <option value="Packung">Packung</option>
+                            <option value="Dose">Dose</option>
+                            <option value="Glas">Glas</option>
+                            <option value="Flasche">Flasche</option>
+                            <option value="Päckchen">Päckchen</option>
+                            <option value="Portion">Portion</option>
+                        </select>
+                    </label>
+                    <button class="add-stock-button" id="addCustomStock" type="button">Hinzufügen</button>
+                </div>
+
+                <p class="custom-message" id="customStockMessage" aria-live="polite"></p>
+                <div class="stock-grid custom-stock-list" id="customStockList" aria-live="polite"></div>
+            </section>
+
             <div class="stock-tools">
                 <button type="button" id="toggleStock">Alles abwählen</button>
             </div>
@@ -503,41 +693,279 @@
 
 
     <script>
-        const stockBoxes = [...document.querySelectorAll('input[name="stock"]')];
+        const standardBoxes = [...document.querySelectorAll('input[name="stock"]')];
         const toggleStock = document.getElementById('toggleStock');
+        const customStockList = document.getElementById('customStockList');
+        const customStockName = document.getElementById('customStockName');
+        const customStockAmount = document.getElementById('customStockAmount');
+        const customStockUnit = document.getElementById('customStockUnit');
+        const customStockMessage = document.getElementById('customStockMessage');
         const savedStock = localStorage.getItem('kuechenpilotGrundvorrat');
+        const savedDetails = localStorage.getItem('kuechenpilotGrundvorratDetails');
+
+        const units = ['g', 'kg', 'ml', 'l', 'Stück', 'Packung', 'Dose', 'Glas', 'Flasche', 'Päckchen', 'Portion'];
+        const defaultUnits = {
+            'Salz': 'g',
+            'Pfeffer': 'g',
+            'Zucker': 'g',
+            'Mehl': 'g',
+            'Haferflocken': 'g',
+            'Nudeln': 'g',
+            'Reis': 'g',
+            'Kartoffeln': 'kg',
+            'Zwiebeln': 'Stück',
+            'Knoblauch': 'Stück',
+            'Speiseöl': 'ml',
+            'Essig': 'ml',
+            'Gemüsebrühe': 'g',
+            'Dosentomaten': 'Dose',
+            'Tomatenmark': 'Tube',
+            'Hülsenfrüchte': 'Dose',
+            'Paniermehl': 'g',
+            'Backpulver': 'Päckchen',
+            'Honig': 'g',
+            'Kräuter und Gewürze': 'g',
+            'Sojasauce': 'ml',
+            'Kaffee oder Tee': 'g',
+            'Milch oder Pflanzendrink': 'l',
+            'Butter oder Margarine': 'g',
+            'Eier': 'Stück',
+            'Käse': 'g',
+            'Joghurt': 'g',
+            'Quark': 'g',
+            'Sahne oder Kochcreme': 'ml',
+            'Senf': 'ml',
+            'Ketchup': 'ml',
+            'Mayonnaise': 'ml',
+            'Marmelade': 'g',
+            'Zitronensaft': 'ml',
+            'Gemüsemischung': 'g',
+            'Erbsen': 'g',
+            'Spinat': 'g',
+            'Beeren': 'g',
+            'Tiefgekühlte Kräuter': 'g',
+            'Brot oder Brötchen': 'Stück',
+            'Fisch': 'g',
+            'Fleisch oder Geflügel': 'g',
+            'Vorgekochte Reste': 'Portion'
+        };
+
+        let selectedNames = null;
+        let storedDetails = [];
 
         if (savedStock) {
             try {
-                const selected = new Set(JSON.parse(savedStock));
-                stockBoxes.forEach(box => {
-                    box.checked = selected.has(box.value);
-                });
+                selectedNames = new Set(JSON.parse(savedStock));
             } catch (_) {
                 localStorage.removeItem('kuechenpilotGrundvorrat');
             }
         }
 
+        if (savedDetails) {
+            try {
+                const parsedDetails = JSON.parse(savedDetails);
+                storedDetails = Array.isArray(parsedDetails) ? parsedDetails : [];
+            } catch (_) {
+                localStorage.removeItem('kuechenpilotGrundvorratDetails');
+            }
+        }
+
+        if (!selectedNames && storedDetails.length) {
+            selectedNames = new Set(storedDetails.map(item => item.name));
+        }
+
+        const detailByName = new Map(
+            storedDetails
+                .filter(item => item && typeof item.name === 'string')
+                .map(item => [item.name, item])
+        );
+
+        function makeQuantityControls(name, detail = {}) {
+            const quantity = document.createElement('div');
+            quantity.className = 'stock-quantity';
+
+            const amount = document.createElement('input');
+            amount.className = 'stock-amount';
+            amount.type = 'text';
+            amount.inputMode = 'decimal';
+            amount.autocomplete = 'off';
+            amount.placeholder = 'Menge';
+            amount.value = detail.amount || '';
+            amount.setAttribute('aria-label', `Menge für ${name}`);
+
+            const unit = document.createElement('select');
+            unit.className = 'stock-unit';
+            unit.setAttribute('aria-label', `Einheit für ${name}`);
+
+            const preferredUnit = detail.unit || defaultUnits[name] || 'Stück';
+            const availableUnits = units.includes(preferredUnit) ? units : [...units, preferredUnit];
+
+            availableUnits.forEach(unitName => {
+                const option = document.createElement('option');
+                option.value = unitName;
+                option.textContent = unitName;
+                option.selected = unitName === preferredUnit;
+                unit.appendChild(option);
+            });
+
+            quantity.append(amount, unit);
+            return quantity;
+        }
+
+        function syncRowState(row) {
+            const box = row.querySelector('input[type="checkbox"]');
+            const quantityFields = row.querySelectorAll('.stock-quantity input, .stock-quantity select');
+            row.classList.toggle('is-inactive', !box.checked);
+            quantityFields.forEach(field => {
+                field.disabled = !box.checked;
+            });
+        }
+
+        function buildRow(name, box, detail = {}, isCustom = false) {
+            const row = document.createElement('div');
+            row.className = `stock-option${isCustom ? ' custom-stock-option' : ''}`;
+            row.dataset.stockName = name;
+            row.dataset.custom = String(isCustom);
+
+            const checkLabel = document.createElement('label');
+            checkLabel.className = 'stock-item-check';
+            const nameLabel = document.createElement('span');
+            nameLabel.textContent = name;
+            checkLabel.append(box, nameLabel);
+
+            row.append(checkLabel, makeQuantityControls(name, detail));
+
+            if (isCustom) {
+                const removeButton = document.createElement('button');
+                removeButton.className = 'remove-stock';
+                removeButton.type = 'button';
+                removeButton.textContent = '×';
+                removeButton.setAttribute('aria-label', `${name} entfernen`);
+                removeButton.addEventListener('click', () => {
+                    row.remove();
+                    customStockMessage.textContent = `${name} wurde entfernt.`;
+                    updateToggleLabel();
+                });
+                row.appendChild(removeButton);
+            }
+
+            box.addEventListener('change', () => {
+                syncRowState(row);
+                updateToggleLabel();
+            });
+
+            syncRowState(row);
+            return row;
+        }
+
+        standardBoxes.forEach(box => {
+            const oldLabel = box.closest('.stock-option');
+            const detail = detailByName.get(box.value) || {};
+
+            if (selectedNames) {
+                box.checked = selectedNames.has(box.value);
+            }
+
+            oldLabel.replaceWith(buildRow(box.value, box, detail));
+        });
+
+        function addCustomRow(detail) {
+            const box = document.createElement('input');
+            box.type = 'checkbox';
+            box.name = 'stock';
+            box.value = detail.name;
+            box.checked = detail.checked !== false;
+            customStockList.appendChild(buildRow(detail.name, box, detail, true));
+        }
+
+        storedDetails
+            .filter(item => item && item.custom && item.name)
+            .forEach(item => addCustomRow(item));
+
+        function getStockRows() {
+            return [...document.querySelectorAll('.stock-option[data-stock-name]')];
+        }
+
+        function getStockBoxes() {
+            return getStockRows().map(row => row.querySelector('input[type="checkbox"]'));
+        }
+
         function updateToggleLabel() {
-            toggleStock.textContent = stockBoxes.some(box => box.checked)
+            toggleStock.textContent = getStockBoxes().some(box => box.checked)
                 ? 'Alles abwählen'
                 : 'Typischen Grundvorrat auswählen';
         }
 
         toggleStock.addEventListener('click', () => {
-            const shouldSelect = !stockBoxes.some(box => box.checked);
-            stockBoxes.forEach(box => {
+            const boxes = getStockBoxes();
+            const shouldSelect = !boxes.some(box => box.checked);
+            boxes.forEach(box => {
                 box.checked = shouldSelect;
+                syncRowState(box.closest('.stock-option'));
             });
             updateToggleLabel();
         });
 
-        stockBoxes.forEach(box => box.addEventListener('change', updateToggleLabel));
+        function addCustomStock() {
+            const name = customStockName.value.trim();
+            const amount = customStockAmount.value.trim();
+
+            if (!name) {
+                customStockMessage.textContent = 'Bitte gib zuerst ein Lebensmittel ein.';
+                customStockName.focus();
+                return;
+            }
+
+            const alreadyExists = getStockRows().some(
+                row => row.dataset.stockName.toLocaleLowerCase('de') === name.toLocaleLowerCase('de')
+            );
+
+            if (alreadyExists) {
+                customStockMessage.textContent = `${name} steht bereits in der Liste.`;
+                customStockName.focus();
+                return;
+            }
+
+            addCustomRow({
+                name,
+                amount,
+                unit: customStockUnit.value,
+                custom: true,
+                checked: true
+            });
+
+            customStockName.value = '';
+            customStockAmount.value = '';
+            customStockUnit.value = 'Stück';
+            customStockMessage.textContent = `${name} wurde hinzugefügt.`;
+            customStockName.focus();
+            updateToggleLabel();
+        }
+
+        document.getElementById('addCustomStock').addEventListener('click', addCustomStock);
+
+        [customStockName, customStockAmount].forEach(field => {
+            field.addEventListener('keydown', event => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addCustomStock();
+                }
+            });
+        });
 
         document.getElementById('stockForm').addEventListener('submit', event => {
             event.preventDefault();
-            const selected = stockBoxes.filter(box => box.checked).map(box => box.value);
-            localStorage.setItem('kuechenpilotGrundvorrat', JSON.stringify(selected));
+            const details = getStockRows()
+                .filter(row => row.querySelector('input[type="checkbox"]').checked)
+                .map(row => ({
+                    name: row.dataset.stockName,
+                    amount: row.querySelector('.stock-amount').value.trim(),
+                    unit: row.querySelector('.stock-unit').value,
+                    custom: row.dataset.custom === 'true'
+                }));
+
+            localStorage.setItem('kuechenpilotGrundvorrat', JSON.stringify(details.map(item => item.name)));
+            localStorage.setItem('kuechenpilotGrundvorratDetails', JSON.stringify(details));
             location.href = 'heute.html';
         });
 
@@ -547,5 +975,3 @@
     <script src="assets/tests/test-runner.js"></script>
 </body>
 </html>
-
-
