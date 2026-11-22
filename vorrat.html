@@ -507,7 +507,9 @@
 
         .stock-tools {
             display: flex;
+            flex-wrap: wrap;
             justify-content: center;
+            gap: 4px 18px;
         }
 
         .stock-tools button {
@@ -618,7 +620,7 @@
         <section class="welcome-card">
             <div class="card-main">
                 <h1>Was ist im <span>Vorrat?</span></h1>
-                <p>Ein typischer Grundvorrat ist bereits ausgewählt. Entferne einfach, was bei euch nicht vorhanden ist. Mengen kannst du angeben, musst du aber nicht.</p>
+                <p>Ein typischer Grundvorrat ist bereits ausgewählt. Was ihr gerade nicht da habt, hakst du ab, was ihr nie braucht, wirfst du mit × raus. Mengen kannst du angeben, musst du aber nicht.</p>
             </div>
 
             <div class="button-row double intro-actions">
@@ -737,6 +739,7 @@
 
             <div class="stock-tools">
                 <button type="button" id="toggleStock">Alles abwählen</button>
+                <button type="button" id="restoreHidden" hidden>Entfernte Vorschläge zurückholen</button>
             </div>
 
             <div class="stock-actions">
@@ -882,9 +885,18 @@
             });
         }
 
+        /* Vorgeschlagene Einträge, die rausgeworfen wurden (bleiben auch nach dem Speichern weg). */
+        const REMOVED_KEY = 'kuechenpilotVorratEntfernt';
+        let removedNames = [];
+        try {
+            const r = JSON.parse(localStorage.getItem(REMOVED_KEY) || '[]');
+            removedNames = Array.isArray(r) ? r : [];
+        } catch (_) { removedNames = []; }
+        const hiddenRows = []; /* { row, grid } zum Zurückholen */
+
         function buildRow(name, box, detail = {}, isCustom = false) {
             const row = document.createElement('div');
-            row.className = `stock-option${isCustom ? ' custom-stock-option' : ''}`;
+            row.className = 'stock-option custom-stock-option';
             row.dataset.stockName = name;
             row.dataset.custom = String(isCustom);
 
@@ -896,19 +908,22 @@
 
             row.append(checkLabel, makeQuantityControls(name, detail));
 
-            if (isCustom) {
-                const removeButton = document.createElement('button');
-                removeButton.className = 'remove-stock';
-                removeButton.type = 'button';
-                removeButton.textContent = '×';
-                removeButton.setAttribute('aria-label', `${name} entfernen`);
-                removeButton.addEventListener('click', () => {
+            const removeButton = document.createElement('button');
+            removeButton.className = 'remove-stock';
+            removeButton.type = 'button';
+            removeButton.textContent = '×';
+            removeButton.setAttribute('aria-label', `${name} entfernen`);
+            removeButton.addEventListener('click', () => {
+                if (isCustom) {
                     row.remove();
                     customStockMessage.textContent = `${name} wurde entfernt.`;
-                    updateToggleLabel();
-                });
-                row.appendChild(removeButton);
-            }
+                } else {
+                    hideStandardRow(row);
+                }
+                updateToggleLabel();
+                updateHiddenInfo();
+            });
+            row.appendChild(removeButton);
 
             box.addEventListener('change', () => {
                 syncRowState(row);
@@ -919,7 +934,7 @@
             return row;
         }
 
-        standardBoxes.forEach(box => {
+        standardBoxes.forEach((box, order) => {
             const oldLabel = box.closest('.stock-option');
             const detail = detailByName.get(box.value) || {};
 
@@ -927,8 +942,36 @@
                 box.checked = selectedNames.has(box.value);
             }
 
-            oldLabel.replaceWith(buildRow(box.value, box, detail));
+            const row = buildRow(box.value, box, detail);
+            row.dataset.order = String(order);
+            oldLabel.replaceWith(row);
+            if (removedNames.includes(box.value)) hideStandardRow(row);
         });
+
+        function hideStandardRow(row) {
+            hiddenRows.push({ row, grid: row.parentElement });
+            row.remove();
+        }
+
+        function updateHiddenInfo() {
+            const link = document.getElementById('restoreHidden');
+            if (!link) return;
+            link.hidden = !hiddenRows.length;
+            link.textContent = `Entfernte Vorschläge zurückholen (${hiddenRows.length})`;
+        }
+
+        function restoreHidden() {
+            hiddenRows.splice(0).forEach(({ row, grid }) => {
+                const box = row.querySelector('input[type="checkbox"]');
+                box.checked = true;
+                syncRowState(row);
+                const next = [...grid.children].find(el => Number(el.dataset.order) > Number(row.dataset.order));
+                grid.insertBefore(row, next || null);
+            });
+            customStockMessage.textContent = 'Alle Vorschläge sind wieder da.';
+            updateToggleLabel();
+            updateHiddenInfo();
+        }
 
         function addCustomRow(detail) {
             const box = document.createElement('input');
@@ -1026,11 +1069,14 @@
                 }));
 
             localStorage.setItem('kuechenpilotGrundvorrat', JSON.stringify(details.map(item => item.name)));
+            localStorage.setItem(REMOVED_KEY, JSON.stringify(hiddenRows.map(h => h.row.dataset.stockName)));
             localStorage.setItem('kuechenpilotGrundvorratDetails', JSON.stringify(details));
             location.href = 'heute.html';
         });
 
+        document.getElementById('restoreHidden').addEventListener('click', restoreHidden);
         updateToggleLabel();
+        updateHiddenInfo();
     </script>
 
     <script src="assets/tests/test-runner.js"></script>
