@@ -481,10 +481,57 @@
             font-size: 1.12rem;
         }
 
+        /* Kopfkachel wie auf den anderen Seiten (Maße aus responsive-master.css) */
+        .start-page { position: relative; }
+
+        .welcome-card,
+        .pilot-card {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card { position: relative; z-index: 3; }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            padding: 6px;
+            overflow: hidden;
+        }
+
+        .pilot-card img { width: 100%; height: auto; display: block; }
+        .pilot-mobile { display: none; }
+
+        .welcome-card h1 {
+            margin: 0 0 14px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        .welcome-card h1 span { color: var(--orange); }
+
+        .welcome-card .lead {
+            margin: 0 auto 18px;
+            max-width: 560px;
+            text-align: center;
+        }
+
+        .welcome-card .controls,
+        .welcome-card .stats { justify-content: center; }
+
+        .welcome-card .button-row { margin-top: 22px; }
+
+        @media (max-width: 760px) {
+            .pilot-desktop { display: none; }
+            .pilot-mobile { display: block; }
+        }
+
         @media (max-width: 760px) {
             body { padding: 16px; }
-            .head { grid-template-columns: 1fr; }
-            .head img.pilot { display: none; }
             .week-label { min-width: 0; flex: 1; font-size: 1.08rem; }
             .week-nav { width: 100%; }
             .days { grid-template-columns: 1fr; }
@@ -495,33 +542,49 @@
             .button-row .next-button { width: 100%; }
         }
     </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css">
     <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body class="plan-page-body no-next">
 
-    <main class="plan-page" aria-label="Küchenpilot Wochenkorb">
-        <section class="sheet head">
-            <div>
-                <p class="eyebrow">Dein Wochenkorb 🧺</p>
-                <h1>Was gibt es <span>diese Woche?</span></h1>
-                <p class="lead">Leg für jeden Tag Rezepte fest. Ich rechne die Mengen für eure Personenzahl aus und schreibe dir die Einkaufsliste – ohne das, was schon im Vorrat ist.</p>
-                <div class="controls">
-                    <div class="week-nav">
-                        <button class="round-button" type="button" id="prevWeek" aria-label="Vorherige Woche">‹</button>
-                        <span class="week-label" id="weekLabel"></span>
-                        <button class="round-button" type="button" id="nextWeek" aria-label="Nächste Woche">›</button>
-                    </div>
-                    <div class="persons" aria-label="Personenzahl">
-                        <span>Wir sind</span>
-                        <button class="round-button small" type="button" id="personsMinus" aria-label="Eine Person weniger">−</button>
-                        <strong id="personsValue">2</strong>
-                        <button class="round-button small" type="button" id="personsPlus" aria-label="Eine Person mehr">+</button>
-                        <span id="personsWord">Personen</span>
+    <main class="start-page plan-page" aria-label="Küchenpilot Wochenkorb">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-daumen.png" alt="Küchenpilot zeigt Daumen hoch">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-daumen.png" alt="Küchenpilot zeigt Daumen hoch">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1>Dein <span>Wochenkorb.</span></h1>
+                    <p class="lead">Plane deine Woche – ich rechne die Mengen aus und schreibe dir die Einkaufsliste.</p>
+                    <div class="controls">
+                        <div class="week-nav">
+                            <button class="round-button" type="button" id="prevWeek" aria-label="Vorherige Woche">‹</button>
+                            <span class="week-label" id="weekLabel"></span>
+                            <button class="round-button" type="button" id="nextWeek" aria-label="Nächste Woche">›</button>
+                        </div>
+                        <div class="persons" aria-label="Personenzahl">
+                            <span>Wir sind</span>
+                            <button class="round-button small" type="button" id="personsMinus" aria-label="Eine Person weniger">−</button>
+                            <strong id="personsValue">2</strong>
+                            <button class="round-button small" type="button" id="personsPlus" aria-label="Eine Person mehr">+</button>
+                            <span id="personsWord">Personen</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <img class="pilot" src="assets/figuren/pilot-daumen.png" alt="Küchenpilot zeigt Daumen hoch">
-        </section>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span>Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
 
         <section class="days" id="days" aria-label="Tage der Woche"></section>
 
@@ -547,13 +610,6 @@
             <a class="nav-tile" href="einkauf.html"><img src="assets/icons/kiste.png" alt=""><span>Einkauf</span></a>
             <a class="nav-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><span>Vorrat</span></a>
         </nav>
-
-        <div class="button-row">
-            <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
-                <span class="arrow" aria-hidden="true">←</span>
-                <span>Zurück</span>
-            </button>
-        </div>
 
         <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
     </main>
