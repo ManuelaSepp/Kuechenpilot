@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Rezepte</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        .start-page {
+            position: relative;
+        }
+
+        .welcome-card,
+        .pilot-card,
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            padding: 6px;
+            overflow: hidden;
+        }
+
+        .pilot-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .welcome-card p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(166, 112, 34, 0.20);
+            outline: none;
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+            transform: translateY(-1px);
+        }
+
+        /* ---------- Rezeptbereich ---------- */
+
+        .recipe-area {
+            width: min(100%, 922px);
+            margin-top: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .sheet {
+            border-radius: 26px;
+            padding: 26px 28px;
+        }
+
+        .sheet h2 {
+            margin: 0 0 14px;
+            color: var(--orange-dark);
+            font-size: 1.5rem;
+        }
+
+        .search-field {
+            display: block;
+        }
+
+        .search-field span {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        .search-field input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid rgba(245, 166, 35, 0.34);
+            border-radius: 16px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 1.15rem;
+        }
+
+        .search-field input:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 4px var(--orange-soft);
+        }
+
+        .filter-group {
+            margin-top: 16px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+            color: var(--muted);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            padding: 7px 14px;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 1.02rem;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .chip:hover,
+        .chip:focus-visible {
+            border-color: var(--orange);
+            outline: none;
+        }
+
+        .chip[aria-pressed="true"] {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #ffffff;
+        }
+
+        .chip small {
+            opacity: 0.75;
+        }
+
+        .result-line {
+            margin: 4px 4px 0;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+            gap: 16px;
+        }
+
+        .recipe-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 18px 18px 16px;
+            border: 2px solid var(--line);
+            border-radius: 20px;
+            background: var(--card);
+            color: inherit;
+            text-decoration: none;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .recipe-card:hover,
+        .recipe-card:focus-visible {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+            box-shadow: 0 16px 28px rgba(166, 112, 34, 0.18);
+            outline: none;
+        }
+
+        .recipe-card .kategorie {
+            align-self: flex-start;
+            padding: 2px 10px;
+            border-radius: 999px;
+            background: var(--orange-soft);
+            color: var(--orange-dark);
+            font-size: 0.95rem;
+        }
+
+        .recipe-card h3 {
+            margin: 0;
+            font-size: 1.22rem;
+            line-height: 1.25;
+        }
+
+        .facts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-top: auto;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .badge-open {
+            color: #b05a00;
+        }
+
+        .empty {
+            padding: 28px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 1.15rem;
+        }
+
+        /* ---------- Detailansicht ---------- */
+
+        .detail-head {
+            text-align: center;
+        }
+
+        .detail-head .kategorie {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: var(--orange-soft);
+            color: var(--orange-dark);
+            font-size: 1rem;
+        }
+
+        .detail-head h2 {
+            margin: 12px 0 16px;
+            color: var(--text);
+            font-size: clamp(1.7rem, 3.6vw, 2.4rem);
+            line-height: 1.15;
+        }
+
+        .fact-boxes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .fact-box {
+            min-width: 120px;
+            padding: 10px 16px;
+            border: 2px solid var(--line);
+            border-radius: 16px;
+            background: #ffffff;
+            text-align: center;
+        }
+
+        .fact-box strong {
+            display: block;
+            font-size: 1.25rem;
+        }
+
+        .fact-box span {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .note-open {
+            margin: 16px auto 0;
+            max-width: 600px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: #fff1dc;
+            color: #8a4b00;
+            text-align: center;
+        }
+
+        .detail-columns {
+            display: grid;
+            grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .ingredients h3 {
+            margin: 16px 0 6px;
+            font-size: 1.1rem;
+            color: var(--muted);
+        }
+
+        .ingredients ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .ingredients li {
+            display: flex;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px dashed rgba(245, 166, 35, 0.35);
+            font-size: 1.1rem;
+        }
+
+        .ingredients li:last-child {
+            border-bottom: 0;
+        }
+
+        .ingredients .menge {
+            flex: 0 0 74px;
+            color: var(--orange-dark);
+            font-weight: 600;
+        }
+
+        .steps ol {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            counter-reset: schritt;
+            display: grid;
+            gap: 10px;
+        }
+
+        .steps li {
+            counter-increment: schritt;
+            display: grid;
+            grid-template-columns: 38px minmax(0, 1fr);
+            gap: 12px;
+            padding: 12px 14px;
+            border: 2px solid var(--line);
+            border-radius: 16px;
+            background: #ffffff;
+            font-size: 1.1rem;
+            line-height: 1.45;
+            cursor: pointer;
+            transition: opacity 0.15s ease, background-color 0.15s ease;
+        }
+
+        .steps li::before {
+            content: counter(schritt);
+            display: grid;
+            place-items: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--orange);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .steps li.done {
+            opacity: 0.5;
+            background: #f6f1e8;
+        }
+
+        .steps li.done::before {
+            content: "✓";
+            background: #7cb342;
+        }
+
+        .steps .hint {
+            margin: -4px 0 12px;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .tip-box {
+            display: grid;
+            grid-template-columns: 40px minmax(0, 1fr);
+            gap: 12px;
+            align-items: start;
+            padding: 14px 16px;
+            border: 2px dashed rgba(245, 166, 35, 0.55);
+            border-radius: 18px;
+            background: #fffaf0;
+            font-size: 1.08rem;
+            line-height: 1.45;
+        }
+
+        .tip-box + .tip-box {
+            margin-top: 10px;
+        }
+
+        .tip-box img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
+        }
+
+        .tip-box p {
+            margin: 0;
+        }
+
+        .source {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .source a {
+            color: var(--orange-dark);
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (min-width: 761px) {
+            body.recipes-page .start-page {
+                padding-top: clamp(24px, 4vw, 42px);
+            }
+
+            body.recipes-page .welcome-card {
+                min-height: 330px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            body.recipes-page .card-main {
+                padding-top: 10px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+                padding: 10px;
+            }
+
+            .button-row {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .button-row .next-button {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .sheet {
+                padding: 22px 18px;
+            }
+
+            .detail-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .recipe-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="recipes-page no-next">
+
+    <main class="start-page" aria-label="Küchenpilot Rezepte">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-rezept.png" alt="Küchenpilot mit Rezeptbuch">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-rezept.png" alt="Küchenpilot mit Rezeptbuch">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1>Deine <span>Rezepte.</span></h1>
+                    <p id="introText">Entdecken, kochen, speichern, lieben. Such dir etwas Leckeres aus – ich führe dich Schritt für Schritt hindurch.</p>
+                </div>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" id="backButton" aria-label="Zurück">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span id="backLabel">Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <div class="recipe-area" id="overview">
+            <section class="sheet" aria-label="Rezepte suchen und filtern">
+                <label class="search-field">
+                    <span>Suchen nach Rezept oder Zutat</span>
+                    <input id="search" type="search" autocomplete="off" placeholder="z. B. Hähnchen, Kartoffeln, Kuchen …">
+                </label>
+
+                <div class="filter-group">
+                    <span class="filter-label">Kategorie</span>
+                    <div class="chips" id="categoryChips"></div>
+                </div>
+
+                <div class="filter-group">
+                    <span class="filter-label">Zubereitung</span>
+                    <div class="chips" id="deviceChips"></div>
+                </div>
+            </section>
+
+            <p class="result-line" id="resultLine" aria-live="polite"></p>
+            <div class="recipe-grid" id="recipeGrid"></div>
+        </div>
+
+        <div class="recipe-area" id="detail" hidden></div>
+    </main>
+
+    <script src="data/rezepte.js"></script>
+    <script>
+        const DATA = window.KP_REZEPTE || { rezepte: [] };
+        const RECIPES = DATA.rezepte;
+        const ALL = 'Alle';
+
+        const state = { query: '', category: ALL, device: ALL };
+
+        const els = {
+            overview: document.getElementById('overview'),
+            detail: document.getElementById('detail'),
+            search: document.getElementById('search'),
+            categoryChips: document.getElementById('categoryChips'),
+            deviceChips: document.getElementById('deviceChips'),
+            resultLine: document.getElementById('resultLine'),
+            grid: document.getElementById('recipeGrid'),
+            backButton: document.getElementById('backButton'),
+            backLabel: document.getElementById('backLabel'),
+            intro: document.getElementById('introText')
+        };
+
+        const introDefault = els.intro.textContent;
+
+        function esc(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function normalize(text) {
+            return String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replaceAll('ß', 'ss');
+        }
+
+        function countBy(list) {
+            const map = new Map();
+            list.forEach(item => map.set(item, (map.get(item) || 0) + 1));
+            return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'de'));
+        }
+
+        function portionText(r) {
+            if (!r.portionen) return '';
+            const unit = r.portionsEinheit || (r.portionen === 1 ? 'Portion' : 'Portionen');
+            return `${r.portionen} ${unit}`;
+        }
+
+        const searchIndex = new Map(RECIPES.map(r => [r.id, normalize([
+            r.titel, r.kategorie, ...(r.tags || []), ...(r.geraete || []),
+            ...(r.zutaten || []).map(z => z.name || z.text)
+        ].join(' '))]));
+
+        /* ---------- Übersicht ---------- */
+
+        function renderChips(container, entries, key) {
+            const all = [[ALL, RECIPES.length], ...entries];
+            container.innerHTML = all.map(([name, count]) => `
+                <button type="button" class="chip" data-value="${esc(name)}" aria-pressed="${state[key] === name}">
+                    ${esc(name)} <small>${count}</small>
+                </button>`).join('');
+            container.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    state[key] = chip.dataset.value;
+                    container.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === chip));
+                    renderList();
+                });
+            });
+        }
+
+        function filtered() {
+            const words = normalize(state.query).split(/\s+/).filter(Boolean);
+            return RECIPES.filter(r => {
+                if (state.category !== ALL && r.kategorie !== state.category) return false;
+                if (state.device !== ALL && !(r.geraete || []).includes(state.device)) return false;
+                const hay = searchIndex.get(r.id);
+                return words.every(w => hay.includes(w));
+            });
+        }
+
+        function cardHtml(r) {
+            const facts = [
+                r.geraete && r.geraete.length ? r.geraete.join(', ') : '',
+                portionText(r),
+                r.zeitMin ? `ca. ${r.zeitMin} Min.` : '',
+                r.naehrwerte && r.naehrwerte.kcal ? `${r.naehrwerte.kcal} kcal` : ''
+            ].filter(Boolean);
+            const open = r.status === 'unvollständig' ? '<span class="badge-open">noch unvollständig</span>' : '';
+            return `
+                <a class="recipe-card" href="#rezept/${encodeURIComponent(r.id)}">
+                    <span class="kategorie">${esc(r.kategorie)}</span>
+                    <h3>${esc(r.titel)}</h3>
+                    <div class="facts">${facts.map(f => `<span>${esc(f)}</span>`).join('<span aria-hidden="true">·</span>')}${open}</div>
+                </a>`;
+        }
+
+        function renderList() {
+            const list = filtered();
+            els.resultLine.textContent = list.length === RECIPES.length
+                ? `${list.length} Rezepte in deiner Sammlung`
+                : `${list.length} von ${RECIPES.length} Rezepten`;
+            els.grid.innerHTML = list.length
+                ? list.map(cardHtml).join('')
+                : '<div class="sheet empty">Dazu habe ich leider nichts gefunden. Versuch es mit einem anderen Wort oder setz die Filter zurück.</div>';
+        }
+
+        /* ---------- Detail ---------- */
+
+        function ingredientsHtml(r) {
+            const groups = [];
+            (r.zutaten || []).forEach(z => {
+                const name = z.gruppe || '';
+                let group = groups.find(g => g.name === name);
+                if (!group) groups.push(group = { name, items: [] });
+                group.items.push(z);
+            });
+            return groups.map(g => `
+                ${g.name ? `<h3>${esc(g.name)}</h3>` : ''}
+                <ul>
+                    ${g.items.map(z => {
+                        const amount = [z.menge, z.einheit].filter(Boolean).join(' ');
+                        const name = amount ? z.name : (z.name || z.text);
+                        return `<li><span class="menge">${esc(amount)}</span><span>${esc(name)}</span></li>`;
+                    }).join('')}
+                </ul>`).join('');
+        }
+
+        function renderDetail(r) {
+            const n = r.naehrwerte || {};
+            const boxes = [
+                r.portionen ? [portionText(r).split(' ')[0], portionText(r).split(' ').slice(1).join(' ')] : null,
+                r.zeitMin ? [`ca. ${r.zeitMin}`, 'Minuten'] : null,
+                n.kcal ? [n.kcal, 'kcal pro Portion'] : null,
+                n.eiweiss != null ? [`${n.eiweiss} g`, 'Eiweiß'] : null,
+                n.kohlenhydrate != null ? [`${n.kohlenhydrate} g`, 'Kohlenhydrate'] : null,
+                n.fett != null ? [`${n.fett} g`, 'Fett'] : null,
+                r.geraete && r.geraete.length ? [r.geraete.join(' / '), 'Zubereitung'] : null
+            ].filter(Boolean);
+
+            const tips = [...(r.tipps || []).map(t => ['gluehbirne', t.replace(/^Tipp:\s*/, '')]), ...(r.notizen || []).map(t => ['klemmbrett', t])];
+            const quelle = r.quelle || {};
+
+            els.detail.innerHTML = `
+                <section class="sheet detail-head">
+                    <span class="kategorie">${esc(r.kategorie)}</span>
+                    <h2>${esc(r.titel)}</h2>
+                    <div class="fact-boxes">
+                        ${boxes.map(([value, label]) => `<div class="fact-box"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('')}
+                    </div>
+                    ${r.status === 'unvollständig' ? '<p class="note-open">Dieses Rezept ist noch unvollständig – Angaben können fehlen.</p>' : ''}
+                </section>
+
+                <div class="detail-columns">
+                    <section class="sheet ingredients">
+                        <h2>Zutaten</h2>
+                        ${ingredientsHtml(r)}
+                    </section>
+
+                    <section class="sheet steps">
+                        <h2>Zubereitung</h2>
+                        <p class="hint">Tipp auf einen Schritt, um ihn abzuhaken.</p>
+                        <ol>${(r.schritte || []).map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+                    </section>
+                </div>
+
+                ${tips.length ? `
+                <section class="sheet">
+                    <h2>Tipps vom Küchenpilot</h2>
+                    ${tips.map(([icon, text]) => `<div class="tip-box"><img src="assets/icons/${icon}.png" alt=""><p>${esc(text)}</p></div>`).join('')}
+                </section>` : ''}
+
+                ${quelle.art ? `<p class="source">Quelle: ${quelle.url ? `<a href="${esc(quelle.url)}" target="_blank" rel="noopener">${esc(quelle.art)}</a>` : esc(quelle.art)}</p>` : ''}
+            `;
+
+            els.detail.querySelectorAll('.steps li').forEach(li => {
+                li.addEventListener('click', () => li.classList.toggle('done'));
+            });
+        }
+
+        /* ---------- Navigation ---------- */
+
+        function route() {
+            const match = location.hash.match(/^#rezept\/(.+)$/);
+            const recipe = match && RECIPES.find(r => r.id === decodeURIComponent(match[1]));
+
+            if (recipe) {
+                renderDetail(recipe);
+                els.overview.hidden = true;
+                els.detail.hidden = false;
+                els.backLabel.textContent = 'Zurück zur Übersicht';
+                els.intro.textContent = 'Alles bereit? Dann lass uns loslegen – Schritt für Schritt.';
+                document.title = `Küchenpilot - ${recipe.titel}`;
+            } else {
+                els.detail.hidden = true;
+                els.overview.hidden = false;
+                els.backLabel.textContent = 'Zurück';
+                els.intro.textContent = introDefault;
+                document.title = 'Küchenpilot - Rezepte';
+            }
+            window.scrollTo(0, 0);
+        }
+
+        els.backButton.addEventListener('click', () => {
+            if (location.hash.startsWith('#rezept/')) {
+                location.hash = '';
+            } else {
+                location.href = 'index.html';
+            }
+        });
+
+        els.search.addEventListener('input', () => {
+            state.query = els.search.value;
+            renderList();
+        });
+
+        renderChips(els.categoryChips, countBy(RECIPES.map(r => r.kategorie)), 'category');
+        renderChips(els.deviceChips, countBy(RECIPES.flatMap(r => r.geraete || [])), 'device');
+        renderList();
+        window.addEventListener('hashchange', route);
+        route();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Rezeptdaten geladen', () => {
+                const n = (window.KP_REZEPTE && window.KP_REZEPTE.rezepte || []).length;
+                return { ok: n > 0, message: `${n} Rezepte gefunden` };
+            });
+            KPTest.add('Alle Rezepte in der Übersicht', () => {
+                const cards = document.querySelectorAll('#recipeGrid .recipe-card').length;
+                const ok = location.hash || cards === RECIPES.length;
+                return { ok: !!ok, message: `${cards} Karten angezeigt` };
+            });
+            KPTest.add('Rezept-IDs eindeutig', () => {
+                const ids = RECIPES.map(r => r.id);
+                const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
+                return { ok: !dupes.length, message: dupes.length ? `Doppelt: ${dupes.join(', ')}` : 'Alle IDs eindeutig' };
+            });
+            KPTest.add('Jedes Rezept hat Zutaten und Schritte', () => {
+                const bad = RECIPES.filter(r => !(r.zutaten || []).length || !(r.schritte || []).length).map(r => r.titel);
+                return { ok: !bad.length, message: bad.length ? bad.join(', ') : 'Alle vollständig' };
+            });
+        }
+    </script>
+</body>
+</html>
