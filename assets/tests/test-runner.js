@@ -55,7 +55,7 @@
     if(!document.body.classList.contains("welcome-page")){
       add("Zurück-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Zurück")); return {ok:!!b,message:b?"Zurück-Button gefunden":"Kein Zurück-Button"}});
     }
-    add("Weiter-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Weiter")); return {ok:!!b,message:b?"Weiter-Button gefunden":"Kein Weiter-Button"}});
+    if(!document.body.classList.contains("no-next")) add("Weiter-Ziel vorhanden",()=>{const b=[...document.querySelectorAll("button")].find(x=>x.textContent.includes("Weiter")); return {ok:!!b,message:b?"Weiter-Button gefunden":"Kein Weiter-Button"}});
     window.addEventListener("load",()=>setTimeout(run,100));
   }
 

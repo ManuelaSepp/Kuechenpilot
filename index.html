@@ -151,6 +151,16 @@
             filter: brightness(0) invert(1);
         }
 
+        .button-row.with-recipes {
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .recipes-button img {
+            width: 28px;
+            height: 28px;
+        }
+
         .arrow {
             font-size: 1.45rem;
             line-height: 1;
@@ -237,6 +247,12 @@
                 justify-content: center;
             }
 
+            .button-row.with-recipes {
+                flex-direction: column-reverse;
+                align-items: center;
+                gap: 12px;
+            }
+
             .next-button {
                 width: 100%;
                 max-width: 340px;
@@ -281,7 +297,11 @@
                 <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
             </div>
 
-            <div class="button-row">
+            <div class="button-row with-recipes">
+                <button class="next-button recipes-button" type="button" onclick="location.href='rezepte.html'" aria-label="Zu den Rezepten">
+                    <img src="assets/icons/kochloeffel.png" alt="" aria-hidden="true">
+                    <span>Rezepte</span>
+                </button>
                 <button class="next-button" onclick="location.href='personen.html'" aria-label="Weiter zur nächsten Seite">
                     <span>Weiter</span>
                     <span class="arrow" aria-hidden="true">→</span>
