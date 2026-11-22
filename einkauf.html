@@ -425,6 +425,48 @@
 
         .hint a { color: var(--orange-dark); }
 
+        .remind-sheet h2 {
+            margin: 0 0 10px;
+            color: var(--orange-dark);
+        }
+
+        .remind-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 10px;
+        }
+
+        .remind-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 2px solid rgba(245, 166, 35, 0.35);
+            border-radius: 16px;
+            background: rgba(245, 166, 35, 0.07);
+        }
+
+        .remind-item > span:first-child {
+            display: grid;
+            gap: 2px;
+            flex: 1 1 220px;
+        }
+
+        .remind-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .small-button.strong {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #ffffff;
+        }
+
         .stock-move {
             margin-top: 20px;
             padding: 16px;
@@ -573,6 +615,7 @@
             </section>
         </div>
 
+        <section class="sheet remind-sheet" id="remindSheet" aria-label="Erinnerungen" hidden></section>
         <section class="sheet" id="listSheet" aria-label="Einkaufsliste"></section>
 
         <section class="sheet" id="haveSheet" aria-label="Schon im Vorrat" hidden></section>
@@ -589,7 +632,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
-    <script src="assets/scripts/planer.js?v=3"></script>
+    <script src="assets/scripts/planer.js?v=4"></script>
     <script>
         const P = window.KPPlaner;
         let week = P.currentWeek();
@@ -669,10 +712,35 @@
             render();
         }
 
+        /* Erinnerungen an regelmäßige Einkäufe (z. B. alle 3 Wochen Kaffee) */
+        function renderReminders(buy) {
+            const sheet = document.getElementById('remindSheet');
+            const onList = new Set(buy.map(i => P.normalize(i.name)));
+            const due = P.dueReminders().filter(r => !onList.has(r.key));
+            if (!due.length) { sheet.hidden = true; sheet.innerHTML = ''; return; }
+            sheet.hidden = false;
+            sheet.innerHTML = `
+                <h2>Zeit für Nachschub?</h2>
+                <ul class="remind-list">
+                    ${due.map(r => `
+                        <li class="remind-item">
+                            <span>
+                                <strong>${P.esc(r.name)}</strong>
+                                <span class="item-note">kaufst du etwa ${P.esc(r.label)}, zuletzt am ${P.esc(r.lastLabel)}. Noch genug da?</span>
+                            </span>
+                            <span class="remind-actions">
+                                <button class="small-button strong" type="button" data-remind-add="${P.esc(r.key)}" data-name="${P.esc(r.name)}">Auf die Liste</button>
+                                <button class="small-button" type="button" data-remind-skip="${P.esc(r.key)}">Hab noch</button>
+                            </span>
+                        </li>`).join('')}
+                </ul>`;
+        }
+
         function render() {
             P.setWeek(week);
             document.getElementById('weekLabel').textContent = P.weekLabel(week);
             const { result, state, buy, have, toStore } = compute();
+            renderReminders(buy);
             const done = buy.filter(i => state.gekauft.includes(i.key)).length;
 
             document.getElementById('stats').innerHTML = result.recipesCount ? [
@@ -784,7 +852,12 @@
 
         document.addEventListener('change', event => {
             const box = event.target.closest('[data-bought]');
-            if (box) updateState(s => toggleIn(s.gekauft, box.dataset.bought));
+            if (box) {
+                /* Kauf mit Datum merken, damit ich regelmäßige Einkäufe erkenne */
+                const item = compute().buy.find(i => i.key === box.dataset.bought);
+                if (item) P.recordPurchase(item.name, box.checked);
+                updateState(s => toggleIn(s.gekauft, box.dataset.bought));
+            }
         });
 
         document.addEventListener('click', event => {
@@ -803,6 +876,12 @@
                 });
             } else if (removeOwn) {
                 updateState(s => { s.eigene.splice(Number(removeOwn.dataset.removeOwn), 1); s.gekauft = s.gekauft.filter(k => !k.startsWith('eigen:')); });
+            } else if (event.target.closest('[data-remind-add]')) {
+                const b = event.target.closest('[data-remind-add]');
+                updateState(s => { if (!s.eigene.includes(b.dataset.name)) s.eigene.push(b.dataset.name); });
+            } else if (event.target.closest('[data-remind-skip]')) {
+                P.snoozeReminder(event.target.closest('[data-remind-skip]').dataset.remindSkip);
+                render();
             } else if (event.target.closest('#storeBought')) {
                 storeBought();
             } else if (event.target.id === 'undoStock' && stockResult) {

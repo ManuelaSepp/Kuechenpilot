@@ -9,6 +9,7 @@
  *   kuechenpilotEinkauf       { "<Montag>": { gekauft: [], habeIch: [], dochKaufen: [], eigene: [], eingeraeumt: [] } }
  *   Wochenplan-Einträge bekommen nach "Gekocht" { gekocht: "<Datum>" } und fallen aus der Einkaufsliste.
  *   kuechenpilotGrundvorratDetails  (kommt von vorrat.html)
+ *   kuechenpilotKaeufe        { "<key>": { name, daten: ["2026-11-22", …], spaeter: "<Datum>" } }  (wann was gekauft wurde)
  */
 (function () {
     const KEYS = {
@@ -17,7 +18,8 @@
         woche: 'kuechenpilotWoche',
         einkauf: 'kuechenpilotEinkauf',
         vorrat: 'kuechenpilotGrundvorrat',
-        vorratDetails: 'kuechenpilotGrundvorratDetails'
+        vorratDetails: 'kuechenpilotGrundvorratDetails',
+        kaeufe: 'kuechenpilotKaeufe'
     };
 
     const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
@@ -685,6 +687,89 @@
         return isoDate(mondayOf(parseIso(iso)));
     }
 
+    /* ---------- Regelmäßige Einkäufe erkennen ---------- */
+
+    function daysBetween(a, b) {
+        return Math.round((parseIso(b) - parseIso(a)) / 86400000);
+    }
+
+    function formatDay(iso) {
+        const d = parseIso(iso);
+        return `${d.getDate()}. ${MONTHS[d.getMonth()]}`;
+    }
+
+    /* Kauf merken (ein Eintrag pro Tag) oder beim Abwählen wieder entfernen. */
+    function recordPurchase(name, bought, day) {
+        const key = normalize(name);
+        if (!key) return;
+        day = day || isoDate(new Date());
+        const all = readJson(KEYS.kaeufe, {}) || {};
+        const entry = all[key] || { name, daten: [] };
+        entry.name = name;
+        if (bought) {
+            if (!entry.daten.includes(day)) entry.daten.push(day);
+            entry.daten.sort();
+            delete entry.spaeter;
+        } else {
+            entry.daten = entry.daten.filter(d => d !== day);
+        }
+        entry.daten = entry.daten.slice(-12);
+        if (entry.daten.length) all[key] = entry; else delete all[key];
+        writeJson(KEYS.kaeufe, all);
+    }
+
+    /* Rhythmus: Abstand zwischen den Käufen (Käufe in derselben Woche zählen als einer). */
+    function rhythmOf(entry) {
+        const dates = [];
+        (entry.daten || []).forEach(d => {
+            if (!dates.length || daysBetween(dates[dates.length - 1], d) >= 4) dates.push(d);
+        });
+        if (dates.length < 2) return null;
+        const gaps = dates.slice(1).map((d, i) => daysBetween(dates[i], d));
+        const every = Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length);
+        if (every < 5) return null;
+        const last = dates[dates.length - 1];
+        return { every, last, due: isoDate(addDays(parseIso(last), every)), count: dates.length };
+    }
+
+    function rhythmLabel(days) {
+        if (days % 7 === 0 || days >= 12) {
+            const weeks = Math.round(days / 7);
+            return weeks === 1 ? 'jede Woche' : `alle ${weeks} Wochen`;
+        }
+        return `alle ${days} Tage`;
+    }
+
+    /*
+     * Was ist bald wieder fällig? (3 Tage vorher erinnern)
+     * Rückgabe: [{ key, name, every, label, last, lastLabel, due }]
+     */
+    function dueReminders(today) {
+        today = today || isoDate(new Date());
+        const all = readJson(KEYS.kaeufe, {}) || {};
+        const out = [];
+        Object.entries(all).forEach(([key, entry]) => {
+            const r = rhythmOf(entry);
+            if (!r) return;
+            if (entry.spaeter && entry.spaeter > today) return;
+            if (daysBetween(today, r.due) > 3) return;
+            out.push({ key, name: entry.name, every: r.every, label: rhythmLabel(r.every), last: r.last, lastLabel: formatDay(r.last), due: r.due });
+        });
+        return out.sort((a, b) => a.due.localeCompare(b.due));
+    }
+
+    /* "Hab noch genug": eine Woche lang (oder ein Drittel des Rhythmus) nicht mehr fragen. */
+    function snoozeReminder(key, today) {
+        today = today || isoDate(new Date());
+        const all = readJson(KEYS.kaeufe, {}) || {};
+        const entry = all[key];
+        if (!entry) return;
+        const r = rhythmOf(entry);
+        const days = r ? Math.max(4, Math.min(7, Math.round(r.every / 3))) : 7;
+        entry.spaeter = isoDate(addDays(parseIso(today), days));
+        writeJson(KEYS.kaeufe, all);
+    }
+
     /* ---------- Einkaufsliste ---------- */
 
     function itemKey(name) {
@@ -826,6 +911,7 @@
         getPlan, savePlan, planArt, defaultMenge, factorFor, mengeLabel, weekEntries,
         parseNumber, classify, splitList, getStock, findStock,
         getStockDetails, saveStockDetails, addToStock, removeFromStock, markCooked, snapshot, restore, stockCoverage,
+        recordPurchase, rhythmOf, dueReminders, snoozeReminder,
         buildShoppingList, formatAmount, formatAmounts,
         getShopState, saveShopState
     };
