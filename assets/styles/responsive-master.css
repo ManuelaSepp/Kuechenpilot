@@ -162,3 +162,89 @@ p {
         padding: 28px 20px;
     }
 }
+
+/* =====================================================================
+   Einheitliche Kopfkachel für alle Seiten mit .hero-shell
+   (Startseite, Personen, Grundvorrat, Vorrat, Rezepte, …).
+   Gleiche Höhe, Überschrift an gleicher Stelle, Knöpfe unten,
+   gleich große Figur-Kachel, die nur leicht von der Karte überdeckt wird.
+   ===================================================================== */
+:root {
+    --kp-hero-height: 500px;
+    --kp-pilot-width: 215px;
+    --kp-pilot-height: 280px;
+    --kp-pilot-overlap: 28px;
+    --kp-mobile-pilot-width: 176px;
+    --kp-mobile-pilot-height: 196px;
+    --kp-mobile-pilot-overlap: 26px;
+}
+
+html body .hero-shell > .pilot-card {
+    width: var(--kp-pilot-width);
+    height: var(--kp-pilot-height);
+    padding: 12px 10px;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+html body .hero-shell > .pilot-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+@media (min-width: 761px) {
+    html body .hero-shell > .welcome-card {
+        width: min(calc(100% - var(--kp-pilot-width) + var(--kp-pilot-overlap)), var(--kp-card-max));
+        height: var(--kp-hero-height);
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    html body .hero-shell > .welcome-card > .card-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 34px;
+    }
+
+    html body .hero-shell > .welcome-card > .button-row {
+        margin-top: auto;
+    }
+}
+
+/* Tablet: etwas kleinere Figur, gleiche Logik. */
+@media (min-width: 761px) and (max-width: 1050px) {
+    :root {
+        --kp-pilot-width: 190px;
+        --kp-pilot-height: 250px;
+        --kp-pilot-overlap: 24px;
+    }
+}
+
+/* Handy: Figur steht über der Karte und ist fast ganz zu sehen. */
+@media (max-width: 760px) {
+    html body .hero-shell {
+        padding-top: calc(var(--kp-mobile-pilot-height) - var(--kp-mobile-pilot-overlap));
+    }
+
+    html body .hero-shell > .pilot-card {
+        top: 0;
+        left: 50%;
+        right: auto;
+        width: var(--kp-mobile-pilot-width);
+        max-width: 60vw;
+        height: var(--kp-mobile-pilot-height);
+        transform: translateX(-50%);
+        padding: 10px;
+    }
+
+    html body .hero-shell > .welcome-card {
+        height: auto;
+    }
+}
