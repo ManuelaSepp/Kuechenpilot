@@ -542,6 +542,30 @@
             .nav-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .button-row .next-button { width: 100%; }
         }
+        .stock-badge {
+            display: inline-block;
+            justify-self: start;
+            margin-top: 4px;
+            padding: 1px 10px;
+            border-radius: 999px;
+            background: rgba(245, 166, 35, 0.12);
+            color: var(--orange-dark, #df8f12);
+            font-style: normal;
+            font-size: 0.9rem;
+        }
+
+        .stock-badge.is-full {
+            background: var(--orange, #f5a623);
+            color: #ffffff;
+        }
+
+        .cooked-tag {
+            padding: 1px 10px;
+            border-radius: 999px;
+            background: rgba(245, 166, 35, 0.14);
+            color: var(--orange-dark, #df8f12);
+            font-weight: 700;
+        }
     </style>
     <link rel="stylesheet" href="assets/styles/responsive-master.css?v=6">
     <link rel="stylesheet" href="assets/tests/test-ui.css">
@@ -593,7 +617,7 @@
             <div>
                 <p id="summaryText"></p>
                 <div class="tools">
-                    <button class="link-button" type="button" id="fillWeek">Freie Tage vorschlagen lassen</button>
+                    <button class="link-button" type="button" id="fillWeek">Freie Tage aus dem Vorrat vorschlagen</button>
                     <button class="link-button" type="button" id="clearWeek">Woche leeren</button>
                 </div>
                 <p class="message" id="message" role="status"></p>
@@ -631,7 +655,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
-    <script src="assets/scripts/planer.js"></script>
+    <script src="assets/scripts/planer.js?v=2"></script>
     <script>
         const P = window.KPPlaner;
         let week = P.currentWeek();
@@ -664,6 +688,7 @@
                     const menge = Number(entry.menge) || P.defaultMenge(recipe);
                     const meta = [];
                     if (recipe.zeitMin) meta.push(`<span>⏱ ${recipe.zeitMin} Min.</span>`);
+                    if (entry.gekocht) meta.push('<span class="cooked-tag">✓ gekocht</span>');
                     return `
                         <div class="meal">
                             <a href="rezepte.html#rezept/${encodeURIComponent(recipe.id)}">${P.esc(recipe.titel)}</a>
@@ -752,21 +777,46 @@
         document.getElementById('personsMinus').addEventListener('click', () => changePersons(-1));
         document.getElementById('personsPlus').addEventListener('click', () => changePersons(1));
 
-        /* Vorschläge für freie Tage: Hauptgerichte, möglichst ohne Wiederholung */
+        /*
+         * Vorschläge für freie Tage: Hauptgerichte ohne Wiederholung.
+         * Ist ein Vorrat gespeichert, kommen zuerst Rezepte, für die schon viel da ist.
+         */
+        function rankedPool(exclude) {
+            const stock = P.getStock();
+            const pool = P.RECIPES
+                .filter(r => r.kategorie === 'Hauptgericht' && !exclude.has(r.id))
+                .map(r => ({ r, cov: P.stockCoverage(r, stock), zufall: Math.random() }));
+            if (stock) {
+                pool.sort((a, b) => {
+                    const qa = a.cov.total ? a.cov.have / a.cov.total : 0;
+                    const qb = b.cov.total ? b.cov.have / b.cov.total : 0;
+                    /* in Stufen von 10 %, damit innerhalb einer Stufe Abwechslung bleibt */
+                    return Math.round(qb * 10) - Math.round(qa * 10) || b.cov.have - a.cov.have || a.zufall - b.zufall;
+                });
+            } else {
+                pool.sort((a, b) => a.zufall - b.zufall);
+            }
+            return { pool, stock };
+        }
+
         document.getElementById('fillWeek').addEventListener('click', () => {
             const plan = P.getPlan();
             const used = new Set(P.weekEntries(week, plan).map(e => e.recipe.id));
-            const pool = P.RECIPES.filter(r => r.kategorie === 'Hauptgericht' && !used.has(r.id));
+            const { pool, stock } = rankedPool(used);
             let added = 0;
             P.weekDays(week).forEach(day => {
                 if ((plan[day.key] || []).length || !pool.length) return;
-                const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+                const pick = pool.shift().r;
                 plan[day.key] = [{ id: pick.id, menge: P.defaultMenge(pick) }];
                 added++;
             });
             P.savePlan(plan);
             render();
-            say(added ? `${added} ${added === 1 ? 'Vorschlag' : 'Vorschläge'} eingetragen. Gefällt dir einer nicht? Einfach mit × entfernen.` : 'Alle Tage sind schon belegt.');
+            if (!added) { say('Alle Tage sind schon belegt.'); return; }
+            const what = `${added} ${added === 1 ? 'Vorschlag' : 'Vorschläge'} eingetragen`;
+            say(stock
+                ? `${what} – zuerst Gerichte, für die du schon viel im Vorrat hast. Gefällt dir einer nicht? Einfach mit × entfernen.`
+                : `${what}. Tipp: Mit gespeichertem Vorrat schlage ich zuerst vor, was du schon da hast.`);
         });
 
         document.getElementById('clearWeek').addEventListener('click', () => {
@@ -800,11 +850,16 @@
                 const hay = P.normalize([r.titel, ...(r.tags || []), ...(r.zutaten || []).map(z => z.name)].join(' '));
                 return q.split(' ').every(word => hay.includes(word));
             });
-            pickerList.innerHTML = list.length ? list.map(r => {
+            /* mit Vorrat: Rezepte, für die schon viel da ist, nach oben */
+            const stock = P.getStock();
+            const rows = list.map(r => ({ r, cov: stock ? P.stockCoverage(r, stock) : null }));
+            if (stock) rows.sort((a, b) => (b.cov.total ? b.cov.have / b.cov.total : 0) - (a.cov.total ? a.cov.have / a.cov.total : 0));
+            pickerList.innerHTML = rows.length ? rows.map(({ r, cov }) => {
                 const meta = [r.kategorie];
                 if (r.zeitMin) meta.push(`${r.zeitMin} Min.`);
                 if (r.naehrwerte && r.naehrwerte.kcal) meta.push(`${r.naehrwerte.kcal} kcal`);
-                return `<li><button type="button" data-id="${P.esc(r.id)}"><strong>${P.esc(r.titel)}</strong><span>${P.esc(meta.join(' · '))}</span></button></li>`;
+                const badge = cov && cov.total ? `<em class="stock-badge${cov.have === cov.total ? ' is-full' : ''}">${cov.have === cov.total ? 'Alles im Vorrat' : `${cov.have} von ${cov.total} Zutaten im Vorrat`}</em>` : '';
+                return `<li><button type="button" data-id="${P.esc(r.id)}"><strong>${P.esc(r.titel)}</strong><span>${P.esc(meta.join(' · '))}</span>${badge}</button></li>`;
             }).join('') : '<li class="lead" style="padding:12px">Kein Rezept gefunden.</li>';
         }
 

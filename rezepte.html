@@ -492,6 +492,70 @@
             background: #7cb342;
         }
 
+        .cooked-box {
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 2px dashed var(--line);
+            display: grid;
+            justify-items: center;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .cooked-box > p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .cooked-button img {
+            width: 30px;
+            height: 30px;
+            object-fit: contain;
+        }
+
+        .cooked-button:disabled {
+            opacity: 0.5;
+            cursor: default;
+            transform: none;
+        }
+
+        .cooked-result {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: var(--orange-soft, rgba(245, 166, 35, 0.12));
+            text-align: left;
+        }
+
+        .cooked-result p {
+            margin: 6px 0 0;
+            font-size: 1rem;
+            line-height: 1.45;
+        }
+
+        .cooked-result .link-button {
+            margin-top: 8px;
+            padding: 0;
+            border: 0;
+            background: none;
+            color: var(--orange-dark);
+            font: inherit;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .cooked-lines {
+            margin-top: 6px;
+            display: grid;
+            gap: 2px;
+            color: var(--muted);
+        }
+
+        .cooked-line::before {
+            content: "• ";
+            color: var(--orange-dark);
+        }
+
         .steps .step-amount {
             color: var(--orange-dark);
             font-weight: 700;
@@ -643,6 +707,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/planer.js?v=2"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
         const RECIPES = DATA.rezepte;
@@ -813,6 +878,14 @@
                         <h2>Zubereitung</h2>
                         <p class="hint">Tipp auf einen Schritt, um ihn abzuhaken.</p>
                         <ol id="stepList">${(r.schritte || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol>
+                        <div class="cooked-box">
+                            <p>Fertig gekocht? Dann ziehe ich die Zutaten von deinem Vorrat ab.</p>
+                            <button class="next-button cooked-button" type="button" id="cookedButton">
+                                <img src="assets/icons/topf.png" alt="" aria-hidden="true">
+                                <span>Gekocht</span>
+                            </button>
+                            <div id="cookedResult" role="status"></div>
+                        </div>
                     </section>
                 </div>
 
@@ -828,6 +901,8 @@
             els.detail.querySelectorAll('.steps li').forEach(li => {
                 li.addEventListener('click', () => li.classList.toggle('done'));
             });
+
+            document.getElementById('cookedButton').addEventListener('click', markCooked);
 
             if (anzahl) {
                 document.getElementById('servingsLess').addEventListener('click', () => setServings(current.anzahl - 1));
@@ -860,6 +935,39 @@
             const note = document.getElementById('scaleNote');
             note.hidden = !original || anzahl === original;
             note.textContent = `Umgerechnet vom Originalrezept für ${KPPortionen.beschriftung(r, original)}. Auch die Mengen in der Zubereitung sind angepasst.`;
+        }
+
+        /* ---------- Gekocht: Vorrat abziehen ---------- */
+
+        let cookedUndo = null;
+
+        function markCooked() {
+            const P = window.KPPlaner;
+            const box = document.getElementById('cookedResult');
+            if (!P) return;
+            const r = current.recipe;
+            const f = KPPortionen.basis(r).anzahl ? KPPortionen.faktor(r, current.anzahl) : 1;
+            cookedUndo = P.snapshot();
+            const changes = P.removeFromStock(r, f);
+            const day = P.markCooked(r.id);
+            const hasStock = !!P.getStockDetails();
+            const lines = changes.map(c => `<span class="cooked-line">${esc(c.name)} – ${esc(c.text)}</span>`).join('');
+            box.innerHTML = `
+                <div class="cooked-result">
+                    <strong>Guten Appetit! 😋</strong>
+                    ${changes.length
+                        ? `<p>Aus dem Vorrat abgezogen:</p><div class="cooked-lines">${lines}</div>`
+                        : `<p>${hasStock ? 'Für dieses Rezept stand nichts mit Menge im Vorrat – da gab es nichts abzuziehen.' : 'Du hast noch keinen Vorrat gespeichert.'}</p>`}
+                    ${day ? '<p>Im Wochenkorb als gekocht markiert.</p>' : ''}
+                    <button class="link-button" type="button" id="cookedUndo">Rückgängig</button>
+                </div>`;
+            document.getElementById('cookedButton').disabled = true;
+            document.getElementById('cookedUndo').addEventListener('click', () => {
+                P.restore(cookedUndo);
+                cookedUndo = null;
+                box.innerHTML = '';
+                document.getElementById('cookedButton').disabled = false;
+            });
         }
 
         /* ---------- Navigation ---------- */

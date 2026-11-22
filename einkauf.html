@@ -425,6 +425,47 @@
 
         .hint a { color: var(--orange-dark); }
 
+        .stock-move {
+            margin-top: 20px;
+            padding: 16px;
+            border: 2px dashed rgba(245, 166, 35, 0.45);
+            border-radius: 18px;
+            background: rgba(245, 166, 35, 0.07);
+            display: grid;
+            gap: 10px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .stock-move p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .stock-move .cook-button {
+            border: 0;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .stock-result {
+            margin: 14px 0 0;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+        }
+
+        .stock-result ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+            color: var(--muted);
+        }
+
+        .stock-result .link-button {
+            margin-top: 8px;
+        }
+
         .list-tools {
             display: flex;
             flex-wrap: wrap;
@@ -548,7 +589,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
-    <script src="assets/scripts/planer.js"></script>
+    <script src="assets/scripts/planer.js?v=2"></script>
     <script>
         const P = window.KPPlaner;
         let week = P.currentWeek();
@@ -593,13 +634,45 @@
                 buy.push({ key: `eigen:${i}:${P.normalize(text)}`, name: text, category: OWN_CATEGORY, amounts: [], recipes: [], own: i });
             });
 
-            return { result, state, buy, have };
+            const toStore = buy.filter(i => i.own === undefined && state.gekauft.includes(i.key) && !state.eingeraeumt.includes(i.key));
+            return { result, state, buy, have, toStore };
+        }
+
+        let stockResult = null; /* { changes, snap } nach "In den Vorrat legen" */
+
+        function stockMoveHtml(toStore) {
+            const result = stockResult ? `
+                <div class="stock-result" role="status">
+                    <strong>Im Vorrat eingeräumt:</strong>
+                    <ul>${stockResult.changes.map(c => `<li>${P.esc(c.name)} – ${P.esc(c.text)}</li>`).join('')}</ul>
+                    <button class="link-button" type="button" id="undoStock">Rückgängig</button>
+                </div>` : '';
+            if (!toStore.length) return result;
+            return `
+                <div class="stock-move">
+                    <p>Fertig eingekauft? Dann lege ich das Abgehakte in deinen Vorrat.</p>
+                    <button class="cook-button" type="button" id="storeBought">
+                        <img src="assets/icons/regal.png" alt="" aria-hidden="true">
+                        <span>In den Vorrat legen (${toStore.length})</span>
+                    </button>
+                </div>${result}`;
+        }
+
+        function storeBought() {
+            const { state, toStore } = compute();
+            if (!toStore.length) return;
+            const snap = P.snapshot();
+            const changes = P.addToStock(toStore.map(i => ({ name: i.name, category: i.category, group: i.group, amounts: i.remaining ? [i.remaining] : i.amounts })));
+            toStore.forEach(i => state.eingeraeumt.push(i.key));
+            P.saveShopState(week, state);
+            stockResult = { changes, snap };
+            render();
         }
 
         function render() {
             P.setWeek(week);
             document.getElementById('weekLabel').textContent = P.weekLabel(week);
-            const { result, state, buy, have } = compute();
+            const { result, state, buy, have, toStore } = compute();
             const done = buy.filter(i => state.gekauft.includes(i.key)).length;
 
             document.getElementById('stats').innerHTML = result.recipesCount ? [
@@ -658,6 +731,7 @@
                         </ul>
                     </div>`).join('') : '<p class="lead">Alles da! Für diese Woche musst du nichts einkaufen. 🎉</p>'}
                 ${ownForm()}
+                ${stockMoveHtml(toStore)}
                 <div class="list-tools">
                     <button class="link-button" type="button" id="copyList">Liste kopieren</button>
                     <button class="link-button" type="button" id="resetChecks">Haken zurücksetzen</button>
@@ -729,6 +803,12 @@
                 });
             } else if (removeOwn) {
                 updateState(s => { s.eigene.splice(Number(removeOwn.dataset.removeOwn), 1); s.gekauft = s.gekauft.filter(k => !k.startsWith('eigen:')); });
+            } else if (event.target.closest('#storeBought')) {
+                storeBought();
+            } else if (event.target.id === 'undoStock' && stockResult) {
+                P.restore(stockResult.snap);
+                stockResult = null;
+                render();
             } else if (event.target.id === 'resetChecks') {
                 updateState(s => { s.gekauft = []; });
             } else if (event.target.id === 'copyList') {
@@ -773,8 +853,8 @@
             }
         }
 
-        document.getElementById('prevWeek').addEventListener('click', () => { week = P.shiftWeek(week, -1); render(); });
-        document.getElementById('nextWeek').addEventListener('click', () => { week = P.shiftWeek(week, 1); render(); });
+        document.getElementById('prevWeek').addEventListener('click', () => { week = P.shiftWeek(week, -1); stockResult = null; render(); });
+        document.getElementById('nextWeek').addEventListener('click', () => { week = P.shiftWeek(week, 1); stockResult = null; render(); });
 
         render();
     </script>
