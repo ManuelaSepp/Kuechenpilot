@@ -260,3 +260,24 @@ html body .hero-shell > .pilot-card img {
 html body .person-cards {
     width: min(100%, var(--kp-hero-max));
 }
+
+/* =====================================================================
+   Schriften: Handschrift für Überschriften und Knöpfe,
+   gut lesbare runde Schrift (Comfortaa, liegt im Repo) für alle Texte.
+   ===================================================================== */
+@font-face {
+    font-family: "Comfortaa";
+    src: url("../../fonts/Comfortaa-Variable.woff2") format("woff2");
+    font-weight: 300 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+html body {
+    font-family: "Comfortaa", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.45;
+}
+
+html body :is(h1, h2, h3, .next-button, .cook-button, .eyebrow, .slogan, .menu-tile strong, .day-label, .week-label) {
+    font-family: "Architects Daughter", "Comfortaa", sans-serif;
+}

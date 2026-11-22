@@ -13,6 +13,14 @@
             font-display: swap;
         }
 
+        @font-face {
+            font-family: "Comfortaa";
+            src: url("fonts/Comfortaa-Variable.woff2") format("woff2");
+            font-weight: 300 700;
+            font-style: normal;
+            font-display: swap;
+        }
+
         :root {
             --sand: #fff7ea;
             --card: #fffdf8;
@@ -33,7 +41,8 @@
         body {
             margin: 0;
             padding: 24px;
-            font-family: "Architects Daughter", sans-serif;
+            font-family: "Comfortaa", "Segoe UI", system-ui, -apple-system, sans-serif;
+            line-height: 1.45;
             background: var(--sand);
             min-height: 100vh;
             display: flex;
@@ -303,6 +312,11 @@
             }
         }
     </style>
+    <style>
+        body :is(h1, h2, h3, .next-button, .cook-button, .eyebrow, .slogan) {
+            font-family: "Architects Daughter", "Comfortaa", sans-serif;
+        }
+    </style>
     <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body class="today-page-body no-next">
@@ -358,7 +372,7 @@
         <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
     </main>
 
-    <script src="assets/scripts/portionen.js"></script>
+    <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
     <script>
         const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
