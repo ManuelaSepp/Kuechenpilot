@@ -492,6 +492,11 @@
             background: #7cb342;
         }
 
+        .steps .step-amount {
+            color: var(--orange-dark);
+            font-weight: 700;
+        }
+
         .steps .hint {
             margin: -4px 0 12px;
             color: var(--muted);
@@ -581,7 +586,7 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=4">
+    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=5">
     <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body class="recipes-page no-next">
@@ -636,7 +641,7 @@
         <div class="recipe-area" id="detail" hidden></div>
     </main>
 
-    <script src="assets/scripts/portionen.js"></script>
+    <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -807,7 +812,7 @@
                     <section class="sheet steps">
                         <h2>Zubereitung</h2>
                         <p class="hint">Tipp auf einen Schritt, um ihn abzuhaken.</p>
-                        <ol>${(r.schritte || []).map(s => `<li>${esc(s)}</li>`).join('')}</ol>
+                        <ol id="stepList">${(r.schritte || []).map(s => `<li><span>${esc(s)}</span></li>`).join('')}</ol>
                     </section>
                 </div>
 
@@ -845,9 +850,16 @@
             const scaled = original ? KPPortionen.skaliereRezept(r, anzahl) : r;
             document.getElementById('ingredientList').innerHTML = ingredientsHtml(scaled);
 
+            /* Mengen in den Schritten ebenfalls umrechnen; abgehakte Schritte bleiben abgehakt. */
+            const f = original ? KPPortionen.faktor(r, anzahl) : 1;
+            document.querySelectorAll('#stepList li').forEach((li, i) => {
+                li.querySelector('span').innerHTML = KPPortionen.skaliereText(esc((r.schritte || [])[i] || ''), f,
+                    neu => `<strong class="step-amount">${neu}</strong>`);
+            });
+
             const note = document.getElementById('scaleNote');
             note.hidden = !original || anzahl === original;
-            note.textContent = `Umgerechnet vom Originalrezept für ${KPPortionen.beschriftung(r, original)}. Mengen in der Zubereitung beziehen sich aufs Original.`;
+            note.textContent = `Umgerechnet vom Originalrezept für ${KPPortionen.beschriftung(r, original)}. Auch die Mengen in der Zubereitung sind angepasst.`;
         }
 
         /* ---------- Navigation ---------- */
@@ -915,6 +927,11 @@
                 if (!r) return { ok: true, message: 'Testrezept nicht vorhanden' };
                 const z = KPPortionen.skaliereRezept(r, 2).zutaten[0];
                 return { ok: z.menge === '300', message: z.text };
+            });
+            KPTest.add('Mengen in der Zubereitung umgerechnet', () => {
+                const t = KPPortionen.skaliereText('100 ml Brühe, 1–2 EL Milch, ½ TL Salz, 5 Minuten bei 180 °C, 4 mm dick', 0.5);
+                const soll = '50 ml Brühe, ½–1 EL Milch, ¼ TL Salz, 5 Minuten bei 180 °C, 4 mm dick';
+                return { ok: t === soll, message: t };
             });
             KPTest.add('Jedes Rezept hat Zutaten und Schritte', () => {
                 const bad = RECIPES.filter(r => !(r.zutaten || []).length || !(r.schritte || []).length).map(r => r.titel);

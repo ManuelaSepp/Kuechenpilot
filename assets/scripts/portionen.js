@@ -97,6 +97,23 @@
         });
     }
 
+    /* Mengen im Fließtext (z. B. Zubereitung) umrechnen: "100 ml", "1–2 EL", "½ TL".
+       Zeiten, Temperaturen und Größen (Min., °C, cm) bleiben unverändert.
+       markiere(neu, alt) darf den neuen Text verpacken, z. B. hervorheben. */
+    const TEXT_MENGE = /(\d+(?:,\d+)?\s?[¼½¾⅓⅔]?|[¼½¾⅓⅔])(?:\s*[–-]\s*(\d+(?:,\d+)?\s?[¼½¾⅓⅔]?|[¼½¾⅓⅔]))?(\s*)(kg|g|ml|l|EL|TL|Prisen?|Scheiben|Portionen)(?![A-Za-zÄÖÜäöüß0-9])/g;
+
+    function skaliereText(text, f, markiere) {
+        const s = String(text || '');
+        if (!f || f === 1) return s;
+        return s.replace(TEXT_MENGE, (ganz, von, bis, abstand, einheit) => {
+            const menge = bis ? `${von}–${bis}` : von;
+            const neu = skaliereMenge(menge, f, einheit);
+            if (isNaN(neu.wert)) return ganz;
+            const ergebnis = `${neu.text}${abstand || ' '}${einheit}`;
+            return markiere ? markiere(ergebnis, ganz) : ergebnis;
+        });
+    }
+
     function beschriftung(rezept, anzahl) {
         const b = basis(rezept);
         if (b.einheit) return `${anzahl} ${b.einheit}`;
@@ -105,7 +122,7 @@
 
     const api = {
         STANDARD_PERSONEN, basis, standard, faktor, parseMenge, formatMenge,
-        skaliereMenge, skaliereZutat, skaliereRezept, beschriftung
+        skaliereMenge, skaliereZutat, skaliereRezept, skaliereText, beschriftung
     };
 
     if (typeof module !== 'undefined' && module.exports) module.exports = api;

@@ -263,20 +263,21 @@ html body .person-cards {
 
 /* =====================================================================
    Schriften: Handschrift für Überschriften und Knöpfe,
-   gut lesbare runde Schrift (Nunito, liegt im Repo) für alle Texte.
+   gut lesbare runde Schrift (Comfortaa, liegt im Repo) für alle Texte.
    ===================================================================== */
 @font-face {
-    font-family: "Nunito";
-    src: url("../../fonts/Nunito-Variable.woff2") format("woff2");
-    font-weight: 200 1000;
+    font-family: "Comfortaa";
+    src: url("../../fonts/Comfortaa-Variable.woff2") format("woff2");
+    font-weight: 300 700;
     font-style: normal;
     font-display: swap;
 }
 
 html body {
-    font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-family: "Comfortaa", "Segoe UI", system-ui, -apple-system, sans-serif;
+    line-height: 1.45;
 }
 
 html body :is(h1, h2, h3, .next-button, .cook-button, .eyebrow, .slogan, .menu-tile strong, .day-label, .week-label) {
-    font-family: "Architects Daughter", "Nunito", sans-serif;
+    font-family: "Architects Daughter", "Comfortaa", sans-serif;
 }
