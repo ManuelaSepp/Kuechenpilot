@@ -539,32 +539,11 @@
             display: none !important;
         }
 
-        /* Figur mit Rezeptbuch ganz zeigen: Karte überdeckt sie nur am Rand. */
-        @media (min-width: 761px) {
-            body.recipes-page {
-                --kp-pilot-overlap: 14px;
-            }
-
-            body.recipes-page .hero-shell > .pilot-card {
-                padding: 10px 6px;
-            }
-        }
-
         @media (min-width: 761px) {
             body.recipes-page .start-page {
                 padding-top: clamp(24px, 4vw, 42px);
             }
 
-            body.recipes-page .welcome-card {
-                min-height: 330px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-
-            body.recipes-page .card-main {
-                padding-top: 10px;
-            }
         }
 
         @media (max-width: 760px) {
@@ -574,8 +553,9 @@
 
             .pilot-mobile {
                 display: block;
-                padding: 10px;
             }
+
+
 
             .button-row {
                 display: grid;
