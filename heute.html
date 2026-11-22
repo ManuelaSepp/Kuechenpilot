@@ -172,6 +172,16 @@
             cursor: pointer;
         }
 
+        .source {
+            margin: -8px 0 16px;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .source a {
+            color: var(--orange-dark);
+        }
+
         .persons-box {
             gap: 8px;
             padding: 6px 10px;
@@ -434,6 +444,7 @@
             <img class="pilot" src="assets/figuren/pilot-winken.png" alt="Küchenpilot winkt">
             <span class="kategorie" id="todayCategory"></span>
             <h1 id="todayTitle">…</h1>
+            <p class="source" id="todaySource" hidden></p>
             <div class="fact-boxes" id="todayFacts"></div>
             <a class="cook-button" id="cookButton" href="rezepte.html">
                 <img src="assets/icons/kochbesteck.png" alt="" aria-hidden="true">
@@ -482,7 +493,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
-    <script src="assets/scripts/planer.js?v=4"></script>
+    <script src="assets/scripts/planer.js?v=5"></script>
     <script>
         const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
             .filter(r => r.status !== 'unvollständig' && (r.zutaten || []).length && (r.schritte || []).length);
@@ -585,6 +596,10 @@
         function render(recipe) {
             document.getElementById('todayCategory').textContent = recipe.kategorie;
             document.getElementById('todayTitle').textContent = recipe.titel;
+            const q = recipe.quelle || {};
+            const src = document.getElementById('todaySource');
+            src.hidden = !q.art;
+            src.innerHTML = q.art ? `Quelle: ${q.url ? `<a href="${esc(q.url)}" target="_blank" rel="noopener">${esc(q.art)} ↗</a>` : esc(q.art)}` : '';
 
             const facts = [];
             if (anzahl) {

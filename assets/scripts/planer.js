@@ -597,7 +597,11 @@
                 return;
             }
             const neu = a ? storeAmount(a) : { amount: '', unit: 'Stück' };
-            details.push({ name: item.name, amount: neu.amount, unit: neu.unit, custom: true });
+            const ort = item.category === CAT.tk ? 'Gefrierschrank'
+                : (item.category === CAT.kuehl || item.category === CAT.fleisch) ? 'Kühlschrank'
+                : (item.category === CAT.trocken || item.category === CAT.gewuerz || item.category === CAT.brot) ? 'Vorratsschrank'
+                : '';
+            details.push(Object.assign({ name: item.name, amount: neu.amount, unit: neu.unit, custom: true }, ort ? { ort } : {}));
             changes.push({ name: item.name, text: neu.amount ? `neu: ${neu.amount} ${neu.unit}` : 'neu im Vorrat' });
         });
         saveStockDetails(details);
