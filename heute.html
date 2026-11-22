@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Heute</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        .today-page {
+            width: min(100%, 760px);
+            display: grid;
+            gap: 22px;
+            padding: clamp(12px, 3vw, 32px) 0;
+        }
+
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            padding: clamp(26px, 4vw, 40px) clamp(20px, 4vw, 44px);
+        }
+
+        .today-card {
+            text-align: center;
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: #9a7240;
+            font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+        }
+
+        .today-card .pilot {
+            display: block;
+            width: clamp(150px, 26vw, 200px);
+            height: auto;
+            margin: 8px auto 4px;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(1.9rem, 5vw, 3rem);
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        .kategorie {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 3px 12px;
+            border-radius: 999px;
+            background: var(--orange-soft);
+            color: var(--orange-dark);
+            font-size: 1rem;
+        }
+
+        .fact-boxes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .fact-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border: 2px solid var(--line);
+            border-radius: 16px;
+            background: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .fact-box img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .cook-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            width: min(100%, 420px);
+            min-height: 64px;
+            padding: 12px 24px;
+            border: 0;
+            border-radius: 18px;
+            background: var(--orange);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 1.45rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(223, 143, 18, 0.28);
+            transition: transform 0.18s ease, background-color 0.18s ease;
+        }
+
+        .cook-button:hover,
+        .cook-button:focus-visible {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .cook-button img {
+            width: 34px;
+            height: 34px;
+            filter: brightness(0) invert(1);
+        }
+
+        .link-button {
+            margin-top: 14px;
+            padding: 6px 12px;
+            border: 0;
+            background: none;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.1rem;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0;
+            padding-block: 24px;
+        }
+
+        .info {
+            padding: 4px 14px;
+            text-align: center;
+        }
+
+        .info + .info {
+            border-left: 1px solid var(--line);
+        }
+
+        .info img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+        }
+
+        .info strong {
+            display: block;
+            margin: 8px 0 4px;
+            font-size: 1.12rem;
+        }
+
+        .info span {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.35;
+        }
+
+        .nav-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            padding-block: 20px;
+        }
+
+        .nav-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 6px;
+            border-radius: 18px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.08rem;
+            transition: background-color 0.15s ease;
+        }
+
+        .nav-tile:hover,
+        .nav-tile:focus-visible {
+            background: var(--orange-soft);
+            outline: none;
+        }
+
+        .nav-tile img {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .nav-tile img.icon-small {
+            transform: scale(2.2);
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        .slogan {
+            margin: 0;
+            text-align: center;
+            color: #9a7240;
+            font-size: 1.12rem;
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 18px;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .info + .info {
+                border-left: 0;
+                border-top: 1px solid var(--line);
+                padding-top: 16px;
+            }
+
+            .nav-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .button-row .next-button {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="today-page-body no-next">
+
+    <main class="today-page" aria-label="Küchenpilot Heute">
+        <section class="sheet today-card">
+            <p class="eyebrow">Für heute schlage ich dir vor: ✨</p>
+            <img class="pilot" src="assets/figuren/pilot-winken.png" alt="Küchenpilot winkt">
+            <span class="kategorie" id="todayCategory"></span>
+            <h1 id="todayTitle">…</h1>
+            <div class="fact-boxes" id="todayFacts"></div>
+            <a class="cook-button" id="cookButton" href="rezepte.html">
+                <img src="assets/icons/kochbesteck.png" alt="" aria-hidden="true">
+                <span>Jetzt kochen</span>
+                <span class="arrow" aria-hidden="true">›</span>
+            </a>
+            <br>
+            <button class="link-button" type="button" id="otherButton">Lieber etwas anderes</button>
+        </section>
+
+        <section class="sheet info-row" aria-label="Hinweise zum Rezept">
+            <div class="info">
+                <img src="assets/icons/regal.png" alt="">
+                <strong id="stockTitle">Dein Vorrat</strong>
+                <span id="stockText"></span>
+            </div>
+            <div class="info">
+                <img src="assets/icons/uhr.png" alt="">
+                <strong id="timeTitle"></strong>
+                <span id="timeText"></span>
+            </div>
+            <div class="info">
+                <img src="assets/icons/herz.png" alt="">
+                <strong>Ein Rezept aus deiner Sammlung</strong>
+                <span>Guten Appetit und viel Freude beim Kochen!</span>
+            </div>
+        </section>
+
+        <nav class="sheet nav-row" aria-label="Bereiche">
+            <a class="nav-tile" href="index.html"><img class="icon-small" src="assets/icons/haus.png" alt=""><span>Start</span></a>
+            <a class="nav-tile" href="rezepte.html"><img src="assets/icons/kochbesteck.png" alt=""><span>Rezepte</span></a>
+            <a class="nav-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><span>Vorrat</span></a>
+            <a class="nav-tile" href="personen.html"><img src="assets/icons/klemmbrett.png" alt=""><span>Personen</span></a>
+        </nav>
+
+        <div class="button-row">
+            <button class="next-button" type="button" onclick="location.href='grundvorrat.html'" aria-label="Zurück zum Grundvorrat">
+                <span class="arrow" aria-hidden="true">←</span>
+                <span>Zurück</span>
+            </button>
+        </div>
+
+        <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
+    </main>
+
+    <script src="data/rezepte.js"></script>
+    <script>
+        const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
+            .filter(r => r.status !== 'unvollständig' && (r.zutaten || []).length && (r.schritte || []).length);
+        const STORE_KEY = 'kuechenpilotHeute';
+
+        function esc(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function normalize(text) {
+            return String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        }
+
+        function todayKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function readJson(key) {
+            try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+        }
+
+        function writeJson(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ohne Speicher geht es trotzdem */ }
+        }
+
+        /* Hauptgerichte bevorzugen, am selben Tag denselben Vorschlag zeigen. */
+        function pool() {
+            const main = RECIPES.filter(r => r.kategorie === 'Hauptgericht');
+            return main.length ? main : RECIPES;
+        }
+
+        function dailyIndex(list, date) {
+            let hash = 0;
+            for (const ch of date) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+            return hash % list.length;
+        }
+
+        function pickRecipe(forceOther) {
+            const list = pool();
+            const date = todayKey();
+            const saved = readJson(STORE_KEY);
+            let recipe = saved && saved.datum === date && list.find(r => r.id === saved.id);
+
+            if (!recipe) recipe = list[dailyIndex(list, date)];
+            if (forceOther && list.length > 1) {
+                let next;
+                do { next = list[Math.floor(Math.random() * list.length)]; } while (next.id === recipe.id);
+                recipe = next;
+            }
+            writeJson(STORE_KEY, { datum: date, id: recipe.id });
+            return recipe;
+        }
+
+        function stockMatches(recipe) {
+            const stock = readJson('kuechenpilotGrundvorrat');
+            if (!Array.isArray(stock) || !stock.length) return null;
+            const words = stock.map(s => ({ label: s, key: normalize(s) }));
+            const found = new Set();
+            (recipe.zutaten || []).forEach(z => {
+                const name = normalize(z.name || z.text);
+                words.forEach(w => { if (w.key.length > 2 && name.includes(w.key)) found.add(w.label); });
+            });
+            return [...found];
+        }
+
+        function render(recipe) {
+            document.getElementById('todayCategory').textContent = recipe.kategorie;
+            document.getElementById('todayTitle').textContent = recipe.titel;
+
+            const facts = [];
+            if (recipe.portionen) facts.push(['klemmbrett', `${recipe.portionen} ${recipe.portionsEinheit || (recipe.portionen === 1 ? 'Portion' : 'Portionen')}`]);
+            if (recipe.zeitMin) facts.push(['uhr', `ca. ${recipe.zeitMin} Min.`]);
+            if (recipe.geraete && recipe.geraete.length) facts.push(['topf', recipe.geraete.join(' / ')]);
+            if (recipe.naehrwerte && recipe.naehrwerte.kcal) facts.push(['apfel', `${recipe.naehrwerte.kcal} kcal`]);
+            document.getElementById('todayFacts').innerHTML = facts
+                .map(([icon, text]) => `<div class="fact-box"><img src="assets/icons/${icon}.png" alt=""><span>${esc(text)}</span></div>`).join('');
+
+            document.getElementById('cookButton').href = `rezepte.html#rezept/${encodeURIComponent(recipe.id)}`;
+
+            const matches = stockMatches(recipe);
+            const stockText = document.getElementById('stockText');
+            if (matches === null) {
+                stockText.textContent = 'Wenn du deinen Grundvorrat anlegst, zeige ich dir hier, was schon da ist.';
+            } else if (matches.length) {
+                stockText.textContent = `Schon da: ${matches.join(', ')}.`;
+            } else {
+                stockText.textContent = 'Für dieses Rezept habe ich in deinem Grundvorrat nichts Passendes gefunden.';
+            }
+
+            const steps = (recipe.schritte || []).length;
+            document.getElementById('timeTitle').textContent = recipe.zeitMin ? `Etwa ${recipe.zeitMin} Minuten` : `${steps} einfache Schritte`;
+            document.getElementById('timeText').textContent = recipe.zeitMin
+                ? `In ${steps} Schritten zum fertigen Gericht.`
+                : 'Ich führe dich Schritt für Schritt hindurch.';
+        }
+
+        if (RECIPES.length) {
+            render(pickRecipe(false));
+            document.getElementById('otherButton').addEventListener('click', () => render(pickRecipe(true)));
+        } else {
+            document.getElementById('todayTitle').textContent = 'Noch keine Rezepte vorhanden';
+        }
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Rezept für heute gewählt', () => {
+                const t = document.getElementById('todayTitle').textContent.trim();
+                return { ok: !!t && t !== '…', message: t };
+            });
+            KPTest.add('Jetzt kochen führt zum Rezept', () => {
+                const href = document.getElementById('cookButton').getAttribute('href');
+                return { ok: href.startsWith('rezepte.html#rezept/'), message: href };
+            });
+        }
+    </script>
+</body>
+</html>
