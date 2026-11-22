@@ -358,6 +358,7 @@
         <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
     </main>
 
+    <script src="assets/scripts/portionen.js"></script>
     <script src="data/rezepte.js"></script>
     <script>
         const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
@@ -435,7 +436,8 @@
             document.getElementById('todayTitle').textContent = recipe.titel;
 
             const facts = [];
-            if (recipe.portionen) facts.push(['klemmbrett', `${recipe.portionen} ${recipe.portionsEinheit || (recipe.portionen === 1 ? 'Portion' : 'Portionen')}`]);
+            const anzahl = KPPortionen.standard(recipe);
+            if (anzahl) facts.push(['klemmbrett', KPPortionen.beschriftung(recipe, anzahl)]);
             if (recipe.zeitMin) facts.push(['uhr', `ca. ${recipe.zeitMin} Min.`]);
             if (recipe.geraete && recipe.geraete.length) facts.push(['topf', recipe.geraete.join(' / ')]);
             if (recipe.naehrwerte && recipe.naehrwerte.kcal) facts.push(['apfel', `${recipe.naehrwerte.kcal} kcal`]);

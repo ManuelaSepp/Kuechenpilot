@@ -348,6 +348,57 @@
             font-size: 0.95rem;
         }
 
+        .servings {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0 auto 16px;
+            padding: 8px 10px;
+            border: 2px solid var(--orange);
+            border-radius: 999px;
+            background: #ffffff;
+        }
+
+        .servings button {
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 50%;
+            background: var(--orange);
+            color: #ffffff;
+            font: inherit;
+            font-size: 1.6rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .servings button:hover,
+        .servings button:focus-visible {
+            background: var(--orange-dark);
+            transform: scale(1.06);
+            outline: none;
+        }
+
+        .servings button:disabled {
+            background: #e8dcc8;
+            cursor: default;
+            transform: none;
+        }
+
+        .servings output {
+            min-width: 130px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .scale-note {
+            margin: -4px 0 12px;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
         .note-open {
             margin: 16px auto 0;
             max-width: 600px;
@@ -493,16 +544,6 @@
                 padding-top: clamp(24px, 4vw, 42px);
             }
 
-            body.recipes-page .welcome-card {
-                min-height: 330px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-
-            body.recipes-page .card-main {
-                padding-top: 10px;
-            }
         }
 
         @media (max-width: 760px) {
@@ -512,8 +553,9 @@
 
             .pilot-mobile {
                 display: block;
-                padding: 10px;
             }
+
+
 
             .button-row {
                 display: grid;
@@ -594,6 +636,7 @@
         <div class="recipe-area" id="detail" hidden></div>
     </main>
 
+    <script src="assets/scripts/portionen.js"></script>
     <script src="data/rezepte.js"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -637,9 +680,8 @@
         }
 
         function portionText(r) {
-            if (!r.portionen) return '';
-            const unit = r.portionsEinheit || (r.portionen === 1 ? 'Portion' : 'Portionen');
-            return `${r.portionen} ${unit}`;
+            const anzahl = KPPortionen.standard(r);
+            return anzahl ? KPPortionen.beschriftung(r, anzahl) : '';
         }
 
         const searchIndex = new Map(RECIPES.map(r => [r.id, normalize([
@@ -702,6 +744,8 @@
 
         /* ---------- Detail ---------- */
 
+        let current = null;
+
         function ingredientsHtml(r) {
             const groups = [];
             (r.zutaten || []).forEach(z => {
@@ -723,8 +767,9 @@
 
         function renderDetail(r) {
             const n = r.naehrwerte || {};
+            const anzahl = KPPortionen.standard(r);
+            current = { recipe: r, anzahl };
             const boxes = [
-                r.portionen ? [portionText(r).split(' ')[0], portionText(r).split(' ').slice(1).join(' ')] : null,
                 r.zeitMin ? [`ca. ${r.zeitMin}`, 'Minuten'] : null,
                 n.kcal ? [n.kcal, 'kcal pro Portion'] : null,
                 n.eiweiss != null ? [`${n.eiweiss} g`, 'Eiweiß'] : null,
@@ -740,6 +785,12 @@
                 <section class="sheet detail-head">
                     <span class="kategorie">${esc(r.kategorie)}</span>
                     <h2>${esc(r.titel)}</h2>
+                    ${anzahl ? `
+                    <div class="servings" role="group" aria-label="Personen anpassen">
+                        <button type="button" id="servingsLess" aria-label="Weniger">−</button>
+                        <output id="servingsValue" aria-live="polite"></output>
+                        <button type="button" id="servingsMore" aria-label="Mehr">+</button>
+                    </div>` : ''}
                     <div class="fact-boxes">
                         ${boxes.map(([value, label]) => `<div class="fact-box"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('')}
                     </div>
@@ -749,7 +800,8 @@
                 <div class="detail-columns">
                     <section class="sheet ingredients">
                         <h2>Zutaten</h2>
-                        ${ingredientsHtml(r)}
+                        <p class="scale-note" id="scaleNote" hidden></p>
+                        <div id="ingredientList"></div>
                     </section>
 
                     <section class="sheet steps">
@@ -771,6 +823,31 @@
             els.detail.querySelectorAll('.steps li').forEach(li => {
                 li.addEventListener('click', () => li.classList.toggle('done'));
             });
+
+            if (anzahl) {
+                document.getElementById('servingsLess').addEventListener('click', () => setServings(current.anzahl - 1));
+                document.getElementById('servingsMore').addEventListener('click', () => setServings(current.anzahl + 1));
+            }
+            setServings(anzahl);
+        }
+
+        /* Zutaten für die gewählte Anzahl umrechnen (Funktionen in assets/scripts/portionen.js). */
+        function setServings(anzahl) {
+            const r = current.recipe;
+            const original = KPPortionen.basis(r).anzahl;
+            if (original) {
+                anzahl = Math.min(20, Math.max(1, anzahl));
+                current.anzahl = anzahl;
+                document.getElementById('servingsValue').textContent = KPPortionen.beschriftung(r, anzahl);
+                document.getElementById('servingsLess').disabled = anzahl <= 1;
+                document.getElementById('servingsMore').disabled = anzahl >= 20;
+            }
+            const scaled = original ? KPPortionen.skaliereRezept(r, anzahl) : r;
+            document.getElementById('ingredientList').innerHTML = ingredientsHtml(scaled);
+
+            const note = document.getElementById('scaleNote');
+            note.hidden = !original || anzahl === original;
+            note.textContent = `Umgerechnet vom Originalrezept für ${KPPortionen.beschriftung(r, original)}. Mengen in der Zubereitung beziehen sich aufs Original.`;
         }
 
         /* ---------- Navigation ---------- */
@@ -832,6 +909,12 @@
                 const ids = RECIPES.map(r => r.id);
                 const dupes = ids.filter((id, i) => ids.indexOf(id) !== i);
                 return { ok: !dupes.length, message: dupes.length ? `Doppelt: ${dupes.join(', ')}` : 'Alle IDs eindeutig' };
+            });
+            KPTest.add('Umrechnung auf 2 Personen', () => {
+                const r = RECIPES.find(x => x.id === 'butter-chicken');
+                if (!r) return { ok: true, message: 'Testrezept nicht vorhanden' };
+                const z = KPPortionen.skaliereRezept(r, 2).zutaten[0];
+                return { ok: z.menge === '300', message: z.text };
             });
             KPTest.add('Jedes Rezept hat Zutaten und Schritte', () => {
                 const bad = RECIPES.filter(r => !(r.zutaten || []).length || !(r.schritte || []).length).map(r => r.titel);
