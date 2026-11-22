@@ -260,3 +260,23 @@ html body .hero-shell > .pilot-card img {
 html body .person-cards {
     width: min(100%, var(--kp-hero-max));
 }
+
+/* =====================================================================
+   Schriften: Handschrift für Überschriften und Knöpfe,
+   gut lesbare runde Schrift (Nunito, liegt im Repo) für alle Texte.
+   ===================================================================== */
+@font-face {
+    font-family: "Nunito";
+    src: url("../../fonts/Nunito-Variable.woff2") format("woff2");
+    font-weight: 200 1000;
+    font-style: normal;
+    font-display: swap;
+}
+
+html body {
+    font-family: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+html body :is(h1, h2, h3, .next-button, .cook-button, .eyebrow, .slogan, .menu-tile strong, .day-label, .week-label) {
+    font-family: "Architects Daughter", "Nunito", sans-serif;
+}
