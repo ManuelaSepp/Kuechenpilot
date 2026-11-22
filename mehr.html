@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Mehr</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --green: #7cb342;
+            --red: #d9534f;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        .start-page {
+            position: relative;
+        }
+
+        .welcome-card,
+        .pilot-card,
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            overflow: hidden;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .welcome-card p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        /* ---------- Inhalt ---------- */
+
+        .content {
+            width: min(100%, 922px);
+            margin-top: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .sheet {
+            border-radius: 26px;
+            padding: 26px 28px;
+        }
+
+        .sheet h2 {
+            margin: 0 0 6px;
+            color: var(--orange-dark);
+            font-size: 1.5rem;
+        }
+
+        .sheet > p {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .link-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .link-tile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 18px;
+            background: #ffffff;
+            color: var(--text);
+            text-decoration: none;
+            transition: border-color 0.18s ease, transform 0.18s ease;
+        }
+
+        .link-tile:hover,
+        .link-tile:focus-visible {
+            border-color: var(--orange);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .link-tile img {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+            flex: none;
+        }
+
+        .link-tile strong {
+            display: block;
+            font-size: 1.12rem;
+        }
+
+        .link-tile span {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .action-button {
+            min-height: 50px;
+            padding: 10px 18px;
+            border: 2px solid var(--orange);
+            border-radius: 16px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .action-button:hover,
+        .action-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .action-button.danger {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .action-button.danger:hover,
+        .action-button.danger:focus-visible {
+            background: var(--red);
+            color: #ffffff;
+        }
+
+        .confirm-box {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 2px dashed var(--red);
+            border-radius: 16px;
+            background: #fff5f4;
+        }
+
+        .confirm-box p {
+            margin: 0 0 12px;
+        }
+
+        .message {
+            min-height: 1.4em;
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 1.02rem;
+        }
+
+        .facts {
+            margin: 0;
+            display: grid;
+            grid-template-columns: max-content 1fr;
+            gap: 6px 18px;
+            font-size: 1.08rem;
+        }
+
+        .facts dt {
+            color: var(--muted);
+        }
+
+        .facts dd {
+            margin: 0;
+        }
+
+        .facts a {
+            color: var(--orange-dark);
+        }
+
+        @media (max-width: 760px) {
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+            }
+
+            .button-row .next-button {
+                width: 100%;
+            }
+
+            .sheet {
+                padding: 22px 18px;
+            }
+
+            .link-list {
+                grid-template-columns: 1fr;
+            }
+
+            .actions .action-button {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=3">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="more-page no-next">
+
+    <main class="start-page" aria-label="Küchenpilot Mehr">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-hinweis.png" alt="Küchenpilot mit erhobenem Finger">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-hinweis.png" alt="Küchenpilot mit erhobenem Finger">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1>Und noch <span>mehr.</span></h1>
+                    <p>Einstellungen, deine gespeicherten Daten und ein paar Infos über deinen Küchenpiloten.</p>
+                </div>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span>Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <div class="content">
+            <section class="sheet" aria-label="Einstellungen">
+                <h2>Einstellungen</h2>
+                <p>Hier änderst du, was der Küchenpilot über euch weiß.</p>
+                <ul class="link-list">
+                    <li><a class="link-tile" href="personen.html"><img src="assets/icons/klemmbrett.png" alt=""><div><strong>Personen</strong><span id="personsInfo">Wer isst mit?</span></div></a></li>
+                    <li><a class="link-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><div><strong>Grundvorrat</strong><span id="stockInfo">Was ist im Vorrat?</span></div></a></li>
+                    <li><a class="link-tile" href="kaloriengrab.html"><img src="assets/icons/apfel.png" alt=""><div><strong>Kalorienziel</strong><span id="goalInfo">Im Kaloriengrab</span></div></a></li>
+                </ul>
+            </section>
+
+            <section class="sheet" aria-label="Deine Daten">
+                <h2>Deine Daten</h2>
+                <p>Alles, was du eingibst, bleibt nur in diesem Browser gespeichert. Mit einer Sicherung nimmst du es auf ein anderes Gerät mit.</p>
+                <div class="actions">
+                    <button class="action-button" type="button" id="exportButton">Sicherung herunterladen</button>
+                    <button class="action-button" type="button" id="importButton">Sicherung einspielen</button>
+                    <input type="file" id="importFile" accept="application/json,.json" hidden>
+                    <button class="action-button danger" type="button" id="resetButton">Alles zurücksetzen</button>
+                </div>
+                <div class="confirm-box" id="confirmBox" hidden>
+                    <p>Wirklich alles löschen? Personen, Vorrat, Wochenplan, Einkaufsliste und Kalorien sind danach weg.</p>
+                    <div class="actions">
+                        <button class="action-button danger" type="button" id="confirmReset">Ja, alles löschen</button>
+                        <button class="action-button" type="button" id="cancelReset">Abbrechen</button>
+                    </div>
+                </div>
+                <p class="message" id="dataMessage" role="status"></p>
+            </section>
+
+            <section class="sheet" aria-label="Über den Küchenpiloten">
+                <h2>Über den Küchenpiloten</h2>
+                <p>Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
+                <dl class="facts">
+                    <dt>Rezepte</dt><dd id="recipeCount">–</dd>
+                    <dt>Rezepte-Stand</dt><dd id="recipeDate">–</dd>
+                    <dt>Gespeichert</dt><dd id="storedCount">–</dd>
+                    <dt>Für Tüftler</dt><dd><a href="index.html?test=1">Test-Modus öffnen</a></dd>
+                </dl>
+            </section>
+        </div>
+    </main>
+
+    <script src="data/rezepte.js"></script>
+    <script>
+        const PREFIX = 'kuechenpilot';
+        const $ = id => document.getElementById(id);
+
+        function storedKeys() {
+            try {
+                return Object.keys(localStorage).filter(k => k.startsWith(PREFIX)).sort();
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function readJson(key) {
+            try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; }
+        }
+
+        function say(text) {
+            $('dataMessage').textContent = text;
+        }
+
+        function renderInfo() {
+            const data = window.KP_REZEPTE || {};
+            const recipes = data.rezepte || [];
+            $('recipeCount').textContent = `${recipes.length} in deiner Sammlung`;
+            if (data.stand) {
+                const [y, m, d] = data.stand.split('-');
+                $('recipeDate').textContent = `${Number(d)}.${Number(m)}.${y}`;
+            }
+            const keys = storedKeys();
+            $('storedCount').textContent = keys.length ? `${keys.length} Bereiche in diesem Browser` : 'noch nichts';
+
+            const persons = Number(readJson('kuechenpilotPersonen'));
+            if (persons > 0) $('personsInfo').textContent = `${persons} ${persons === 1 ? 'Person' : 'Personen'}`;
+            const stock = readJson('kuechenpilotGrundvorrat');
+            if (Array.isArray(stock)) $('stockInfo').textContent = `${stock.length} Lebensmittel`;
+            const cal = readJson('kuechenpilotKalorien');
+            if (cal && Number(cal.ziel) > 0) $('goalInfo').textContent = `${Number(cal.ziel).toLocaleString('de-DE')} kcal pro Tag`;
+        }
+
+        $('exportButton').addEventListener('click', () => {
+            const backup = { app: 'Küchenpilot', erstellt: new Date().toISOString(), daten: {} };
+            storedKeys().forEach(k => { backup.daten[k] = localStorage.getItem(k); });
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const d = new Date();
+            a.href = url;
+            a.download = `kuechenpilot-sicherung-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            say(Object.keys(backup.daten).length ? 'Sicherung heruntergeladen.' : 'Es gibt noch nichts zu sichern – die Datei ist leer.');
+        });
+
+        $('importButton').addEventListener('click', () => $('importFile').click());
+
+        $('importFile').addEventListener('change', async () => {
+            const file = $('importFile').files[0];
+            $('importFile').value = '';
+            if (!file) return;
+            try {
+                const backup = JSON.parse(await file.text());
+                const entries = Object.entries((backup && backup.daten) || {}).filter(([k, v]) => k.startsWith(PREFIX) && typeof v === 'string');
+                if (!entries.length) { say('In dieser Datei habe ich keine Küchenpilot-Daten gefunden.'); return; }
+                entries.forEach(([k, v]) => localStorage.setItem(k, v));
+                say(`Sicherung eingespielt: ${entries.length} Bereiche übernommen.`);
+                renderInfo();
+            } catch (e) {
+                say('Die Datei konnte ich nicht lesen. Ist es eine Küchenpilot-Sicherung?');
+            }
+        });
+
+        $('resetButton').addEventListener('click', () => { $('confirmBox').hidden = false; say(''); });
+        $('cancelReset').addEventListener('click', () => { $('confirmBox').hidden = true; });
+        $('confirmReset').addEventListener('click', () => {
+            const keys = storedKeys();
+            keys.forEach(k => { try { localStorage.removeItem(k); } catch (e) { /* egal */ } });
+            $('confirmBox').hidden = true;
+            say(keys.length ? 'Alles zurückgesetzt. Der Küchenpilot startet wieder frisch.' : 'Es war nichts gespeichert.');
+            renderInfo();
+            document.getElementById('personsInfo').textContent = 'Wer isst mit?';
+            document.getElementById('stockInfo').textContent = 'Was ist im Vorrat?';
+            document.getElementById('goalInfo').textContent = 'Im Kaloriengrab';
+        });
+
+        renderInfo();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Einstellungs-Links vorhanden', () => {
+                const n = document.querySelectorAll('.link-tile').length;
+                return { ok: n === 3, message: `${n} Links` };
+            });
+        }
+    </script>
+</body>
+</html>

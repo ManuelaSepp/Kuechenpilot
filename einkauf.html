@@ -46,6 +46,7 @@
         .plan-page {
             width: min(100%, 980px);
             display: grid;
+            grid-template-columns: minmax(0, 1fr);
             gap: 22px;
             padding: clamp(12px, 3vw, 32px) 0;
         }
@@ -403,6 +404,7 @@
 
         .empty {
             display: grid;
+            grid-template-columns: minmax(0, 1fr);
             justify-items: center;
             gap: 12px;
             text-align: center;
@@ -492,7 +494,7 @@
             .cook-button { width: 100%; }
         }
     </style>
-    <link rel="stylesheet" href="assets/styles/responsive-master.css">
+    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=3">
     <link rel="stylesheet" href="assets/tests/test-ui.css">
 </head>
 <body class="shop-page-body no-next">
