@@ -1,0 +1,648 @@
+/*
+ * Gemeinsame Logik für Wochenkorb (Wochenplan) und Einkauf.
+ * Alles bleibt im Browser (localStorage), es gibt keinen Server.
+ *
+ * Gespeicherte Daten:
+ *   kuechenpilotWochenplan   { "2026-11-23": [ { id, menge } ] }   (Schlüssel = Datum des Tages)
+ *   kuechenpilotPersonen      Zahl (Standard 2), auch von personen.html gesetzt
+ *   kuechenpilotWoche         Montag der zuletzt angesehenen Woche ("2026-11-23")
+ *   kuechenpilotEinkauf       { "<Montag>": { gekauft: [], habeIch: [], dochKaufen: [], eigene: [] } }
+ *   kuechenpilotGrundvorratDetails  (kommt von vorrat.html)
+ */
+(function () {
+    const KEYS = {
+        plan: 'kuechenpilotWochenplan',
+        personen: 'kuechenpilotPersonen',
+        woche: 'kuechenpilotWoche',
+        einkauf: 'kuechenpilotEinkauf',
+        vorrat: 'kuechenpilotGrundvorrat',
+        vorratDetails: 'kuechenpilotGrundvorratDetails'
+    };
+
+    const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
+        .filter(r => r.status !== 'unvollständig' && (r.zutaten || []).length);
+    const BY_ID = new Map(RECIPES.map(r => [r.id, r]));
+
+    /* ---------- Speicher ---------- */
+
+    function readJson(key, fallback) {
+        try {
+            const value = JSON.parse(localStorage.getItem(key) || 'null');
+            return value === null ? fallback : value;
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function writeJson(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ohne Speicher geht es trotzdem */ }
+    }
+
+    function getPersonen() {
+        const fallback = (window.KPPortionen && window.KPPortionen.STANDARD_PERSONEN) || 2;
+        const n = Number(readJson(KEYS.personen, fallback));
+        return Number.isFinite(n) && n >= 1 ? Math.round(n) : fallback;
+    }
+
+    function setPersonen(n) {
+        writeJson(KEYS.personen, Math.max(1, Math.min(20, Math.round(n))));
+    }
+
+    /* ---------- Datum und Woche ---------- */
+
+    const DAY_NAMES = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+    const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+    function isoDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function parseIso(text) {
+        const [y, m, d] = String(text).split('-').map(Number);
+        return new Date(y, (m || 1) - 1, d || 1);
+    }
+
+    function mondayOf(date) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const shift = (d.getDay() + 6) % 7;
+        d.setDate(d.getDate() - shift);
+        return d;
+    }
+
+    function addDays(date, n) {
+        const d = new Date(date);
+        d.setDate(d.getDate() + n);
+        return d;
+    }
+
+    function currentWeek() {
+        const saved = readJson(KEYS.woche, null);
+        const thisWeek = isoDate(mondayOf(new Date()));
+        /* Eine vergangene Woche nicht wieder öffnen, dann lieber die aktuelle. */
+        if (typeof saved === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(saved) && saved >= thisWeek) return saved;
+        return thisWeek;
+    }
+
+    function setWeek(monday) {
+        writeJson(KEYS.woche, monday);
+    }
+
+    function shiftWeek(monday, n) {
+        return isoDate(addDays(parseIso(monday), 7 * n));
+    }
+
+    function weekDays(monday) {
+        const start = parseIso(monday);
+        return DAY_NAMES.map((name, i) => {
+            const d = addDays(start, i);
+            return { key: isoDate(d), name, short: name.slice(0, 2), date: d, label: `${d.getDate()}. ${MONTHS[d.getMonth()]}` };
+        });
+    }
+
+    function weekLabel(monday) {
+        const s = parseIso(monday);
+        const e = addDays(s, 6);
+        const thisWeek = isoDate(mondayOf(new Date()));
+        let prefix = '';
+        if (monday === thisWeek) prefix = 'Diese Woche · ';
+        else if (monday === shiftWeek(thisWeek, 1)) prefix = 'Nächste Woche · ';
+        const left = s.getMonth() === e.getMonth() ? `${s.getDate()}.` : `${s.getDate()}. ${MONTHS[s.getMonth()]}`;
+        return `${prefix}${left} – ${e.getDate()}. ${MONTHS[e.getMonth()]}`;
+    }
+
+    /* ---------- Wochenplan ---------- */
+
+    function getPlan() {
+        const plan = readJson(KEYS.plan, {});
+        return plan && typeof plan === 'object' && !Array.isArray(plan) ? plan : {};
+    }
+
+    function savePlan(plan) {
+        /* leere Tage nicht speichern */
+        Object.keys(plan).forEach(k => { if (!Array.isArray(plan[k]) || !plan[k].length) delete plan[k]; });
+        writeJson(KEYS.plan, plan);
+    }
+
+    /*
+     * Umrechnung wie auf der Rezeptseite: Personen-Rezepte nach Personenzahl,
+     * Rezepte mit Laib/Blech/Stück nach dieser Anzahl.
+     * Ist assets/scripts/portionen.js (KPPortionen) geladen, wird dessen Rechnung benutzt.
+     */
+    function portionen() {
+        return window.KPPortionen || null;
+    }
+
+    function planArt(recipe) {
+        return recipe && recipe.portionsEinheit ? 'stueck' : 'personen';
+    }
+
+    function defaultMenge(recipe) {
+        if (planArt(recipe) === 'stueck') {
+            const kp = portionen();
+            return kp ? kp.standard(recipe) || 1 : Number(recipe.portionen) || 1;
+        }
+        return getPersonen();
+    }
+
+    function factorFor(entry, recipe) {
+        const menge = Number(entry.menge) || defaultMenge(recipe);
+        const kp = portionen();
+        if (kp) return kp.faktor(recipe, menge);
+        return menge / (Number(recipe.portionen) || 1);
+    }
+
+    function mengeLabel(recipe, menge) {
+        const kp = portionen();
+        if (kp) return kp.beschriftung(recipe, menge);
+        if (planArt(recipe) === 'stueck') return `${menge} ${recipe.portionsEinheit}`;
+        return `${menge} ${menge === 1 ? 'Person' : 'Personen'}`;
+    }
+
+    function weekEntries(monday, plan) {
+        plan = plan || getPlan();
+        const out = [];
+        weekDays(monday).forEach(day => {
+            (plan[day.key] || []).forEach((entry, index) => {
+                const recipe = BY_ID.get(entry.id);
+                if (recipe) out.push({ day, entry, index, recipe });
+            });
+        });
+        return out;
+    }
+
+    /* ---------- Zutaten verstehen ---------- */
+
+    function normalize(text) {
+        return String(text || '')
+            .toLowerCase()
+            .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    const FRACTIONS = { '½': 0.5, '¼': 0.25, '¾': 0.75, '⅓': 1 / 3, '⅔': 2 / 3, '⅛': 0.125 };
+
+    function parseNumber(text) {
+        let t = String(text || '').replace(/ca\.?/gi, '').trim();
+        if (!t) return null;
+        /* Spannen wie "1–2" oder "150-200": den größeren Wert nehmen, damit genug da ist. */
+        const parts = t.split(/\s*[–-]\s*/);
+        if (parts.length > 1) t = parts[parts.length - 1];
+        let value = 0;
+        let found = false;
+        const frac = t.match(/[½¼¾⅓⅔⅛]/);
+        if (frac) { value += FRACTIONS[frac[0]]; found = true; t = t.replace(frac[0], ''); }
+        const slash = t.match(/(\d+)\s*\/\s*(\d+)/);
+        if (slash) { value += Number(slash[1]) / Number(slash[2]); found = true; t = t.replace(slash[0], ''); }
+        const num = t.match(/\d+(?:[.,]\d+)?/);
+        if (num) { value += Number(num[0].replace(',', '.')); found = true; }
+        return found ? value : null;
+    }
+
+    const UNIT_ALIASES = {
+        '': 'Stück', 'stk': 'Stück', 'stück': 'Stück',
+        'pck.': 'Päckchen', 'pck': 'Päckchen', 'packung': 'Päckchen', 'päckchen': 'Päckchen',
+        'kleines stück': 'Stück'
+    };
+
+    function normUnit(unit) {
+        const u = String(unit || '').trim();
+        const key = u.toLowerCase();
+        return Object.prototype.hasOwnProperty.call(UNIT_ALIASES, key) ? UNIT_ALIASES[key] : u;
+    }
+
+    /* Grundeinheit, damit sich g/kg und ml/l zusammenrechnen lassen. */
+    function toBase(amount, unit) {
+        const u = String(unit || '').toLowerCase();
+        if (u === 'kg') return { amount: amount * 1000, unit: 'g' };
+        if (u === 'l') return { amount: amount * 1000, unit: 'ml' };
+        return { amount, unit: normUnit(unit) };
+    }
+
+    const CAT = {
+        gemuese: 'Obst & Gemüse',
+        fleisch: 'Fleisch & Fisch',
+        kuehl: 'Kühlregal',
+        brot: 'Brot & Backwaren',
+        trocken: 'Vorratsschrank',
+        gewuerz: 'Gewürze & Kräuter',
+        tk: 'Tiefkühl',
+        sonst: 'Sonstiges'
+    };
+    const CATEGORY_ORDER = [CAT.gemuese, CAT.fleisch, CAT.kuehl, CAT.brot, CAT.trocken, CAT.gewuerz, CAT.tk, CAT.sonst];
+
+    /*
+     * Regeln: Suchmuster (auf normalisiertem Namen) → einheitlicher Name + Abteilung im Laden.
+     * Die Reihenfolge ist wichtig: spezielle Begriffe zuerst (Paprikapulver vor Paprika).
+     */
+    const RULES = [
+        [/^(lauwarmes |kaltes |etwas )?wasser\b|gurkenwasser|dosieren|geschmack|belieben/, null],
+        [/tk-lachs|lachs/, 'Lachs', CAT.fleisch],
+        [/seelachs/, 'Seelachsfilet', CAT.fleisch],
+        [/kabeljau/, 'Kabeljaufilet', CAT.fleisch],
+        [/haehnchen/, 'Hähnchenbrust', CAT.fleisch],
+        [/pute/, 'Putenbrust', CAT.fleisch],
+        [/rinderhack/, 'Rinderhackfleisch', CAT.fleisch],
+        [/hackfleisch/, 'Hackfleisch', CAT.fleisch],
+        [/schweinefilet/, 'Schweinefilet', CAT.fleisch],
+        [/bacon/, 'Bacon', CAT.fleisch],
+        [/speck/, 'Speck', CAT.fleisch],
+        [/salami/, 'Salami', CAT.fleisch],
+        [/kochschinken|schinken/, 'Kochschinken', CAT.fleisch],
+        [/kasseler/, 'Kasseler', CAT.fleisch],
+        [/pesto/, 'Pesto', CAT.trocken],
+        [/kaesekrainer/, 'Käsekrainer', CAT.fleisch],
+
+        [/paprikapulver|paprika,? edelsuess/, 'Paprikapulver', CAT.gewuerz, 'gewuerz'],
+        [/knoblauchpulver/, 'Knoblauchpulver', CAT.gewuerz, 'gewuerz'],
+        [/currypulver|^curry/, 'Currypulver', CAT.gewuerz, 'gewuerz'],
+        [/cayenne/, 'Cayennepfeffer', CAT.gewuerz, 'gewuerz'],
+        [/pfeffer/, 'Pfeffer', CAT.gewuerz],
+        [/meersalz|^salz/, 'Salz', CAT.gewuerz],
+        [/muskat/, 'Muskat', CAT.gewuerz, 'gewuerz'],
+        [/majoran/, 'Majoran', CAT.gewuerz, 'gewuerz'],
+        [/zimt/, 'Zimt', CAT.gewuerz, 'gewuerz'],
+        [/kuemmel/, 'Kümmel', CAT.gewuerz, 'gewuerz'],
+        [/garam masala/, 'Garam Masala', CAT.gewuerz, 'gewuerz'],
+        [/oregano/, 'Oregano', CAT.gewuerz, 'gewuerz'],
+        [/thymian/, 'Thymian', CAT.gewuerz, 'gewuerz'],
+        [/rosmarin/, 'Rosmarin', CAT.gewuerz, 'gewuerz'],
+        [/italienische kraeuter/, 'Italienische Kräuter', CAT.gewuerz, 'gewuerz'],
+        [/graf koks|rauchige drecksau/, 'Grillgewürz', CAT.gewuerz, 'gewuerz'],
+        [/gemahlener ingwer/, 'Ingwer', CAT.gewuerz, 'gewuerz'],
+        [/^(etwas )?chili$/, 'Chili', CAT.gewuerz, 'gewuerz'],
+        [/petersilie/, 'Petersilie', CAT.gewuerz, 'kraeuter'],
+        [/schnittlauch/, 'Schnittlauch', CAT.gewuerz, 'kraeuter'],
+        [/salbei/, 'Salbei', CAT.gewuerz, 'kraeuter'],
+        [/gehackte kraeuter|^kraeuter/, 'Kräuter', CAT.gewuerz, 'kraeuter'],
+
+        [/fruehlingszwiebel/, 'Frühlingszwiebeln', CAT.gemuese],
+        [/roestzwiebel/, 'Röstzwiebeln', CAT.trocken],
+        [/zwiebel/, 'Zwiebeln', CAT.gemuese],
+        [/knoblauch/, 'Knoblauch', CAT.gemuese],
+        [/kartoffel/, 'Kartoffeln', CAT.gemuese],
+        [/moehre/, 'Möhren', CAT.gemuese],
+        [/zucchini/, 'Zucchini', CAT.gemuese],
+        [/getrocknete tomaten/, 'Getrocknete Tomaten', CAT.trocken],
+        [/passierte tomaten|geschaelte tomaten|dosentomaten/, 'Dosentomaten', CAT.trocken],
+        [/tomatenmark/, 'Tomatenmark', CAT.trocken],
+        [/tomate/, 'Tomaten', CAT.gemuese],
+        [/paprika/, 'Paprika', CAT.gemuese],
+        [/chilischote/, 'Chilischote', CAT.gemuese],
+        [/blumenkohl/, 'Blumenkohl', CAT.gemuese],
+        [/brokkoli/, 'Brokkoli', CAT.gemuese],
+        [/kohlrabi/, 'Kohlrabi', CAT.gemuese],
+        [/spitzkohl/, 'Spitzkohl', CAT.gemuese],
+        [/weisskohl/, 'Weißkohl', CAT.gemuese],
+        [/rotkohl/, 'Rotkohl', CAT.gemuese],
+        [/lauch/, 'Lauch', CAT.gemuese],
+        [/kuerbis/, 'Hokkaido-Kürbis', CAT.gemuese],
+        [/champignon/, 'Champignons', CAT.gemuese],
+        [/salatgurke/, 'Salatgurke', CAT.gemuese],
+        [/gewuerzgurke/, 'Gewürzgurken', CAT.trocken],
+        [/avocado/, 'Avocado', CAT.gemuese],
+        [/ingwer/, 'Ingwer', CAT.gemuese],
+        [/aepfel|apfel/, 'Äpfel', CAT.gemuese],
+        [/birne/, 'Birnen', CAT.gemuese],
+        [/aprikose/, 'Aprikosen', CAT.gemuese],
+        [/ananas/, 'Ananas', CAT.gemuese],
+        [/limettensaft/, 'Limettensaft', CAT.trocken],
+        [/zitronensaft/, 'Zitronensaft', CAT.kuehl],
+        [/zitrone/, 'Zitrone', CAT.gemuese],
+        [/spinat/, 'Spinat', CAT.tk],
+        [/erbsen/, 'Erbsen', CAT.tk],
+        [/edamame/, 'Edamame', CAT.tk],
+
+        [/eigelb|\bei(er)?\b/, 'Eier', CAT.kuehl],
+        [/buttermilch/, 'Buttermilch', CAT.kuehl],
+        [/milch/, 'Milch', CAT.kuehl],
+        [/butterschmalz/, 'Butterschmalz', CAT.kuehl],
+        [/kraeuterbutter/, 'Kräuterbutter', CAT.kuehl],
+        [/butter(?!milch)/, 'Butter', CAT.kuehl],
+        [/kraeuterfrischkaese/, 'Kräuterfrischkäse', CAT.kuehl],
+        [/koerniger frischkaese/, 'Körniger Frischkäse', CAT.kuehl],
+        [/frischkaese/, 'Frischkäse', CAT.kuehl],
+        [/quark/, 'Quark', CAT.kuehl],
+        [/skyr/, 'Skyr', CAT.kuehl],
+        [/joghurt/, 'Joghurt', CAT.kuehl],
+        [/creme fraiche/, 'Crème fraîche', CAT.kuehl],
+        [/sahne|kochcreme/, 'Sahne', CAT.kuehl],
+        [/ricotta/, 'Ricotta', CAT.kuehl],
+        [/mozzarella/, 'Mozzarella', CAT.kuehl],
+        [/parmesan/, 'Parmesan', CAT.kuehl],
+        [/cheddar/, 'Cheddar', CAT.kuehl],
+        [/kaese|gouda|emmentaler/, 'Käse', CAT.kuehl],
+        [/tortellini/, 'Tortellini', CAT.kuehl],
+        [/filoteig|fruehlingsrollen/, 'Teigblätter', CAT.kuehl],
+
+        [/toast/, 'Toastbrot', CAT.brot],
+        [/broetchen/, 'Brötchen', CAT.brot],
+
+        [/dinkelmehl/, 'Dinkelmehl', CAT.trocken],
+        [/roggenmehl/, 'Roggenmehl', CAT.trocken],
+        [/mehl/, 'Mehl', CAT.trocken],
+        [/speisestaerke/, 'Speisestärke', CAT.trocken],
+        [/vanillezucker/, 'Vanillezucker', CAT.trocken],
+        [/puderzucker/, 'Puderzucker', CAT.trocken],
+        [/zucker/, 'Zucker', CAT.trocken],
+        [/agavendicksaft/, 'Agavendicksaft', CAT.trocken],
+        [/backpulver/, 'Backpulver', CAT.trocken],
+        [/hefe/, 'Trockenhefe', CAT.trocken],
+        [/haferflocken/, 'Haferflocken', CAT.trocken],
+        [/paniermehl|panko/, 'Paniermehl', CAT.trocken],
+        [/lasagneplatten/, 'Lasagneplatten', CAT.trocken],
+        [/nudeln|spaghetti|tagliatelle/, 'Nudeln', CAT.trocken],
+        [/risottoreis/, 'Risottoreis', CAT.trocken],
+        [/reis/, 'Reis', CAT.trocken],
+        [/gemuesebruehe|bruehe/, 'Gemüsebrühe', CAT.trocken],
+        [/sesamoel/, 'Sesamöl', CAT.trocken],
+        [/olivenoel/, 'Olivenöl', CAT.trocken],
+        [/oel\b|oelspray|pflanzenoel/, 'Speiseöl', CAT.trocken],
+        [/essig/, 'Essig', CAT.trocken],
+        [/hoisin/, 'Hoisin-Sauce', CAT.trocken],
+        [/soja/, 'Sojasauce', CAT.trocken],
+        [/senf/, 'Senf', CAT.trocken],
+        [/ketchup/, 'Ketchup', CAT.trocken],
+        [/honig/, 'Honig', CAT.trocken],
+        [/erdnussbutter/, 'Erdnussbutter', CAT.trocken],
+        [/erdnuesse/, 'Erdnüsse', CAT.trocken],
+        [/haselnuess/, 'Gemahlene Haselnüsse', CAT.trocken],
+        [/walnuess/, 'Walnüsse', CAT.trocken],
+        [/sonnenblumenkerne/, 'Sonnenblumenkerne', CAT.trocken],
+        [/sesam/, 'Sesam', CAT.trocken],
+        [/rosinen/, 'Rosinen', CAT.trocken],
+        [/weisswein/, 'Weißwein', CAT.sonst],
+        [/mineralwasser/, 'Mineralwasser', CAT.sonst],
+        [/obstsaft/, 'Obstsaft', CAT.sonst]
+    ];
+
+    /* Beschreibende Wörter, die für den Einkauf egal sind. */
+    function cleanName(name) {
+        return String(name || '')
+            .replace(/\([^)]*\)/g, '')
+            .replace(/[„“"]/g, '')
+            .replace(/^optional:\s*/i, '')
+            .replace(/^(etwas|ca\.)\s+/i, '')
+            .replace(/\s+(nach (geschmack|belieben)|zum (bestäuben|bestreichen|abschmecken|einweichen|vorkochen.*)|für die form|zimmerwarm|vorsichtig dosieren|ohne haut)\b.*$/i, '')
+            .replace(/,.*$/, '')
+            .trim();
+    }
+
+    function stripParens(text) {
+        return String(text || '').replace(/\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    /* "Salz, Pfeffer und Muskat" ohne Menge → drei einzelne Zutaten. */
+    function splitList(zutat) {
+        const whole = stripParens(zutat.name || zutat.text).replace(/^(etwas|optional:)\s+/i, '');
+        const hasAmount = parseNumber(zutat.menge) !== null;
+        if (!hasAmount && /,|\s(und|&)\s/.test(whole)) {
+            const pieces = whole
+                .split(/\s*,\s*|\s+und\/oder\s+|\s+und\s+|\s*&\s*/)
+                .map(p => p.trim())
+                .filter(Boolean);
+            if (pieces.length > 1 && pieces.every(p => p.split(' ').length <= 3)) return pieces;
+        }
+        return [whole];
+    }
+
+    function classify(name) {
+        const key = normalize(stripParens(name));
+        for (const [re, canonical, category, group] of RULES) {
+            if (re.test(key)) {
+                if (canonical === null) return null;
+                return { name: canonical, category, group: group || '' };
+            }
+        }
+        const short = cleanName(name).replace(/^(frische[rsn]?|kleine[rsn]?|große[rsn]?|mittelgroße[rsn]?|gehackte[rsn]?|geriebene[rsn]?|zarte[rsn]?)\s+/i, '') || name;
+        const pretty = short.charAt(0).toUpperCase() + short.slice(1);
+        return { name: pretty, category: CAT.sonst, group: '' };
+    }
+
+    /*
+     * Löffel und Prisen sind für den Einkauf nur ungefähr wichtig:
+     * - gibt es auch g oder ml, werden sie grob dazugerechnet (TL ≈ 5, EL ≈ 15),
+     * - sonst als Löffel zusammengefasst.
+     * g und ml werden zusammengelegt (bei Sahne, Joghurt usw. fast gleich).
+     */
+    const SPOON_TL = { 'TL': 1, 'EL': 3, 'Prise': 0.1, 'Msp.': 0.1 };
+
+    function mergeUnits(sums, keepSpoons) {
+        const map = new Map(sums);
+        let tl = 0;
+        Object.keys(SPOON_TL).forEach(u => {
+            if (map.has(u)) { tl += map.get(u) * SPOON_TL[u]; map.delete(u); }
+        });
+        const g = map.get('g') || 0;
+        const ml = map.get('ml') || 0;
+        if (g && ml) {
+            map.delete('g'); map.delete('ml');
+            map.set(g >= ml ? 'g' : 'ml', g + ml);
+        }
+        const weightUnit = map.has('g') ? 'g' : map.has('ml') ? 'ml' : null;
+        if (tl) {
+            if (weightUnit && !keepSpoons) map.set(weightUnit, map.get(weightUnit) + tl * 5);
+            else if (tl >= 3) map.set('EL', tl / 3);
+            else map.set('TL', tl);
+        }
+        return [...map.entries()].map(([unit, amount]) => ({ unit, amount }));
+    }
+
+    /* ---------- Vorrat ---------- */
+
+    /* Welche Zutaten deckt ein Eintrag im Grundvorrat ab? */
+    const STOCK_COVERS = {
+        'Kräuter und Gewürze': item => item.group === 'gewuerz',
+        'Tiefgekühlte Kräuter': item => item.group === 'kraeuter',
+        'Milch oder Pflanzendrink': item => item.name === 'Milch',
+        'Butter oder Margarine': item => item.name === 'Butter',
+        'Sahne oder Kochcreme': item => item.name === 'Sahne',
+        'Speiseöl': item => item.name === 'Speiseöl',
+        'Brot oder Brötchen': item => item.name === 'Brötchen',
+        'Hülsenfrüchte': () => false,
+        /* Diese Sammelbegriffe sind zu allgemein, um daraus etwas sicher abzuleiten. */
+        'Fleisch oder Geflügel': () => false,
+        'Fisch': () => false,
+        'Gemüsemischung': () => false,
+        'Beeren': () => false,
+        'Vorgekochte Reste': () => false
+    };
+
+    function getStock() {
+        let details = readJson(KEYS.vorratDetails, null);
+        if (!Array.isArray(details)) {
+            const names = readJson(KEYS.vorrat, null);
+            details = Array.isArray(names) ? names.map(name => ({ name })) : null;
+        }
+        if (!details) return null;
+        return details
+            .filter(d => d && typeof d.name === 'string' && d.name.trim())
+            .map(d => {
+                const cls = classify(cleanName(d.name)) || { name: d.name };
+                return {
+                    name: d.name,
+                    canonical: cls.name,
+                    amount: parseNumber(d.amount),
+                    unit: d.unit || '',
+                    custom: !!d.custom
+                };
+            });
+    }
+
+    function findStock(item, stock) {
+        if (!stock) return null;
+        for (const s of stock) {
+            const rule = STOCK_COVERS[s.name];
+            if (rule ? rule(item) : s.canonical === item.name) return s;
+        }
+        /* eigene Einträge: lockerer Vergleich ("Couscous" ↔ "Couscous, fein") */
+        const key = normalize(item.name);
+        return stock.find(s => {
+            const sk = normalize(s.name);
+            return s.custom && sk.length > 3 && (key.includes(sk) || sk.includes(key));
+        }) || null;
+    }
+
+    /* ---------- Einkaufsliste ---------- */
+
+    function itemKey(name) {
+        return normalize(name);
+    }
+
+    /*
+     * Baut aus dem Wochenplan die Einkaufsliste.
+     * Ergebnis: { items: [...], recipesCount, stockKnown }
+     * Jedes item: { key, name, category, amounts: [{amount, unit}], unknownAmount, recipes: [Titel], stock, remaining }
+     */
+    function buildShoppingList(monday, options) {
+        options = options || {};
+        const plan = options.plan || getPlan();
+        const stock = options.stock !== undefined ? options.stock : getStock();
+        const entries = weekEntries(monday, plan);
+        const map = new Map();
+
+        entries.forEach(({ entry, recipe }) => {
+            const factor = factorFor(entry, recipe);
+            (recipe.zutaten || []).forEach(zutat => {
+                const baseAmount = parseNumber(zutat.menge);
+                splitList(zutat).forEach((piece, i, all) => {
+                    const cls = classify(piece);
+                    if (!cls) return;
+                    const key = itemKey(cls.name);
+                    if (!map.has(key)) {
+                        map.set(key, { key, name: cls.name, category: cls.category, group: cls.group, sums: new Map(), unknownAmount: false, recipes: [] });
+                    }
+                    const item = map.get(key);
+                    if (!item.recipes.includes(recipe.titel)) item.recipes.push(recipe.titel);
+                    if (baseAmount === null || all.length > 1) {
+                        item.unknownAmount = true;
+                        return;
+                    }
+                    const base = toBase(baseAmount * factor, zutat.einheit);
+                    item.sums.set(base.unit, (item.sums.get(base.unit) || 0) + base.amount);
+                });
+            });
+        });
+
+        const items = [...map.values()].map(item => {
+            const amounts = mergeUnits(item.sums, item.category === CAT.gewuerz);
+            const out = { key: item.key, name: item.name, category: item.category, group: item.group, amounts, unknownAmount: item.unknownAmount && !amounts.length, recipes: item.recipes, stock: null, remaining: null };
+            const s = findStock(out, stock);
+            if (s) {
+                out.stock = s;
+                /* Menge im Vorrat bekannt? Dann prüfen, ob sie reicht. */
+                if (s.amount !== null && s.amount !== undefined && amounts.length === 1) {
+                    const have = toBase(s.amount, s.unit);
+                    const need = amounts[0];
+                    if (have.unit === need.unit && need.amount > have.amount) {
+                        out.remaining = { unit: need.unit, amount: need.amount - have.amount };
+                    }
+                }
+            }
+            return out;
+        });
+
+        items.sort((a, b) => {
+            const c = CATEGORY_ORDER.indexOf(a.category) - CATEGORY_ORDER.indexOf(b.category);
+            return c || a.name.localeCompare(b.name, 'de');
+        });
+
+        return { items, recipesCount: entries.length, stockKnown: !!stock };
+    }
+
+    /* ---------- Mengen schön anzeigen ---------- */
+
+    const COUNT_UNITS = ['Stück', 'Päckchen', 'Kugel', 'Bund', 'Scheiben', 'Dose', 'Glas', 'Flasche'];
+
+    function niceNumber(n) {
+        const whole = Math.floor(n);
+        const rest = n - whole;
+        const fracs = [[0.25, '¼'], [0.5, '½'], [0.75, '¾']];
+        for (const [v, s] of fracs) {
+            if (Math.abs(rest - v) < 0.04) return whole ? `${whole}${s}` : s;
+        }
+        if (rest < 0.04) return String(whole);
+        return String(Math.round(n * 10) / 10).replace('.', ',');
+    }
+
+    function formatAmount(a) {
+        let { amount, unit } = a;
+        if (unit === 'g' && amount >= 1000) { amount /= 1000; unit = 'kg'; }
+        else if (unit === 'ml' && amount >= 1000) { amount /= 1000; unit = 'l'; }
+        else if (unit === 'g' || unit === 'ml') { amount = amount >= 20 ? Math.ceil(amount / 5) * 5 : Math.ceil(amount); }
+        else if (COUNT_UNITS.includes(unit)) { amount = Math.ceil(amount - 0.01); }
+        else if (unit === 'TL' || unit === 'EL') { amount = Math.max(0.5, Math.round(amount * 2) / 2); }
+        const text = niceNumber(amount);
+        if (unit === 'Stück') return text;
+        return `${text} ${unit}`;
+    }
+
+    function formatAmounts(item) {
+        if (item.remaining) return formatAmount(item.remaining);
+        if (!item.amounts.length) return '';
+        return item.amounts.map(formatAmount).join(' + ');
+    }
+
+    /* ---------- Einkauf-Status (abgehakt usw.) ---------- */
+
+    function getShopState(monday) {
+        const all = readJson(KEYS.einkauf, {});
+        const s = (all && all[monday]) || {};
+        return {
+            gekauft: Array.isArray(s.gekauft) ? s.gekauft : [],
+            habeIch: Array.isArray(s.habeIch) ? s.habeIch : [],
+            dochKaufen: Array.isArray(s.dochKaufen) ? s.dochKaufen : [],
+            eigene: Array.isArray(s.eigene) ? s.eigene : []
+        };
+    }
+
+    function saveShopState(monday, state) {
+        const all = readJson(KEYS.einkauf, {}) || {};
+        all[monday] = state;
+        /* alte Wochen (älter als 8 Wochen) aufräumen */
+        const limit = shiftWeek(isoDate(mondayOf(new Date())), -8);
+        Object.keys(all).forEach(k => { if (k < limit) delete all[k]; });
+        writeJson(KEYS.einkauf, all);
+    }
+
+    function esc(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    window.KPPlaner = {
+        KEYS, RECIPES, BY_ID, CATEGORY_ORDER,
+        readJson, writeJson, esc, normalize,
+        getPersonen, setPersonen,
+        isoDate, parseIso, mondayOf, currentWeek, setWeek, shiftWeek, weekDays, weekLabel,
+        getPlan, savePlan, planArt, defaultMenge, factorFor, mengeLabel, weekEntries,
+        parseNumber, classify, splitList, getStock, findStock,
+        buildShoppingList, formatAmount, formatAmounts,
+        getShopState, saveShopState
+    };
+})();

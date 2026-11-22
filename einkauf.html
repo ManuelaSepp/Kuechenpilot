@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Einkauf</title>
+    <style>
+
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        button, input { font-family: inherit; }
+
+        .plan-page {
+            width: min(100%, 980px);
+            display: grid;
+            gap: 22px;
+            padding: clamp(12px, 3vw, 32px) 0;
+        }
+
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            padding: clamp(22px, 3.5vw, 36px) clamp(18px, 4vw, 40px);
+        }
+
+        /* Kopf */
+        .head {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .head img.pilot {
+            width: clamp(110px, 16vw, 160px);
+            height: auto;
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: #9a7240;
+            font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+        }
+
+        h1 {
+            margin: 4px 0 12px;
+            font-size: clamp(1.9rem, 5vw, 2.8rem);
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        h1 span { color: var(--orange); }
+
+        .lead {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 22px;
+        }
+
+        .week-nav, .persons {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .round-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-size: 1.35rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .round-button:hover, .round-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .round-button.small {
+            width: 30px;
+            height: 30px;
+            font-size: 1.05rem;
+            border-width: 1.5px;
+        }
+
+        .week-label {
+            min-width: 230px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .persons strong {
+            min-width: 26px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        /* Navigation unten (wie auf der Heute-Seite) */
+        .nav-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            padding-block: 18px;
+        }
+
+        .nav-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 6px;
+            border-radius: 18px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.08rem;
+            transition: background-color 0.15s ease;
+        }
+
+        .nav-tile:hover, .nav-tile:focus-visible { background: var(--orange-soft); outline: none; }
+        .nav-tile img { width: 40px; height: 40px; object-fit: contain; }
+        .nav-tile img.icon-small { transform: scale(2.2); }
+
+        .button-row { display: flex; justify-content: flex-start; }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover, .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .arrow { font-size: 1.45rem; line-height: 1; }
+
+        .slogan {
+            margin: 0;
+            text-align: center;
+            color: #9a7240;
+            font-size: 1.12rem;
+        }
+
+        .link-button {
+            padding: 6px 10px;
+            border: 0;
+            background: none;
+            color: var(--orange-dark);
+            font-size: 1.05rem;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+        }
+
+        .cook-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 60px;
+            padding: 12px 26px;
+            border: 0;
+            border-radius: 18px;
+            background: var(--orange);
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 12px 24px rgba(223, 143, 18, 0.28);
+            transition: transform 0.18s ease, background-color 0.18s ease;
+        }
+
+        .cook-button:hover, .cook-button:focus-visible {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .cook-button img {
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) invert(1);
+        }
+
+        .message {
+            min-height: 1.3em;
+            margin: 0;
+            color: var(--orange-dark);
+            font-size: 1rem;
+        }
+
+        /* Einkaufsliste */
+        .plan-page { width: min(100%, 820px); }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .stat {
+            padding: 6px 14px;
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            background: #ffffff;
+            font-size: 1.05rem;
+        }
+
+        .stat strong { color: var(--orange-dark); }
+
+        .group + .group { margin-top: 22px; }
+
+        .group h2 {
+            margin: 0 0 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--line);
+            font-size: 1.35rem;
+            font-weight: 600;
+        }
+
+        .items {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            gap: 4px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 6px;
+            border-radius: 14px;
+        }
+
+        .item:hover { background: var(--orange-soft); }
+
+        .item input[type="checkbox"] {
+            width: 26px;
+            height: 26px;
+            accent-color: var(--orange);
+            cursor: pointer;
+        }
+
+        .item label { cursor: pointer; }
+
+        .item-name {
+            display: block;
+            font-size: 1.15rem;
+            line-height: 1.25;
+        }
+
+        .item-amount {
+            color: var(--orange-dark);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .item-note {
+            display: block;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.3;
+        }
+
+        .item.is-done .item-name,
+        .item.is-done .item-amount {
+            color: #9b9b9b;
+            text-decoration: line-through;
+        }
+
+        .small-button {
+            padding: 4px 10px;
+            border: 1.5px solid var(--line);
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-size: 0.92rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .small-button:hover, .small-button:focus-visible {
+            border-color: var(--orange);
+            background: var(--orange-soft);
+            outline: none;
+        }
+
+        .add-own {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .add-own input {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 14px;
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            background: #ffffff;
+            font-size: 1.08rem;
+        }
+
+        .add-own input:focus { border-color: var(--orange); outline: none; }
+
+        .add-own button {
+            padding: 0 18px;
+            border: 0;
+            border-radius: 14px;
+            background: var(--orange);
+            color: #ffffff;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        details.have > summary {
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: 600;
+            list-style-position: outside;
+        }
+
+        details.have > summary span {
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: normal;
+        }
+
+        details.have .items { margin-top: 10px; }
+
+        details.have .item { grid-template-columns: 1fr auto; }
+
+        .empty {
+            display: grid;
+            justify-items: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .empty img { width: 150px; height: auto; }
+        .empty p { margin: 0; font-size: 1.15rem; color: var(--muted); }
+
+        .hint {
+            margin: 0;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: var(--orange-soft);
+            color: var(--text);
+            font-size: 1.02rem;
+            line-height: 1.35;
+        }
+
+        .hint a { color: var(--orange-dark); }
+
+        .list-tools {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 760px) {
+            body { padding: 16px; }
+            .head { grid-template-columns: 1fr; }
+            .head img.pilot { display: none; }
+            .week-label { min-width: 0; flex: 1; font-size: 1.08rem; }
+            .week-nav { width: 100%; }
+            .item { gap: 10px; }
+            .item .small-button { padding: 4px 8px; }
+            .nav-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .button-row .next-button { width: 100%; }
+            .cook-button { width: 100%; }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="shop-page-body no-next">
+
+    <main class="plan-page" aria-label="Küchenpilot Einkauf">
+        <section class="sheet head">
+            <div>
+                <p class="eyebrow">Einkaufen leicht gemacht 🛒</p>
+                <h1>Deine <span>Einkaufsliste</span></h1>
+                <p class="lead">Ich schaue in deinen Wochenkorb, rechne alle Zutaten zusammen und lasse weg, was du schon im Vorrat hast.</p>
+                <div class="controls">
+                    <div class="week-nav">
+                        <button class="round-button" type="button" id="prevWeek" aria-label="Vorherige Woche">‹</button>
+                        <span class="week-label" id="weekLabel"></span>
+                        <button class="round-button" type="button" id="nextWeek" aria-label="Nächste Woche">›</button>
+                    </div>
+                </div>
+                <div class="stats" id="stats"></div>
+            </div>
+            <img class="pilot" src="assets/figuren/pilot-einkauf.png" alt="Küchenpilot mit Einkaufswagen">
+        </section>
+
+        <section class="sheet" id="listSheet" aria-label="Einkaufsliste"></section>
+
+        <section class="sheet" id="haveSheet" aria-label="Schon im Vorrat" hidden></section>
+
+        <nav class="sheet nav-row" aria-label="Bereiche">
+            <a class="nav-tile" href="index.html"><img class="icon-small" src="assets/icons/haus.png" alt=""><span>Start</span></a>
+            <a class="nav-tile" href="wochenkorb.html"><img src="assets/icons/wochenkorb.png" alt=""><span>Wochenkorb</span></a>
+            <a class="nav-tile" href="rezepte.html"><img src="assets/icons/kochbesteck.png" alt=""><span>Rezepte</span></a>
+            <a class="nav-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><span>Vorrat</span></a>
+        </nav>
+
+        <div class="button-row">
+            <button class="next-button" type="button" onclick="location.href='wochenkorb.html'" aria-label="Zurück zum Wochenkorb">
+                <span class="arrow" aria-hidden="true">←</span>
+                <span>Zurück</span>
+            </button>
+        </div>
+
+        <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
+    </main>
+
+    <script src="assets/scripts/portionen.js"></script>
+    <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/planer.js"></script>
+    <script>
+        const P = window.KPPlaner;
+        let week = P.currentWeek();
+
+        const listSheet = document.getElementById('listSheet');
+        const haveSheet = document.getElementById('haveSheet');
+        const OWN_CATEGORY = 'Eigene Einträge';
+
+        function plural(n, one, many) {
+            return `${n} ${n === 1 ? one : many}`;
+        }
+
+        function noteFor(item) {
+            const parts = [];
+            if (item.remaining) {
+                const s = item.stock;
+                parts.push(`Im Vorrat: ${s.amount} ${s.unit} – reicht nicht ganz`);
+            }
+            if (item.recipes.length) parts.push(`für ${item.recipes.join(', ')}`);
+            return parts.join(' · ');
+        }
+
+        /* Liste berechnen und in "kaufen" und "schon da" aufteilen */
+        function compute() {
+            const result = P.buildShoppingList(week);
+            const state = P.getShopState(week);
+            const buy = [];
+            const have = [];
+
+            result.items.forEach(item => {
+                const coveredByStock = item.stock && !item.remaining;
+                const markedHave = state.habeIch.includes(item.key);
+                const forcedBuy = state.dochKaufen.includes(item.key);
+                if ((coveredByStock && !forcedBuy) || markedHave) {
+                    have.push({ ...item, reason: markedHave ? 'Hast du als vorhanden markiert' : `Im Vorrat: ${item.stock.name}` });
+                } else {
+                    buy.push(item);
+                }
+            });
+
+            state.eigene.forEach((text, i) => {
+                buy.push({ key: `eigen:${i}:${P.normalize(text)}`, name: text, category: OWN_CATEGORY, amounts: [], recipes: [], own: i });
+            });
+
+            return { result, state, buy, have };
+        }
+
+        function render() {
+            P.setWeek(week);
+            document.getElementById('weekLabel').textContent = P.weekLabel(week);
+            const { result, state, buy, have } = compute();
+            const done = buy.filter(i => state.gekauft.includes(i.key)).length;
+
+            document.getElementById('stats').innerHTML = result.recipesCount ? [
+                `<span class="stat"><strong>${buy.length - done}</strong> noch kaufen</span>`,
+                `<span class="stat"><strong>${have.length}</strong> schon da</span>`,
+                `<span class="stat"><strong>${result.recipesCount}</strong> ${result.recipesCount === 1 ? 'Gericht' : 'Gerichte'}</span>`
+            ].join('') : '';
+
+            if (!result.recipesCount && !state.eigene.length) {
+                listSheet.innerHTML = `
+                    <div class="empty">
+                        <img src="assets/figuren/pilot-hinweis-halb.png" alt="">
+                        <p>Für diese Woche ist noch nichts geplant.<br>Leg im Wochenkorb fest, was ihr essen wollt – dann schreibe ich die Liste.</p>
+                        <a class="cook-button" href="wochenkorb.html">
+                            <img src="assets/icons/wochenkorb.png" alt="" aria-hidden="true">
+                            <span>Zum Wochenkorb</span>
+                            <span class="arrow" aria-hidden="true">›</span>
+                        </a>
+                    </div>
+                    ${ownForm()}`;
+                haveSheet.hidden = true;
+                return;
+            }
+
+            const groups = [...P.CATEGORY_ORDER, OWN_CATEGORY]
+                .map(cat => ({ cat, items: buy.filter(i => i.category === cat) }))
+                .filter(g => g.items.length);
+
+            const stockHint = result.stockKnown ? '' : `
+                <p class="hint">Tipp: Du hast noch keinen Vorrat gespeichert. <a href="vorrat.html">Trag ihn hier ein</a>, dann lasse ich weg, was du schon hast.</p>`;
+
+            listSheet.innerHTML = `
+                ${stockHint}
+                ${groups.length ? groups.map(g => `
+                    <div class="group">
+                        <h2>${P.esc(g.cat)}</h2>
+                        <ul class="items">
+                            ${g.items.map(item => {
+                                const isDone = state.gekauft.includes(item.key);
+                                const id = `i-${P.esc(item.key).replace(/[^a-z0-9-]/gi, '_')}`;
+                                const amount = P.formatAmounts(item);
+                                const note = noteFor(item);
+                                const action = item.own !== undefined
+                                    ? `<button class="small-button" type="button" data-remove-own="${item.own}" aria-label="${P.esc(item.name)} löschen">löschen</button>`
+                                    : `<button class="small-button" type="button" data-have="${P.esc(item.key)}" aria-label="${P.esc(item.name)} habe ich schon">hab ich</button>`;
+                                return `
+                                    <li class="item${isDone ? ' is-done' : ''}">
+                                        <input type="checkbox" id="${id}" data-bought="${P.esc(item.key)}" ${isDone ? 'checked' : ''}>
+                                        <label for="${id}">
+                                            <span class="item-name">${P.esc(item.name)}${amount ? ` · <span class="item-amount">${P.esc(amount)}</span>` : ''}</span>
+                                            ${note ? `<span class="item-note">${P.esc(note)}</span>` : ''}
+                                        </label>
+                                        ${action}
+                                    </li>`;
+                            }).join('')}
+                        </ul>
+                    </div>`).join('') : '<p class="lead">Alles da! Für diese Woche musst du nichts einkaufen. 🎉</p>'}
+                ${ownForm()}
+                <div class="list-tools">
+                    <button class="link-button" type="button" id="copyList">Liste kopieren</button>
+                    <button class="link-button" type="button" id="resetChecks">Haken zurücksetzen</button>
+                </div>
+                <p class="message" id="message" role="status"></p>`;
+
+            if (have.length) {
+                haveSheet.hidden = false;
+                haveSheet.innerHTML = `
+                    <details class="have">
+                        <summary>Schon da <span>(${plural(have.length, 'Zutat', 'Zutaten')} aus deinem Vorrat)</span></summary>
+                        <ul class="items">
+                            ${have.map(item => {
+                                const amount = P.formatAmounts({ ...item, remaining: null });
+                                return `
+                                <li class="item">
+                                    <span>
+                                        <span class="item-name">${P.esc(item.name)}${amount ? ` · <span class="item-amount">${P.esc(amount)}</span>` : ''}</span>
+                                        <span class="item-note">${P.esc(item.reason)}</span>
+                                    </span>
+                                    <button class="small-button" type="button" data-buy="${P.esc(item.key)}" aria-label="${P.esc(item.name)} doch kaufen">doch kaufen</button>
+                                </li>`;
+                            }).join('')}
+                        </ul>
+                    </details>`;
+            } else {
+                haveSheet.hidden = true;
+            }
+        }
+
+        function ownForm() {
+            return `
+                <form class="add-own" id="ownForm">
+                    <input type="text" id="ownInput" placeholder="Noch etwas dazu? z. B. Spülmittel" autocomplete="off" aria-label="Eigenen Eintrag hinzufügen">
+                    <button type="submit">+</button>
+                </form>`;
+        }
+
+        function updateState(fn) {
+            const state = P.getShopState(week);
+            fn(state);
+            P.saveShopState(week, state);
+            render();
+        }
+
+        function toggleIn(list, key) {
+            const i = list.indexOf(key);
+            if (i >= 0) list.splice(i, 1); else list.push(key);
+        }
+
+        document.addEventListener('change', event => {
+            const box = event.target.closest('[data-bought]');
+            if (box) updateState(s => toggleIn(s.gekauft, box.dataset.bought));
+        });
+
+        document.addEventListener('click', event => {
+            const have = event.target.closest('[data-have]');
+            const buy = event.target.closest('[data-buy]');
+            const removeOwn = event.target.closest('[data-remove-own]');
+            if (have) {
+                updateState(s => {
+                    if (!s.habeIch.includes(have.dataset.have)) s.habeIch.push(have.dataset.have);
+                    s.dochKaufen = s.dochKaufen.filter(k => k !== have.dataset.have);
+                });
+            } else if (buy) {
+                updateState(s => {
+                    s.habeIch = s.habeIch.filter(k => k !== buy.dataset.buy);
+                    if (!s.dochKaufen.includes(buy.dataset.buy)) s.dochKaufen.push(buy.dataset.buy);
+                });
+            } else if (removeOwn) {
+                updateState(s => { s.eigene.splice(Number(removeOwn.dataset.removeOwn), 1); s.gekauft = s.gekauft.filter(k => !k.startsWith('eigen:')); });
+            } else if (event.target.id === 'resetChecks') {
+                updateState(s => { s.gekauft = []; });
+            } else if (event.target.id === 'copyList') {
+                copyList();
+            }
+        });
+
+        document.addEventListener('submit', event => {
+            if (event.target.id !== 'ownForm') return;
+            event.preventDefault();
+            const text = document.getElementById('ownInput').value.trim();
+            if (!text) return;
+            updateState(s => s.eigene.push(text));
+            const input = document.getElementById('ownInput');
+            if (input) input.focus();
+        });
+
+        async function copyList() {
+            const { state, buy } = compute();
+            const open = buy.filter(i => !state.gekauft.includes(i.key));
+            const lines = [`Einkaufsliste – ${P.weekLabel(week)}`];
+            [...P.CATEGORY_ORDER, OWN_CATEGORY].forEach(cat => {
+                const items = open.filter(i => i.category === cat);
+                if (!items.length) return;
+                lines.push('', `${cat}:`);
+                items.forEach(i => {
+                    const amount = P.formatAmounts(i);
+                    lines.push(`- ${i.name}${amount ? ` (${amount})` : ''}`);
+                });
+            });
+            const text = lines.join('\n');
+            const msg = document.getElementById('message');
+            try {
+                if (navigator.share && matchMedia('(max-width: 760px)').matches) {
+                    await navigator.share({ title: 'Einkaufsliste', text });
+                    return;
+                }
+                await navigator.clipboard.writeText(text);
+                if (msg) msg.textContent = 'Liste kopiert – du kannst sie z. B. in eine Nachricht einfügen.';
+            } catch (e) {
+                if (msg) msg.textContent = 'Kopieren hat nicht geklappt. Du kannst die Liste aber hier abhaken.';
+            }
+        }
+
+        document.getElementById('prevWeek').addEventListener('click', () => { week = P.shiftWeek(week, -1); render(); });
+        document.getElementById('nextWeek').addEventListener('click', () => { week = P.shiftWeek(week, 1); render(); });
+
+        render();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Zutaten werden zusammengezählt', () => {
+                const r = KPPlaner.RECIPES.find(x => (x.zutaten || []).some(z => z.einheit === 'g'));
+                const monday = KPPlaner.currentWeek();
+                const days = KPPlaner.weekDays(monday);
+                const plan = { [days[0].key]: [{ id: r.id, menge: KPPlaner.defaultMenge(r) }], [days[1].key]: [{ id: r.id, menge: KPPlaner.defaultMenge(r) }] };
+                const one = KPPlaner.buildShoppingList(monday, { plan: { [days[0].key]: plan[days[0].key] }, stock: null });
+                const two = KPPlaner.buildShoppingList(monday, { plan, stock: null });
+                const a = one.items.find(i => i.amounts.some(x => x.unit === 'g'));
+                const b = two.items.find(i => i.key === a.key);
+                const ok = Math.abs(b.amounts[0].amount - 2 * a.amounts[0].amount) < 0.01;
+                return { ok, message: `${a.name}: ${a.amounts[0].amount} → ${b.amounts[0].amount}` };
+            });
+            KPTest.add('Vorrat wird abgezogen', () => {
+                const r = KPPlaner.RECIPES.find(x => (x.zutaten || []).some(z => /Salz/.test(z.name)));
+                const monday = KPPlaner.currentWeek();
+                const day = KPPlaner.weekDays(monday)[0].key;
+                const plan = { [day]: [{ id: r.id, menge: 2 }] };
+                const list = KPPlaner.buildShoppingList(monday, { plan, stock: [{ name: 'Salz', canonical: 'Salz', amount: null, unit: '' }] });
+                const salz = list.items.find(i => i.name === 'Salz');
+                return { ok: !!salz && !!salz.stock, message: salz ? 'Salz als vorhanden erkannt' : 'Salz fehlt' };
+            });
+        }
+    </script>
+</body>
+</html>

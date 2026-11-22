@@ -559,12 +559,14 @@
 
     
 <script>
-let personCount=2;
+let personCount=(()=>{try{const n=Number(JSON.parse(localStorage.getItem('kuechenpilotPersonen')||'2'));return n>=1?Math.round(n):2;}catch(e){return 2;}})();
+document.getElementById('personCount').textContent=personCount;
 let openPersons=false;
 
 function changePersons(a){
  personCount=Math.max(1,personCount+a);
  document.getElementById('personCount').textContent=personCount;
+ try{localStorage.setItem('kuechenpilotPersonen',JSON.stringify(personCount));}catch(e){}
  renderPersonCards();
 }
 
@@ -715,9 +717,10 @@ if (window.KPTest && window.KPTest.enabled) {
     return {ok:r.ok,message:r.ok?`grundvorrat.html erreichbar (HTTP ${r.status}).`:`grundvorrat.html nicht erreichbar${r.status?` (HTTP ${r.status})`:""}.`};
   });
 
-  KPTest.add("Personenzähler startet bei 2", () => {
+  KPTest.add("Personenzähler startet bei gespeichertem Wert (sonst 2)", () => {
     const e=document.getElementById("personCount");
-    return {ok:e?.textContent.trim()==="2",message:e?`Aktuell: ${e.textContent.trim()}`:"personCount fehlt."};
+    let saved=2; try{saved=Number(JSON.parse(localStorage.getItem("kuechenpilotPersonen")||"2"))||2;}catch(_){}
+    return {ok:e?.textContent.trim()===String(saved),message:e?`Aktuell: ${e.textContent.trim()}`:"personCount fehlt."};
   });
 
   KPTest.add("Plus / Minus funktionieren", () => {
@@ -733,6 +736,7 @@ if (window.KPTest && window.KPTest.enabled) {
     personCount=1; document.getElementById("personCount").textContent="1"; changePersons(-1);
     const ok=personCount===1;
     personCount=c; document.getElementById("personCount").textContent=String(c); openPersons=o; renderPersonCards();
+    try{localStorage.setItem("kuechenpilotPersonen",JSON.stringify(c));}catch(_){}
     return {ok,message:ok?"Minimum 1 eingehalten.":"Minimum funktioniert nicht."};
   });
 
