@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Kaloriengrab</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --green: #7cb342;
+            --red: #d9534f;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        .start-page {
+            position: relative;
+        }
+
+        .welcome-card,
+        .pilot-card,
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            overflow: hidden;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .welcome-card p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        /* ---------- Inhalt ---------- */
+
+        .content {
+            width: min(100%, 922px);
+            margin-top: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .sheet {
+            border-radius: 26px;
+            padding: 26px 28px;
+        }
+
+        .sheet h2 {
+            margin: 0 0 14px;
+            color: var(--orange-dark);
+            font-size: 1.5rem;
+        }
+
+        .day-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .round-button {
+            width: 42px;
+            height: 42px;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .round-button:hover,
+        .round-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .round-button:disabled {
+            opacity: 0.35;
+            cursor: default;
+            background: #ffffff;
+            color: var(--orange-dark);
+        }
+
+        .day-label {
+            min-width: 210px;
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .total {
+            text-align: center;
+        }
+
+        .total strong {
+            display: block;
+            font-size: clamp(2.2rem, 6vw, 3rem);
+            line-height: 1.1;
+        }
+
+        .total span {
+            color: var(--muted);
+            font-size: 1.12rem;
+        }
+
+        .bar {
+            position: relative;
+            height: 22px;
+            margin: 16px 0 8px;
+            border-radius: 999px;
+            background: #f3e8d6;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 999px;
+            background: var(--green);
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+
+        .bar-fill.warn {
+            background: var(--orange);
+        }
+
+        .bar-fill.over {
+            background: var(--red);
+        }
+
+        .status {
+            margin: 0;
+            text-align: center;
+            color: var(--muted);
+            font-size: 1.08rem;
+        }
+
+        .goal-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+            font-size: 1.05rem;
+        }
+
+        .goal-row input {
+            width: 110px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="search"] {
+            padding: 10px 12px;
+            border: 2px solid rgba(245, 166, 35, 0.34);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 1.08rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 4px var(--orange-soft);
+        }
+
+        .entries {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .entries li {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed rgba(245, 166, 35, 0.35);
+            font-size: 1.1rem;
+        }
+
+        .entries li:last-child {
+            border-bottom: 0;
+        }
+
+        .entries .kcal {
+            color: var(--orange-dark);
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .entries a {
+            color: inherit;
+        }
+
+        .remove {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 50%;
+            background: #f6efe3;
+            color: var(--muted);
+            font: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .remove:hover,
+        .remove:focus-visible {
+            background: var(--red);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .empty {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .add-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 22px;
+        }
+
+        .add-grid h3 {
+            margin: 0 0 10px;
+            font-size: 1.15rem;
+        }
+
+        .add-grid input {
+            width: 100%;
+        }
+
+        .suggestions {
+            display: grid;
+            gap: 8px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .suggestion {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border: 2px solid rgba(245, 166, 35, 0.25);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 1.02rem;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .suggestion:hover,
+        .suggestion:focus-visible {
+            border-color: var(--orange);
+            outline: none;
+        }
+
+        .suggestion small {
+            color: var(--orange-dark);
+            white-space: nowrap;
+        }
+
+        .suggestion.plan {
+            border-style: dashed;
+            background: #fffaf0;
+        }
+
+        .free-entry {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 110px;
+            gap: 10px;
+        }
+
+        .add-button {
+            margin-top: 10px;
+            width: 100%;
+            min-height: 48px;
+            border: 0;
+            border-radius: 14px;
+            background: var(--orange);
+            color: #ffffff;
+            font: inherit;
+            font-size: 1.12rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .add-button:hover,
+        .add-button:focus-visible {
+            background: var(--orange-dark);
+            outline: none;
+        }
+
+        .message {
+            min-height: 1.4em;
+            margin: 8px 0 0;
+            color: var(--red);
+            font-size: 1rem;
+        }
+
+        .week {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 10px;
+            align-items: end;
+            height: 190px;
+        }
+
+        .week-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 6px;
+            height: 100%;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .week-day .col {
+            width: 100%;
+            max-width: 46px;
+            min-height: 4px;
+            border-radius: 10px 10px 4px 4px;
+            background: var(--green);
+        }
+
+        .week-day .col.over {
+            background: var(--red);
+        }
+
+        .week-day .col.none {
+            background: #efe4d1;
+        }
+
+        .week-day small {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .week-day.active strong {
+            color: var(--orange-dark);
+        }
+
+        .hint {
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+            }
+
+            .button-row .next-button {
+                width: 100%;
+            }
+
+            .sheet {
+                padding: 22px 18px;
+            }
+
+            .add-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .week {
+                gap: 5px;
+                height: 160px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=3">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="calories-page no-next">
+
+    <main class="start-page" aria-label="Küchenpilot Kaloriengrab">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-kaloriengrab.png" alt="Zufriedener Küchenpilot">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-kaloriengrab.png" alt="Zufriedener Küchenpilot">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1>Dein <span>Kaloriengrab.</span></h1>
+                    <p>Genießen, im Blick behalten, wohlfühlen. Trag ein, was du gegessen hast – ich zähle für dich mit.</p>
+                </div>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span>Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <div class="content">
+            <section class="sheet" aria-label="Kalorien des Tages">
+                <div class="day-nav">
+                    <button class="round-button" type="button" id="prevDay" aria-label="Tag davor">‹</button>
+                    <span class="day-label" id="dayLabel"></span>
+                    <button class="round-button" type="button" id="nextDay" aria-label="Tag danach">›</button>
+                </div>
+
+                <div class="total">
+                    <strong id="totalValue">0 kcal</strong>
+                    <span id="goalText"></span>
+                </div>
+                <div class="bar" aria-hidden="true"><div class="bar-fill" id="barFill"></div></div>
+                <p class="status" id="statusText" aria-live="polite"></p>
+
+                <label class="goal-row">
+                    <span>Mein Tagesziel:</span>
+                    <input type="number" id="goalInput" min="800" max="5000" step="50" inputmode="numeric">
+                    <span>kcal</span>
+                </label>
+            </section>
+
+            <section class="sheet" aria-label="Gegessen">
+                <h2>Gegessen</h2>
+                <ul class="entries" id="entryList"></ul>
+                <p class="empty" id="emptyText">Noch nichts eingetragen.</p>
+            </section>
+
+            <section class="sheet" aria-label="Eintragen">
+                <h2>Eintragen</h2>
+                <div class="add-grid">
+                    <div>
+                        <h3>Aus deinen Rezepten (1 Portion)</h3>
+                        <input type="search" id="recipeSearch" placeholder="Rezept suchen …" autocomplete="off">
+                        <div class="suggestions" id="suggestions"></div>
+                    </div>
+                    <div>
+                        <h3>Etwas anderes</h3>
+                        <div class="free-entry">
+                            <input type="text" id="freeName" placeholder="z. B. Apfel" autocomplete="off" aria-label="Was hast du gegessen?">
+                            <input type="number" id="freeKcal" placeholder="kcal" min="0" max="5000" inputmode="numeric" aria-label="Kalorien">
+                        </div>
+                        <button class="add-button" type="button" id="addFree">Hinzufügen</button>
+                        <p class="message" id="freeMessage" role="status"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="sheet" aria-label="Die letzten 7 Tage">
+                <h2>Die letzten 7 Tage</h2>
+                <div class="week" id="week"></div>
+                <p class="hint">Grün: im Ziel · Rot: drüber. Tipp auf einen Tag, um ihn anzusehen.</p>
+            </section>
+        </div>
+    </main>
+
+    <script src="data/rezepte.js"></script>
+    <script>
+        /*
+         * Speicher (nur im Browser):
+         *   kuechenpilotKalorien = { ziel: 2000, tage: { "2026-11-22": [ { name, kcal, id? } ] } }
+         * Liest zusätzlich kuechenpilotWochenplan (vom Wochenkorb), um geplante Gerichte vorzuschlagen.
+         */
+        const STORE_KEY = 'kuechenpilotKalorien';
+        const PLAN_KEY = 'kuechenpilotWochenplan';
+        const DEFAULT_GOAL = 2000;
+        const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+        const WEEKDAYS_LONG = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+        const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
+            .filter(r => r.naehrwerte && r.naehrwerte.kcal);
+        const BY_ID = new Map(((window.KP_REZEPTE || {}).rezepte || []).map(r => [r.id, r]));
+
+        const $ = id => document.getElementById(id);
+
+        function esc(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function normalize(text) {
+            return String(text || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        }
+
+        function isoDate(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function addDays(iso, n) {
+            const [y, m, d] = iso.split('-').map(Number);
+            const date = new Date(y, m - 1, d + n);
+            return isoDate(date);
+        }
+
+        function parseIso(iso) {
+            const [y, m, d] = iso.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function load() {
+            let data = null;
+            try { data = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) { data = null; }
+            if (!data || typeof data !== 'object') data = {};
+            if (!(Number(data.ziel) > 0)) data.ziel = DEFAULT_GOAL;
+            if (!data.tage || typeof data.tage !== 'object') data.tage = {};
+            return data;
+        }
+
+        function save() {
+            Object.keys(state.data.tage).forEach(k => { if (!state.data.tage[k].length) delete state.data.tage[k]; });
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(state.data)); } catch (e) { /* ohne Speicher geht es trotzdem */ }
+        }
+
+        const today = isoDate(new Date());
+        const state = { data: load(), day: today };
+
+        function entries(day) {
+            return state.data.tage[day] || [];
+        }
+
+        function sum(day) {
+            return entries(day).reduce((s, e) => s + (Number(e.kcal) || 0), 0);
+        }
+
+        function dayLabel(iso) {
+            if (iso === today) return 'Heute';
+            if (iso === addDays(today, -1)) return 'Gestern';
+            const d = parseIso(iso);
+            return `${WEEKDAYS_LONG[d.getDay()]}, ${d.getDate()}.${d.getMonth() + 1}.`;
+        }
+
+        /* Gerichte aus dem Wochenplan für den Tag (falls der Wochenkorb genutzt wird). */
+        function plannedRecipes(day) {
+            let plan = null;
+            try { plan = JSON.parse(localStorage.getItem(PLAN_KEY) || 'null'); } catch (e) { plan = null; }
+            const list = plan && Array.isArray(plan[day]) ? plan[day] : [];
+            return list
+                .map(item => BY_ID.get(typeof item === 'string' ? item : (item && (item.id || item.rezept))))
+                .filter(r => r && r.naehrwerte && r.naehrwerte.kcal);
+        }
+
+        function addEntry(entry) {
+            if (!state.data.tage[state.day]) state.data.tage[state.day] = [];
+            state.data.tage[state.day].push(entry);
+            save();
+            render();
+        }
+
+        /* ---------- Anzeige ---------- */
+
+        function renderTotal() {
+            const total = sum(state.day);
+            const goal = state.data.ziel;
+            const ratio = total / goal;
+            $('dayLabel').textContent = dayLabel(state.day);
+            $('nextDay').disabled = state.day >= today;
+            $('totalValue').textContent = `${total.toLocaleString('de-DE')} kcal`;
+            $('goalText').textContent = `von ${goal.toLocaleString('de-DE')} kcal Tagesziel`;
+
+            const fill = $('barFill');
+            fill.style.width = `${Math.min(100, ratio * 100)}%`;
+            fill.classList.toggle('warn', ratio > 0.85 && ratio <= 1);
+            fill.classList.toggle('over', ratio > 1);
+
+            let text;
+            if (!total) text = 'Noch nichts eingetragen – guten Appetit!';
+            else if (ratio <= 1) text = `Noch ${(goal - total).toLocaleString('de-DE')} kcal frei. Genieß es!`;
+            else text = `${(total - goal).toLocaleString('de-DE')} kcal über dem Ziel – morgen ist ein neuer Tag.`;
+            $('statusText').textContent = text;
+
+            if (document.activeElement !== $('goalInput')) $('goalInput').value = goal;
+        }
+
+        function renderEntries() {
+            const list = entries(state.day);
+            $('emptyText').hidden = list.length > 0;
+            $('entryList').innerHTML = list.map((e, i) => {
+                const recipe = e.id && BY_ID.get(e.id);
+                const name = recipe
+                    ? `<a href="rezepte.html#rezept/${encodeURIComponent(e.id)}">${esc(e.name)}</a>`
+                    : esc(e.name);
+                return `<li><span>${name}</span><span class="kcal">${Number(e.kcal).toLocaleString('de-DE')} kcal</span>
+                    <button class="remove" type="button" data-index="${i}" aria-label="${esc(e.name)} entfernen">×</button></li>`;
+            }).join('');
+            $('entryList').querySelectorAll('.remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.data.tage[state.day].splice(Number(btn.dataset.index), 1);
+                    save();
+                    render();
+                });
+            });
+        }
+
+        function suggestionButton(r, planned) {
+            return `<button class="suggestion${planned ? ' plan' : ''}" type="button" data-id="${esc(r.id)}">
+                <span>${planned ? '📅 ' : ''}${esc(r.titel)}</span><small>${r.naehrwerte.kcal} kcal</small></button>`;
+        }
+
+        function renderSuggestions() {
+            const words = normalize($('recipeSearch').value).split(/\s+/).filter(Boolean);
+            const planned = words.length ? [] : plannedRecipes(state.day);
+            const plannedIds = new Set(planned.map(r => r.id));
+            const matches = RECIPES
+                .filter(r => !plannedIds.has(r.id))
+                .filter(r => words.every(w => normalize(r.titel + ' ' + r.kategorie).includes(w)))
+                .slice(0, words.length ? 30 : 6);
+            const html = planned.map(r => suggestionButton(r, true)).join('') + matches.map(r => suggestionButton(r, false)).join('');
+            $('suggestions').innerHTML = html || '<p class="empty">Kein Rezept mit Kalorienangabe gefunden.</p>';
+            $('suggestions').querySelectorAll('.suggestion').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const r = BY_ID.get(btn.dataset.id);
+                    addEntry({ name: r.titel, kcal: r.naehrwerte.kcal, id: r.id });
+                });
+            });
+        }
+
+        function renderWeek() {
+            const days = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6));
+            const goal = state.data.ziel;
+            const max = Math.max(goal, ...days.map(sum)) || 1;
+            $('week').innerHTML = days.map(day => {
+                const total = sum(day);
+                const height = total ? Math.max(4, Math.round(total / max * 120)) : 4;
+                const cls = !total ? 'none' : (total > goal ? 'over' : '');
+                const d = parseIso(day);
+                return `<button class="week-day${day === state.day ? ' active' : ''}" type="button" data-day="${day}"
+                        aria-label="${esc(dayLabel(day))}: ${total} kcal">
+                    <small>${total ? total.toLocaleString('de-DE') : '–'}</small>
+                    <span class="col ${cls}" style="height:${height}px"></span>
+                    <strong>${WEEKDAYS[d.getDay()]}</strong>
+                </button>`;
+            }).join('');
+            $('week').querySelectorAll('.week-day').forEach(btn => {
+                btn.addEventListener('click', () => { state.day = btn.dataset.day; render(); });
+            });
+        }
+
+        function render() {
+            renderTotal();
+            renderEntries();
+            renderSuggestions();
+            renderWeek();
+        }
+
+        /* ---------- Bedienung ---------- */
+
+        $('prevDay').addEventListener('click', () => { state.day = addDays(state.day, -1); render(); });
+        $('nextDay').addEventListener('click', () => {
+            if (state.day < today) { state.day = addDays(state.day, 1); render(); }
+        });
+
+        $('goalInput').addEventListener('change', () => {
+            const value = Math.round(Number($('goalInput').value));
+            if (value >= 800 && value <= 5000) {
+                state.data.ziel = value;
+                save();
+            }
+            $('goalInput').value = state.data.ziel;
+            render();
+        });
+
+        $('recipeSearch').addEventListener('input', renderSuggestions);
+
+        $('addFree').addEventListener('click', () => {
+            const name = $('freeName').value.trim();
+            const kcal = Math.round(Number($('freeKcal').value));
+            if (!name) { $('freeMessage').textContent = 'Bitte gib an, was du gegessen hast.'; return; }
+            if (!(kcal > 0 && kcal <= 5000)) { $('freeMessage').textContent = 'Bitte gib die Kalorien an (1 bis 5000).'; return; }
+            $('freeMessage').textContent = '';
+            $('freeName').value = '';
+            $('freeKcal').value = '';
+            addEntry({ name, kcal });
+        });
+
+        $('freeKcal').addEventListener('keydown', e => { if (e.key === 'Enter') $('addFree').click(); });
+
+        render();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Rezepte mit Kalorien vorhanden', () => ({ ok: RECIPES.length > 0, message: `${RECIPES.length} Rezepte mit kcal` }));
+            KPTest.add('Wochenübersicht zeigt 7 Tage', () => {
+                const n = document.querySelectorAll('#week .week-day').length;
+                return { ok: n === 7, message: `${n} Tage` };
+            });
+        }
+    </script>
+</body>
+</html>

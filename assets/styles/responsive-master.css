@@ -247,4 +247,16 @@ html body .hero-shell > .pilot-card img {
     html body .hero-shell > .welcome-card {
         height: auto;
     }
+
+    /* Nichts darf breiter als der Bildschirm werden. */
+    html body .hero-shell,
+    html body .hero-shell > .welcome-card {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+/* Untere Kacheln so breit wie Karte + Figur (wie das Menü der Startseite). */
+html body .person-cards {
+    width: min(100%, var(--kp-hero-max));
 }
