@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Eigenes Rezept</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --red: #d9534f;
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        .start-page {
+            position: relative;
+        }
+
+        .welcome-card,
+        .pilot-card,
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card {
+            position: relative;
+            z-index: 3;
+        }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            overflow: hidden;
+        }
+
+        .pilot-mobile {
+            display: none;
+        }
+
+        h1 {
+            margin: 0 0 18px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        h1 span {
+            color: var(--orange);
+        }
+
+        .welcome-card p {
+            margin: 0 auto;
+            max-width: 560px;
+            text-align: center;
+            color: var(--muted);
+            line-height: 1.42;
+        }
+
+        .button-row {
+            margin-top: 22px;
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: inherit;
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            text-decoration: none;
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover,
+        .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .next-button.primary {
+            background: var(--orange);
+            color: #ffffff;
+        }
+
+        .next-button.primary:hover,
+        .next-button.primary:focus-visible {
+            background: var(--orange-dark);
+            border-color: var(--orange-dark);
+        }
+
+        .arrow {
+            font-size: 1.45rem;
+            line-height: 1;
+        }
+
+        /* ---------- Formular ---------- */
+
+        .content {
+            width: min(100%, 922px);
+            margin-top: 28px;
+            display: grid;
+            gap: 22px;
+        }
+
+        .sheet {
+            border-radius: 26px;
+            padding: 26px 28px;
+        }
+
+        .sheet h2 {
+            margin: 0 0 6px;
+            color: var(--orange-dark);
+            font-size: 1.5rem;
+        }
+
+        .sheet > p.lead {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 1.02rem;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px 18px;
+        }
+
+        .fields .wide {
+            grid-column: 1 / -1;
+        }
+
+        .field {
+            display: grid;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .field > span {
+            font-size: 1.05rem;
+        }
+
+        .field small {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 2px solid rgba(245, 166, 35, 0.34);
+            border-radius: 14px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            font-size: 1.05rem;
+        }
+
+        .field textarea {
+            min-height: 190px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            outline: none;
+            border-color: var(--orange);
+            box-shadow: 0 0 0 4px var(--orange-soft);
+        }
+
+        .field.invalid input,
+        .field.invalid textarea {
+            border-color: var(--red);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 14px;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 999px;
+            background: #ffffff;
+            font-size: 1.02rem;
+            cursor: pointer;
+        }
+
+        .chip input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .chip:has(input:checked) {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #ffffff;
+        }
+
+        .chip:has(input:focus-visible) {
+            box-shadow: 0 0 0 4px var(--orange-soft);
+        }
+
+        .preview {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--orange-soft);
+            font-size: 0.98rem;
+        }
+
+        .preview strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--orange-dark);
+        }
+
+        .preview ul {
+            margin: 0;
+            padding-left: 18px;
+            display: grid;
+            gap: 2px;
+        }
+
+        .preview .menge {
+            color: var(--orange-dark);
+            font-weight: 600;
+        }
+
+        .preview .group {
+            list-style: none;
+            margin: 6px 0 0 -18px;
+            color: var(--muted);
+        }
+
+        .form-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .message {
+            margin: 0;
+            color: var(--red);
+            font-size: 1.02rem;
+        }
+
+        .message:empty {
+            display: none;
+        }
+
+        .note {
+            margin: 14px 0 0;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 760px) {
+            .pilot-desktop {
+                display: none;
+            }
+
+            .pilot-mobile {
+                display: block;
+            }
+
+            .button-row .next-button,
+            .form-actions .next-button {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .sheet {
+                padding: 22px 18px;
+            }
+
+            .fields {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css?v=6">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="recipes-page no-next">
+
+    <main class="start-page" aria-label="Küchenpilot eigenes Rezept">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-rezept.png" alt="Küchenpilot mit Rezeptbuch">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-rezept.png" alt="Küchenpilot mit Rezeptbuch">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1 id="pageTitle">Dein eigenes <span>Rezept.</span></h1>
+                    <p id="introText">Schreib auf, was du gerne kochst. Danach findest du es bei den Rezepten, bei Heute, im Wochenkorb und auf der Einkaufsliste.</p>
+                </div>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" id="backButton" aria-label="Zurück zu den Rezepten">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span>Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <form class="content" id="recipeForm" novalidate>
+            <section class="sheet" aria-label="Das Wichtigste">
+                <h2>Das Wichtigste</h2>
+                <p class="lead">Nur der Name ist Pflicht, der Rest hilft beim Planen.</p>
+                <div class="fields">
+                    <label class="field wide" id="titleField">
+                        <span>Name des Gerichts</span>
+                        <input id="titel" type="text" maxlength="90" placeholder="z. B. Omas Kartoffelsuppe" autocomplete="off">
+                    </label>
+                    <label class="field">
+                        <span>Kategorie</span>
+                        <select id="kategorie"></select>
+                    </label>
+                    <label class="field">
+                        <span>Für wie viele Personen?</span>
+                        <input id="portionen" type="number" min="1" max="20" inputmode="numeric" value="2">
+                        <small>So viele werden mit den Mengen unten satt.</small>
+                    </label>
+                    <label class="field">
+                        <span>Zeit in Minuten</span>
+                        <input id="zeitMin" type="number" min="1" max="1440" inputmode="numeric" placeholder="z. B. 30">
+                    </label>
+                    <label class="field">
+                        <span>Kalorien pro Portion</span>
+                        <input id="kcal" type="number" min="1" max="5000" inputmode="numeric" placeholder="wenn bekannt">
+                    </label>
+                    <div class="field wide">
+                        <span>Zubereitung mit</span>
+                        <div class="chips" id="geraete"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="sheet" aria-label="Zutaten">
+                <h2>Zutaten</h2>
+                <p class="lead">Eine Zutat pro Zeile, Menge zuerst. Eine Zeile mit Doppelpunkt am Ende wird eine Überschrift, z. B. „Für die Soße:“.</p>
+                <label class="field" id="zutatenField">
+                    <span class="visually-hidden">Zutaten</span>
+                    <textarea id="zutaten" placeholder="500 g Kartoffeln&#10;1 Zwiebel&#10;750 ml Gemüsebrühe&#10;Salz und Pfeffer"></textarea>
+                </label>
+                <div class="preview" id="zutatenPreview" hidden></div>
+            </section>
+
+            <section class="sheet" aria-label="Zubereitung">
+                <h2>Zubereitung</h2>
+                <p class="lead">Ein Schritt pro Zeile. Mengen in den Schritten rechnet der Küchenpilot später auch um.</p>
+                <label class="field" id="schritteField">
+                    <span class="visually-hidden">Zubereitung</span>
+                    <textarea id="schritte" placeholder="Kartoffeln und Zwiebel schälen und würfeln.&#10;Mit der Brühe 20 Minuten köcheln lassen.&#10;Pürieren und abschmecken."></textarea>
+                </label>
+            </section>
+
+            <section class="sheet" aria-label="Tipps und Quelle">
+                <h2>Tipps und Quelle</h2>
+                <p class="lead">Freiwillig. Die Quelle erscheint direkt unter dem Namen des Gerichts.</p>
+                <div class="fields">
+                    <label class="field wide">
+                        <span>Tipps (einer pro Zeile)</span>
+                        <textarea id="tipps" style="min-height: 100px" placeholder="Schmeckt am nächsten Tag noch besser."></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Woher ist das Rezept?</span>
+                        <input id="quelleArt" type="text" maxlength="80" placeholder="z. B. Chefkoch, Oma, Kochbuch">
+                    </label>
+                    <label class="field">
+                        <span>Link</span>
+                        <input id="quelleUrl" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
+                    </label>
+                </div>
+            </section>
+
+            <section class="sheet" aria-label="Speichern">
+                <div class="form-actions">
+                    <p class="message" id="formMessage" role="alert"></p>
+                    <button class="next-button primary" type="submit" id="saveButton">
+                        <span>Rezept speichern</span>
+                        <span class="arrow" aria-hidden="true">→</span>
+                    </button>
+                </div>
+                <p class="note">Eigene Rezepte bleiben in diesem Browser gespeichert. Auf ein anderes Gerät nimmst du sie mit einer Sicherung unter „Mehr“ mit.</p>
+            </section>
+        </form>
+    </main>
+
+    <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
+    <script>
+        const ER = window.KPEigeneRezepte;
+        const RECIPES = (window.KP_REZEPTE && window.KP_REZEPTE.rezepte) || [];
+        const $ = id => document.getElementById(id);
+        const KATEGORIEN = ['Hauptgericht', 'Suppe', 'Beilage', 'Snack', 'Süßspeise', 'Kuchen & Backen', 'Brot & Backen'];
+        const GERAETE = ['Pfanne', 'Topf', 'Backofen', 'Airfryer'];
+
+        const editId = new URLSearchParams(location.search).get('id');
+        const editing = editId ? ER.get(editId) : null;
+
+        function esc(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        /* Kategorien: feste Liste plus alles, was in der Sammlung vorkommt. */
+        const kategorien = [...new Set([...KATEGORIEN, ...RECIPES.map(r => r.kategorie).filter(Boolean)])];
+        $('kategorie').innerHTML = kategorien.map(k => `<option>${esc(k)}</option>`).join('');
+
+        const geraete = [...new Set([...GERAETE, ...RECIPES.flatMap(r => r.geraete || []), ...((editing && editing.geraete) || [])])];
+        $('geraete').innerHTML = geraete.map(g => `<label class="chip"><input type="checkbox" value="${esc(g)}">${esc(g)}</label>`).join('');
+
+        function renderPreview() {
+            const list = ER.parseZutaten($('zutaten').value);
+            const box = $('zutatenPreview');
+            box.hidden = !list.length;
+            if (!list.length) return;
+            let gruppe = '';
+            const items = list.map(z => {
+                let head = '';
+                if ((z.gruppe || '') !== gruppe) {
+                    gruppe = z.gruppe || '';
+                    if (gruppe) head = `<li class="group">${esc(gruppe)}</li>`;
+                }
+                const menge = [z.menge, z.einheit].filter(Boolean).join(' ');
+                return `${head}<li>${menge ? `<span class="menge">${esc(menge)}</span> ` : ''}${esc(z.name)}</li>`;
+            }).join('');
+            box.innerHTML = `<strong>So verstehe ich deine Zutaten (${list.length}):</strong><ul>${items}</ul>`;
+        }
+
+        if (editing) {
+            document.title = `Küchenpilot - ${editing.titel} bearbeiten`;
+            $('pageTitle').innerHTML = 'Rezept <span>bearbeiten.</span>';
+            $('introText').textContent = `Du änderst „${editing.titel}“. Speichern nicht vergessen.`;
+            $('titel').value = editing.titel || '';
+            $('kategorie').value = editing.kategorie || 'Hauptgericht';
+            $('portionen').value = editing.portionen || 2;
+            $('zeitMin').value = editing.zeitMin || '';
+            $('kcal').value = (editing.naehrwerte && editing.naehrwerte.kcal) || '';
+            (editing.geraete || []).forEach(g => {
+                const box = [...document.querySelectorAll('#geraete input')].find(i => i.value === g);
+                if (box) box.checked = true;
+            });
+            $('zutaten').value = ER.zutatenText(editing.zutaten);
+            $('schritte').value = (editing.schritte || []).join('\n');
+            $('tipps').value = (editing.tipps || []).join('\n');
+            $('quelleArt').value = (editing.quelle && editing.quelle.art) || '';
+            $('quelleUrl').value = (editing.quelle && editing.quelle.url) || '';
+            $('saveButton').querySelector('span').textContent = 'Änderungen speichern';
+        }
+        $('backButton').addEventListener('click', () => {
+            location.href = editing ? `rezepte.html#rezept/${encodeURIComponent(editing.id)}` : 'rezepte.html';
+        });
+        renderPreview();
+        $('zutaten').addEventListener('input', renderPreview);
+
+        function fail(fieldId, text) {
+            $(fieldId).classList.add('invalid');
+            $('formMessage').textContent = text;
+            const input = $(fieldId).querySelector('input, textarea');
+            if (input) input.focus();
+            return false;
+        }
+
+        function cleanUrl(value) {
+            const v = value.trim();
+            if (!v) return '';
+            const withProto = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+            try { return new URL(withProto).href; } catch (e) { return ''; }
+        }
+
+        $('recipeForm').addEventListener('submit', event => {
+            event.preventDefault();
+            document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+            $('formMessage').textContent = '';
+
+            const titel = $('titel').value.trim();
+            const zutaten = ER.parseZutaten($('zutaten').value);
+            const schritte = ER.parseSchritte($('schritte').value);
+            if (!titel) return fail('titleField', 'Wie heißt dein Gericht?');
+            if (!zutaten.length) return fail('zutatenField', 'Schreib mindestens eine Zutat auf.');
+            if (!schritte.length) return fail('schritteField', 'Schreib mindestens einen Schritt auf.');
+
+            const url = cleanUrl($('quelleUrl').value);
+            let art = $('quelleArt').value.trim();
+            if (!art && url) art = new URL(url).hostname.replace(/^www\./, '');
+            const kcal = Math.round(Number($('kcal').value));
+
+            const recipe = Object.assign({}, editing || {}, {
+                id: editing ? editing.id : '',
+                titel,
+                kategorie: $('kategorie').value,
+                tags: (editing && editing.tags) || [],
+                portionen: Math.min(20, Math.max(1, Math.round(Number($('portionen').value) || 2))),
+                zeitMin: Math.round(Number($('zeitMin').value)) || null,
+                geraete: [...document.querySelectorAll('#geraete input:checked')].map(i => i.value),
+                naehrwerte: kcal > 0 ? { kcal } : {},
+                zutaten,
+                schritte,
+                tipps: $('tipps').value.split(/\r?\n/).map(t => t.trim()).filter(Boolean),
+                quelle: art ? (url ? { art, url } : { art }) : {}
+            });
+            delete recipe.portionsEinheit;
+            const saved = ER.save(recipe);
+            location.href = `rezepte.html#rezept/${encodeURIComponent(saved.id)}`;
+        });
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Zutaten werden erkannt', () => {
+                const z = KPEigeneRezepte.parseZutaten('Teig:\n250 g Mehl\n½ TL Salz\n3 Eier');
+                const ok = z.length === 3 && z[0].menge === '250' && z[0].einheit === 'g' && z[0].name === 'Mehl'
+                    && z[0].gruppe === 'Teig' && z[1].menge === '½' && z[2].name === 'Eier';
+                return { ok, message: z.map(x => `${x.menge}|${x.einheit}|${x.name}`).join(', ') };
+            });
+            KPTest.add('Schritte ohne Nummern', () => {
+                const s = KPEigeneRezepte.parseSchritte('1. Schälen\n2) Kochen\n\n- Essen');
+                return { ok: s.join('/') === 'Schälen/Kochen/Essen', message: s.join(' / ') };
+            });
+        }
+    </script>
+</body>
+</html>
