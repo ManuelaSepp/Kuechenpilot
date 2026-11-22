@@ -651,14 +651,14 @@
     function stockCoverage(recipe, stock) {
         stock = stock === undefined ? getStock() : stock;
         const seen = new Set();
-        const out = { have: 0, total: 0, missing: [] };
+        const out = { have: 0, total: 0, missing: [], haveNames: [] };
         (recipe.zutaten || []).forEach(zutat => {
             splitList(zutat).forEach(piece => {
                 const cls = classify(piece);
                 if (!cls || cls.category === CAT.gewuerz || seen.has(cls.name)) return;
                 seen.add(cls.name);
                 out.total++;
-                if (stock && findStock({ name: cls.name, group: cls.group, category: cls.category }, stock)) out.have++;
+                if (stock && findStock({ name: cls.name, group: cls.group, category: cls.category }, stock)) { out.have++; out.haveNames.push(cls.name); }
                 else out.missing.push(cls.name);
             });
         });

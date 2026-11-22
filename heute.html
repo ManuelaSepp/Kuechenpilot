@@ -172,6 +172,113 @@
             cursor: pointer;
         }
 
+        .persons-box {
+            gap: 8px;
+            padding: 6px 10px;
+        }
+
+        .mini-round {
+            width: 34px;
+            height: 34px;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .mini-round:hover:not(:disabled),
+        .mini-round:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .mini-round:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        .choices {
+            margin-top: 14px;
+            text-align: center;
+        }
+
+        .choices[hidden] {
+            display: none;
+        }
+
+        .choices-title {
+            margin: 0 0 10px;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .choice {
+            display: grid;
+            gap: 4px;
+            align-content: start;
+            justify-items: start;
+            padding: 14px;
+            border: 2px solid var(--line);
+            border-radius: 18px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, border-color 0.18s ease;
+        }
+
+        .choice:hover,
+        .choice:focus-visible {
+            border-color: var(--orange);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .choice strong {
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .choice span {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .stock-badge {
+            margin-top: 4px;
+            padding: 1px 10px;
+            border-radius: 999px;
+            background: var(--orange-soft);
+            color: var(--orange-dark);
+            font-style: normal;
+            font-size: 0.9rem;
+        }
+
+        .stock-badge.is-full {
+            background: var(--orange);
+            color: #ffffff;
+        }
+
+        @media (max-width: 760px) {
+            .choice-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
         .info-row {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -334,7 +441,8 @@
                 <span class="arrow" aria-hidden="true">›</span>
             </a>
             <br>
-            <button class="link-button" type="button" id="otherButton">Lieber etwas anderes</button>
+            <button class="link-button" type="button" id="otherButton" aria-controls="choices">Lieber etwas anderes</button>
+            <div class="choices" id="choices" hidden></div>
         </section>
 
         <section class="sheet info-row" aria-label="Hinweise zum Rezept">
@@ -374,6 +482,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/planer.js?v=3"></script>
     <script>
         const RECIPES = ((window.KP_REZEPTE || {}).rezepte || [])
             .filter(r => r.status !== 'unvollständig' && (r.zutaten || []).length && (r.schritte || []).length);
@@ -405,7 +514,12 @@
             try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* ohne Speicher geht es trotzdem */ }
         }
 
-        /* Hauptgerichte bevorzugen, am selben Tag denselben Vorschlag zeigen. */
+        const P = window.KPPlaner;
+        let shown = null;          /* aktuelles Rezept */
+        let anzahl = 0;            /* Personen bzw. Stück für das aktuelle Rezept */
+        let choiceOffset = 0;      /* für "Noch andere" */
+
+        /* Hauptgerichte bevorzugen. */
         function pool() {
             const main = RECIPES.filter(r => r.kategorie === 'Hauptgericht');
             return main.length ? main : RECIPES;
@@ -417,32 +531,55 @@
             return hash % list.length;
         }
 
-        function pickRecipe(forceOther) {
-            const list = pool();
+        /*
+         * Rezepte nach Vorrat sortiert: zuerst die, für die am meisten da ist.
+         * Ohne gespeicherten Vorrat bleibt die Reihenfolge pro Tag gleich gemischt.
+         */
+        function ranked(excludeId) {
+            const stock = P ? P.getStock() : null;
+            const date = todayKey();
+            return pool()
+                .filter(r => r.id !== excludeId)
+                .map(r => {
+                    const cov = stock ? P.stockCoverage(r, stock) : null;
+                    const quote = cov && cov.total ? cov.have / cov.total : 0;
+                    return { r, cov, quote, mix: dailyIndex([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], date + r.id) };
+                })
+                .sort((a, b) => b.quote - a.quote || (b.cov ? b.cov.have : 0) - (a.cov ? a.cov.have : 0) || a.mix - b.mix);
+        }
+
+        function defaultAnzahl(recipe) {
+            if (!KPPortionen.basis(recipe).anzahl) return 0;
+            if (KPPortionen.basis(recipe).personen && P) return P.getPersonen();
+            return KPPortionen.standard(recipe);
+        }
+
+        /* Vorschlag des Tages: gespeichert, sonst einer der fünf mit dem meisten Vorrat. */
+        function pickRecipe() {
             const date = todayKey();
             const saved = readJson(STORE_KEY);
+            const list = pool();
             let recipe = saved && saved.datum === date && list.find(r => r.id === saved.id);
-
-            if (!recipe) recipe = list[dailyIndex(list, date)];
-            if (forceOther && list.length > 1) {
-                let next;
-                do { next = list[Math.floor(Math.random() * list.length)]; } while (next.id === recipe.id);
-                recipe = next;
+            if (!recipe) {
+                const top = ranked(null).slice(0, 5);
+                recipe = top[dailyIndex(top, date)].r;
             }
-            writeJson(STORE_KEY, { datum: date, id: recipe.id });
-            return recipe;
+            const n = saved && saved.datum === date && saved.id === recipe.id && Number(saved.anzahl);
+            choose(recipe, n || defaultAnzahl(recipe));
+        }
+
+        function choose(recipe, n) {
+            shown = recipe;
+            anzahl = n;
+            writeJson(STORE_KEY, { datum: todayKey(), id: recipe.id, anzahl });
+            render(recipe);
         }
 
         function stockMatches(recipe) {
-            const stock = readJson('kuechenpilotGrundvorrat');
-            if (!Array.isArray(stock) || !stock.length) return null;
-            const words = stock.map(s => ({ label: s, key: normalize(s) }));
-            const found = new Set();
-            (recipe.zutaten || []).forEach(z => {
-                const name = normalize(z.name || z.text);
-                words.forEach(w => { if (w.key.length > 2 && name.includes(w.key)) found.add(w.label); });
-            });
-            return [...found];
+            if (!P) return null;
+            const stock = P.getStock();
+            if (!stock) return null;
+            return P.stockCoverage(recipe, stock);
         }
 
         function render(recipe) {
@@ -450,24 +587,32 @@
             document.getElementById('todayTitle').textContent = recipe.titel;
 
             const facts = [];
-            const anzahl = KPPortionen.standard(recipe);
-            if (anzahl) facts.push(['klemmbrett', KPPortionen.beschriftung(recipe, anzahl)]);
-            if (recipe.zeitMin) facts.push(['uhr', `ca. ${recipe.zeitMin} Min.`]);
-            if (recipe.geraete && recipe.geraete.length) facts.push(['topf', recipe.geraete.join(' / ')]);
-            if (recipe.naehrwerte && recipe.naehrwerte.kcal) facts.push(['apfel', `${recipe.naehrwerte.kcal} kcal`]);
-            document.getElementById('todayFacts').innerHTML = facts
+            if (anzahl) {
+                facts.push(`
+                    <div class="fact-box persons-box" aria-label="Für wie viele">
+                        <img src="assets/icons/klemmbrett.png" alt="">
+                        <button class="mini-round" type="button" id="lessPersons" aria-label="Weniger" ${anzahl <= 1 ? 'disabled' : ''}>−</button>
+                        <span id="personsLabel">${esc(KPPortionen.beschriftung(recipe, anzahl))}</span>
+                        <button class="mini-round" type="button" id="morePersons" aria-label="Mehr" ${anzahl >= 20 ? 'disabled' : ''}>+</button>
+                    </div>`);
+            }
+            const plain = [];
+            if (recipe.zeitMin) plain.push(['uhr', `ca. ${recipe.zeitMin} Min.`]);
+            if (recipe.geraete && recipe.geraete.length) plain.push(['topf', recipe.geraete.join(' / ')]);
+            if (recipe.naehrwerte && recipe.naehrwerte.kcal) plain.push(['apfel', `${recipe.naehrwerte.kcal} kcal`]);
+            document.getElementById('todayFacts').innerHTML = facts.join('') + plain
                 .map(([icon, text]) => `<div class="fact-box"><img src="assets/icons/${icon}.png" alt=""><span>${esc(text)}</span></div>`).join('');
 
-            document.getElementById('cookButton').href = `rezepte.html#rezept/${encodeURIComponent(recipe.id)}`;
+            document.getElementById('cookButton').href = `rezepte.html#rezept/${encodeURIComponent(recipe.id)}${anzahl ? `/${anzahl}` : ''}`;
 
-            const matches = stockMatches(recipe);
+            const cov = stockMatches(recipe);
             const stockText = document.getElementById('stockText');
-            if (matches === null) {
-                stockText.textContent = 'Wenn du deinen Grundvorrat anlegst, zeige ich dir hier, was schon da ist.';
-            } else if (matches.length) {
-                stockText.textContent = `Schon da: ${matches.join(', ')}.`;
+            if (cov === null) {
+                stockText.textContent = 'Wenn du deinen Vorrat anlegst, zeige ich dir hier, was schon da ist.';
+            } else if (cov.have) {
+                stockText.textContent = `${cov.have} von ${cov.total} Zutaten schon da: ${cov.haveNames.join(', ')}.`;
             } else {
-                stockText.textContent = 'Für dieses Rezept habe ich in deinem Grundvorrat nichts Passendes gefunden.';
+                stockText.textContent = 'Für dieses Rezept habe ich in deinem Vorrat nichts Passendes gefunden.';
             }
 
             const steps = (recipe.schritte || []).length;
@@ -477,9 +622,66 @@
                 : 'Ich führe dich Schritt für Schritt hindurch.';
         }
 
+        function changePersons(delta) {
+            const n = Math.min(20, Math.max(1, anzahl + delta));
+            if (n === anzahl) return;
+            /* Personen-Rezepte: gilt auch als neue Personenzahl für Wochenkorb und Einkauf */
+            if (P && KPPortionen.basis(shown).personen) P.setPersonen(n);
+            choose(shown, n);
+        }
+
+        /* "Lieber etwas anderes": drei Gerichte zur Wahl, die mit dem meisten Vorrat zuerst */
+        function renderChoices() {
+            const box = document.getElementById('choices');
+            const list = ranked(shown.id);
+            if (choiceOffset >= list.length) choiceOffset = 0;
+            const three = list.slice(choiceOffset, choiceOffset + 3);
+            box.hidden = false;
+            box.innerHTML = `
+                <p class="choices-title">Wie wär's damit?</p>
+                <div class="choice-grid">
+                    ${three.map(({ r, cov }) => {
+                        const meta = [];
+                        if (r.zeitMin) meta.push(`${r.zeitMin} Min.`);
+                        if (r.naehrwerte && r.naehrwerte.kcal) meta.push(`${r.naehrwerte.kcal} kcal`);
+                        const badge = cov && cov.total
+                            ? `<em class="stock-badge${cov.have === cov.total ? ' is-full' : ''}">${cov.have === cov.total ? 'Alles im Vorrat' : `${cov.have} von ${cov.total} im Vorrat`}</em>`
+                            : '';
+                        return `
+                            <button class="choice" type="button" data-choice="${esc(r.id)}">
+                                <strong>${esc(r.titel)}</strong>
+                                <span>${esc(meta.join(' · '))}</span>
+                                ${badge}
+                            </button>`;
+                    }).join('')}
+                </div>
+                ${list.length > 3 ? '<button class="link-button" type="button" id="moreChoices">Noch andere zeigen</button>' : ''}`;
+        }
+
+        document.addEventListener('click', event => {
+            if (event.target.closest('#lessPersons')) changePersons(-1);
+            else if (event.target.closest('#morePersons')) changePersons(1);
+            else if (event.target.closest('#moreChoices')) { choiceOffset += 3; renderChoices(); }
+            else {
+                const c = event.target.closest('[data-choice]');
+                if (!c) return;
+                const recipe = RECIPES.find(r => r.id === c.dataset.choice);
+                if (!recipe) return;
+                document.getElementById('choices').hidden = true;
+                choiceOffset = 0;
+                choose(recipe, defaultAnzahl(recipe));
+                document.querySelector('.today-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
         if (RECIPES.length) {
-            render(pickRecipe(false));
-            document.getElementById('otherButton').addEventListener('click', () => render(pickRecipe(true)));
+            pickRecipe();
+            document.getElementById('otherButton').addEventListener('click', () => {
+                const box = document.getElementById('choices');
+                if (!box.hidden) { box.hidden = true; return; }
+                choiceOffset = 0;
+                renderChoices();
+            });
         } else {
             document.getElementById('todayTitle').textContent = 'Noch keine Rezepte vorhanden';
         }

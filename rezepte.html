@@ -707,7 +707,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
-    <script src="assets/scripts/planer.js?v=2"></script>
+    <script src="assets/scripts/planer.js?v=3"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
         const RECIPES = DATA.rezepte;
@@ -835,9 +835,11 @@
                 </ul>`).join('');
         }
 
-        function renderDetail(r) {
+        function renderDetail(r, wunsch) {
             const n = r.naehrwerte || {};
-            const anzahl = KPPortionen.standard(r);
+            const standard = KPPortionen.standard(r);
+            /* Personenzahl kann von der Heute-Seite mitkommen: #rezept/<id>/<anzahl> */
+            const anzahl = standard && wunsch ? Math.min(20, Math.max(1, wunsch)) : standard;
             current = { recipe: r, anzahl };
             const boxes = [
                 r.zeitMin ? [`ca. ${r.zeitMin}`, 'Minuten'] : null,
@@ -973,11 +975,11 @@
         /* ---------- Navigation ---------- */
 
         function route() {
-            const match = location.hash.match(/^#rezept\/(.+)$/);
+            const match = location.hash.match(/^#rezept\/([^/]+)(?:\/(\d+))?$/);
             const recipe = match && RECIPES.find(r => r.id === decodeURIComponent(match[1]));
 
             if (recipe) {
-                renderDetail(recipe);
+                renderDetail(recipe, match[2] ? Number(match[2]) : 0);
                 els.overview.hidden = true;
                 els.detail.hidden = false;
                 els.backLabel.textContent = 'Zurück zur Übersicht';
