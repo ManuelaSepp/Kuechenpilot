@@ -151,14 +151,111 @@
             filter: brightness(0) invert(1);
         }
 
-        .button-row.with-recipes {
-            justify-content: space-between;
-            gap: 18px;
+        /* ---------- Menü zu allen Bereichen ---------- */
+
+        .main-menu {
+            position: relative;
+            z-index: 3;
+            width: min(100%, 922px);
+            margin-top: 28px;
+            padding: 26px 28px 28px;
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
         }
 
-        .recipes-button img {
-            width: 28px;
-            height: 28px;
+        .main-menu h2 {
+            margin: 0 0 16px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+        }
+
+        .menu-grid {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .menu-tile {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 16px 10px 14px;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--text);
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 8px 18px rgba(166, 112, 34, 0.10);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        a.menu-tile:hover,
+        a.menu-tile:focus-visible {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+            box-shadow: 0 14px 26px rgba(166, 112, 34, 0.18);
+            outline: none;
+        }
+
+        .menu-tile img {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
+        .menu-tile img.icon-small {
+            transform: scale(2.2);
+        }
+
+        .menu-tile strong {
+            font-size: 1.22rem;
+        }
+
+        .menu-tile span {
+            color: var(--muted);
+            font-size: 0.98rem;
+            line-height: 1.3;
+        }
+
+        .menu-tile.soon {
+            opacity: 0.55;
+            border-style: dashed;
+            box-shadow: none;
+        }
+
+        .menu-tile.soon em {
+            font-style: normal;
+            padding: 1px 10px;
+            border-radius: 999px;
+            background: rgba(245, 166, 35, 0.14);
+            color: var(--orange-dark);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 760px) {
+            .main-menu {
+                padding: 22px 16px;
+                border-radius: 26px;
+            }
+
+            .menu-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            .menu-tile img {
+                width: 44px;
+                height: 44px;
+            }
         }
 
         .arrow {
@@ -247,12 +344,6 @@
                 justify-content: center;
             }
 
-            .button-row.with-recipes {
-                flex-direction: column-reverse;
-                align-items: center;
-                gap: 12px;
-            }
-
             .next-button {
                 width: 100%;
                 max-width: 340px;
@@ -297,11 +388,7 @@
                 <p>Ich unterstütze dich bei Planung, Einkauf und Organisation – damit du dich ganz dem Kochen und Genießen widmen kannst.</p>
             </div>
 
-            <div class="button-row with-recipes">
-                <button class="next-button recipes-button" type="button" onclick="location.href='rezepte.html'" aria-label="Zu den Rezepten">
-                    <img src="assets/icons/kochloeffel.png" alt="" aria-hidden="true">
-                    <span>Rezepte</span>
-                </button>
+            <div class="button-row">
                 <button class="next-button" onclick="location.href='personen.html'" aria-label="Weiter zur nächsten Seite">
                     <span>Weiter</span>
                     <span class="arrow" aria-hidden="true">→</span>
@@ -309,6 +396,20 @@
             </div>
         </section>
         </div>
+
+        <nav class="main-menu" aria-label="Alle Bereiche">
+            <h2>Wohin soll's gehen?</h2>
+            <ul class="menu-grid">
+                <li><div class="menu-tile soon" aria-disabled="true"><img class="icon-small" src="assets/icons/haus.png" alt=""><strong>Heute</strong><span>Dein Tag, deine Mahlzeiten</span><em>kommt bald</em></div></li>
+                <li><div class="menu-tile soon" aria-disabled="true"><img src="assets/icons/wochenkorb.png" alt=""><strong>Wochenkorb</strong><span>Planen und organisieren</span><em>kommt bald</em></div></li>
+                <li><a class="menu-tile" href="rezepte.html"><img src="assets/icons/kochbesteck.png" alt=""><strong>Rezepte</strong><span>Entdecken, kochen, lieben</span></a></li>
+                <li><div class="menu-tile soon" aria-disabled="true"><img src="assets/icons/kiste.png" alt=""><strong>Einkauf</strong><span>Einkaufen leicht gemacht</span><em>kommt bald</em></div></li>
+                <li><a class="menu-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><strong>Vorrat</strong><span>Vorräte im Blick</span></a></li>
+                <li><div class="menu-tile soon" aria-disabled="true"><img src="assets/icons/apfel.png" alt=""><strong>Kaloriengrab</strong><span>Genießen und wohlfühlen</span><em>kommt bald</em></div></li>
+                <li><a class="menu-tile" href="personen.html"><img src="assets/icons/klemmbrett.png" alt=""><strong>Personen</strong><span>Wer isst mit?</span></a></li>
+                <li><div class="menu-tile soon" aria-disabled="true"><img src="assets/icons/stern.png" alt=""><strong>Mehr</strong><span>Einstellungen und Infos</span><em>kommt bald</em></div></li>
+            </ul>
+        </nav>
     </main>
 
     <script src="assets/tests/test-runner.js"></script>
