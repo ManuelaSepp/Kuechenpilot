@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küchenpilot - Wochenkorb</title>
+    <style>
+        @font-face {
+            font-family: "Architects Daughter";
+            src: url("fonts/ArchitectsDaughter-Regular.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --sand: #fff7ea;
+            --card: #fffdf8;
+            --orange: #f5a623;
+            --orange-dark: #df8f12;
+            --orange-soft: rgba(245, 166, 35, 0.12);
+            --line: rgba(245, 166, 35, 0.28);
+            --text: #333333;
+            --muted: #555555;
+            --shadow: 0 16px 36px rgba(166, 112, 34, 0.16);
+            --shadow-small: 0 10px 22px rgba(166, 112, 34, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 24px;
+            font-family: "Architects Daughter", sans-serif;
+            background: var(--sand);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--text);
+        }
+
+        button, input { font-family: inherit; }
+
+        .plan-page {
+            width: min(100%, 980px);
+            display: grid;
+            gap: 22px;
+            padding: clamp(12px, 3vw, 32px) 0;
+        }
+
+        .sheet {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            padding: clamp(22px, 3.5vw, 36px) clamp(18px, 4vw, 40px);
+        }
+
+        /* Kopf */
+        .head {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .head img.pilot {
+            width: clamp(110px, 16vw, 160px);
+            height: auto;
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: #9a7240;
+            font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+        }
+
+        h1 {
+            margin: 4px 0 12px;
+            font-size: clamp(1.9rem, 5vw, 2.8rem);
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        h1 span { color: var(--orange); }
+
+        .lead {
+            margin: 0 0 16px;
+            color: var(--muted);
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 22px;
+        }
+
+        .week-nav, .persons {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .round-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--orange);
+            border-radius: 50%;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-size: 1.35rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .round-button:hover, .round-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .round-button.small {
+            width: 30px;
+            height: 30px;
+            font-size: 1.05rem;
+            border-width: 1.5px;
+        }
+
+        .week-label {
+            min-width: 230px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .persons strong {
+            min-width: 26px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+
+        /* Tage */
+        .days {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+        }
+
+        .day {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 150px;
+            padding: 16px;
+            border: 2px solid var(--line);
+            border-radius: 22px;
+            background: #ffffff;
+            box-shadow: 0 8px 18px rgba(166, 112, 34, 0.08);
+        }
+
+        .day.is-today {
+            border-color: var(--orange);
+        }
+
+        .day-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .day-head strong { font-size: 1.25rem; }
+        .day-head span { color: var(--muted); font-size: 1rem; }
+
+        .today-badge {
+            margin-left: 6px;
+            padding: 1px 9px;
+            border-radius: 999px;
+            background: var(--orange);
+            color: #ffffff !important;
+            font-size: 0.85rem !important;
+        }
+
+        .meal {
+            position: relative;
+            display: grid;
+            gap: 6px;
+            padding: 10px 38px 10px 12px;
+            border-radius: 16px;
+            background: var(--orange-soft);
+        }
+
+        .meal a {
+            color: var(--text);
+            font-size: 1.08rem;
+            line-height: 1.25;
+            text-decoration: none;
+        }
+
+        .meal a:hover, .meal a:focus-visible {
+            color: var(--orange-dark);
+            text-decoration: underline;
+            outline: none;
+        }
+
+        .meal-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 12px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .portion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .remove {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--muted);
+            font-size: 1.3rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .remove:hover, .remove:focus-visible {
+            background: #ffffff;
+            color: #b24a1a;
+            outline: none;
+        }
+
+        .add-meal {
+            margin-top: auto;
+            padding: 9px 12px;
+            border: 2px dashed var(--line);
+            border-radius: 16px;
+            background: transparent;
+            color: var(--orange-dark);
+            font-size: 1.05rem;
+            cursor: pointer;
+        }
+
+        .add-meal:hover, .add-meal:focus-visible {
+            border-color: var(--orange);
+            background: var(--orange-soft);
+            outline: none;
+        }
+
+        /* Abschluss */
+        .summary {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .summary p { margin: 0; font-size: 1.15rem; }
+
+        .summary .tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .link-button {
+            padding: 6px 10px;
+            border: 0;
+            background: none;
+            color: var(--orange-dark);
+            font-size: 1.05rem;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+            cursor: pointer;
+        }
+
+        .cook-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 60px;
+            padding: 12px 26px;
+            border: 0;
+            border-radius: 18px;
+            background: var(--orange);
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 12px 24px rgba(223, 143, 18, 0.28);
+            transition: transform 0.18s ease, background-color 0.18s ease;
+        }
+
+        .cook-button:hover, .cook-button:focus-visible {
+            background: var(--orange-dark);
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .cook-button img {
+            width: 32px;
+            height: 32px;
+            filter: brightness(0) invert(1);
+        }
+
+        .message {
+            min-height: 1.3em;
+            margin: 0;
+            color: var(--orange-dark);
+            font-size: 1rem;
+        }
+
+        /* Rezept-Auswahl */
+        dialog {
+            width: min(100% - 24px, 620px);
+            max-height: min(90vh, 760px);
+            padding: 0;
+            border: 2px solid rgba(245, 166, 35, 0.5);
+            border-radius: 26px;
+            background: var(--card);
+            color: var(--text);
+            box-shadow: var(--shadow);
+        }
+
+        dialog::backdrop { background: rgba(80, 55, 20, 0.35); }
+
+        .picker {
+            display: flex;
+            flex-direction: column;
+            max-height: min(90vh, 760px);
+        }
+
+        .picker-head {
+            display: grid;
+            gap: 10px;
+            padding: 20px 22px 12px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .picker-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .picker-title h2 { margin: 0; font-size: 1.45rem; }
+
+        .picker input[type="search"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--line);
+            border-radius: 14px;
+            background: #ffffff;
+            font-size: 1.1rem;
+        }
+
+        .picker input[type="search"]:focus { border-color: var(--orange); outline: none; }
+
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .chip {
+            padding: 4px 12px;
+            border: 1.5px solid var(--line);
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--text);
+            font-size: 0.98rem;
+            cursor: pointer;
+        }
+
+        .chip.is-active {
+            border-color: var(--orange);
+            background: var(--orange);
+            color: #ffffff;
+        }
+
+        .picker-list {
+            list-style: none;
+            margin: 0;
+            padding: 10px 14px 18px;
+            overflow-y: auto;
+        }
+
+        .picker-list button {
+            width: 100%;
+            display: grid;
+            gap: 2px;
+            padding: 10px 12px;
+            border: 0;
+            border-radius: 14px;
+            background: transparent;
+            color: var(--text);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .picker-list button:hover, .picker-list button:focus-visible {
+            background: var(--orange-soft);
+            outline: none;
+        }
+
+        .picker-list strong { font-size: 1.1rem; font-weight: 600; }
+        .picker-list span { color: var(--muted); font-size: 0.95rem; }
+
+        /* Navigation unten (wie auf der Heute-Seite) */
+        .nav-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            padding-block: 18px;
+        }
+
+        .nav-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 6px;
+            border-radius: 18px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 1.08rem;
+            transition: background-color 0.15s ease;
+        }
+
+        .nav-tile:hover, .nav-tile:focus-visible { background: var(--orange-soft); outline: none; }
+        .nav-tile img { width: 40px; height: 40px; object-fit: contain; }
+        .nav-tile img.icon-small { transform: scale(2.2); }
+
+        .button-row { display: flex; justify-content: flex-start; }
+
+        .next-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 170px;
+            min-height: 56px;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-size: 1.18rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+        }
+
+        .next-button:hover, .next-button:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            transform: translateY(-2px);
+            outline: none;
+        }
+
+        .arrow { font-size: 1.45rem; line-height: 1; }
+
+        .slogan {
+            margin: 0;
+            text-align: center;
+            color: #9a7240;
+            font-size: 1.12rem;
+        }
+
+        /* Kopfkachel wie auf den anderen Seiten (Maße aus responsive-master.css) */
+        .start-page { position: relative; }
+
+        .welcome-card,
+        .pilot-card {
+            background: var(--card);
+            border: 2px solid rgba(245, 166, 35, 0.42);
+            box-shadow: var(--shadow);
+        }
+
+        .welcome-card { position: relative; z-index: 3; }
+
+        .pilot-card {
+            position: absolute;
+            z-index: 2;
+            pointer-events: none;
+            border-radius: 28px;
+            padding: 6px;
+            overflow: hidden;
+        }
+
+        .pilot-card img { width: 100%; height: auto; display: block; }
+        .pilot-mobile { display: none; }
+
+        .welcome-card h1 {
+            margin: 0 0 14px;
+            text-align: center;
+            line-height: 1.08;
+            font-weight: 600;
+        }
+
+        .welcome-card h1 span { color: var(--orange); }
+
+        .welcome-card .lead {
+            margin: 0 auto 18px;
+            max-width: 560px;
+            text-align: center;
+        }
+
+        .welcome-card .controls,
+        .welcome-card .stats { justify-content: center; }
+
+        .welcome-card .button-row { margin-top: 22px; }
+
+        @media (max-width: 760px) {
+            .pilot-desktop { display: none; }
+            .pilot-mobile { display: block; }
+        }
+
+        @media (max-width: 760px) {
+            body { padding: 16px; }
+            .week-label { min-width: 0; flex: 1; font-size: 1.08rem; }
+            .week-nav { width: 100%; }
+            .days { grid-template-columns: 1fr; }
+            .day { min-height: 0; }
+            .summary { flex-direction: column; align-items: stretch; }
+            .cook-button { width: 100%; }
+            .nav-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .button-row .next-button { width: 100%; }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/styles/responsive-master.css">
+    <link rel="stylesheet" href="assets/tests/test-ui.css">
+</head>
+<body class="plan-page-body no-next">
+
+    <main class="start-page plan-page" aria-label="Küchenpilot Wochenkorb">
+        <div class="hero-shell">
+            <div class="pilot-card pilot-desktop">
+                <img src="assets/figuren/pilot-daumen.png" alt="Küchenpilot zeigt Daumen hoch">
+            </div>
+
+            <div class="pilot-card pilot-mobile">
+                <img src="assets/figuren/pilot-daumen.png" alt="Küchenpilot zeigt Daumen hoch">
+            </div>
+
+            <section class="welcome-card">
+                <div class="card-main">
+                    <h1>Dein <span>Wochenkorb.</span></h1>
+                    <p class="lead">Plane deine Woche – ich rechne die Mengen aus und schreibe dir die Einkaufsliste.</p>
+                    <div class="controls">
+                        <div class="week-nav">
+                            <button class="round-button" type="button" id="prevWeek" aria-label="Vorherige Woche">‹</button>
+                            <span class="week-label" id="weekLabel"></span>
+                            <button class="round-button" type="button" id="nextWeek" aria-label="Nächste Woche">›</button>
+                        </div>
+                        <div class="persons" aria-label="Personenzahl">
+                            <span>Wir sind</span>
+                            <button class="round-button small" type="button" id="personsMinus" aria-label="Eine Person weniger">−</button>
+                            <strong id="personsValue">2</strong>
+                            <button class="round-button small" type="button" id="personsPlus" aria-label="Eine Person mehr">+</button>
+                            <span id="personsWord">Personen</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-row">
+                    <button class="next-button" type="button" onclick="location.href='index.html'" aria-label="Zurück zur Startseite">
+                        <span class="arrow" aria-hidden="true">←</span>
+                        <span>Zurück</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <section class="days" id="days" aria-label="Tage der Woche"></section>
+
+        <section class="sheet summary">
+            <div>
+                <p id="summaryText"></p>
+                <div class="tools">
+                    <button class="link-button" type="button" id="fillWeek">Freie Tage vorschlagen lassen</button>
+                    <button class="link-button" type="button" id="clearWeek">Woche leeren</button>
+                </div>
+                <p class="message" id="message" role="status"></p>
+            </div>
+            <a class="cook-button" href="einkauf.html" id="toShopping">
+                <img src="assets/icons/kiste.png" alt="" aria-hidden="true">
+                <span>Zur Einkaufsliste</span>
+                <span class="arrow" aria-hidden="true">›</span>
+            </a>
+        </section>
+
+        <nav class="sheet nav-row" aria-label="Bereiche">
+            <a class="nav-tile" href="index.html"><img class="icon-small" src="assets/icons/haus.png" alt=""><span>Start</span></a>
+            <a class="nav-tile" href="rezepte.html"><img src="assets/icons/kochbesteck.png" alt=""><span>Rezepte</span></a>
+            <a class="nav-tile" href="einkauf.html"><img src="assets/icons/kiste.png" alt=""><span>Einkauf</span></a>
+            <a class="nav-tile" href="vorrat.html"><img src="assets/icons/regal.png" alt=""><span>Vorrat</span></a>
+        </nav>
+
+        <p class="slogan">Nimmt dir das Denken ab – nicht die Freude am Kochen.</p>
+    </main>
+
+    <dialog id="picker" aria-labelledby="pickerTitle">
+        <div class="picker">
+            <div class="picker-head">
+                <div class="picker-title">
+                    <h2 id="pickerTitle">Rezept wählen</h2>
+                    <button class="round-button small" type="button" id="closePicker" aria-label="Auswahl schließen">×</button>
+                </div>
+                <input type="search" id="pickerSearch" placeholder="Rezept oder Zutat suchen …" autocomplete="off" aria-label="Rezept suchen">
+                <div class="chips" id="pickerChips"></div>
+            </div>
+            <ul class="picker-list" id="pickerList"></ul>
+        </div>
+    </dialog>
+
+    <script src="assets/scripts/portionen.js"></script>
+    <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/planer.js"></script>
+    <script>
+        const P = window.KPPlaner;
+        let week = P.currentWeek();
+        let pickerDay = null;
+        let pickerCategory = 'Alle';
+
+        const daysEl = document.getElementById('days');
+        const messageEl = document.getElementById('message');
+
+        function say(text) {
+            messageEl.textContent = text;
+        }
+
+        function renderPersons() {
+            const n = P.getPersonen();
+            document.getElementById('personsValue').textContent = n;
+            document.getElementById('personsWord').textContent = n === 1 ? 'Person' : 'Personen';
+        }
+
+        function render() {
+            P.setWeek(week);
+            document.getElementById('weekLabel').textContent = P.weekLabel(week);
+            const plan = P.getPlan();
+            const today = P.isoDate(new Date());
+
+            daysEl.innerHTML = P.weekDays(week).map(day => {
+                const meals = (plan[day.key] || []).map((entry, index) => {
+                    const recipe = P.BY_ID.get(entry.id);
+                    if (!recipe) return '';
+                    const menge = Number(entry.menge) || P.defaultMenge(recipe);
+                    const meta = [];
+                    if (recipe.zeitMin) meta.push(`<span>⏱ ${recipe.zeitMin} Min.</span>`);
+                    return `
+                        <div class="meal">
+                            <a href="rezepte.html#rezept/${encodeURIComponent(recipe.id)}">${P.esc(recipe.titel)}</a>
+                            <div class="meal-meta">
+                                <span class="portion">
+                                    <button class="round-button small" type="button" data-action="minus" data-day="${day.key}" data-index="${index}" aria-label="Weniger für ${P.esc(recipe.titel)}">−</button>
+                                    <span>${P.esc(P.mengeLabel(recipe, menge))}</span>
+                                    <button class="round-button small" type="button" data-action="plus" data-day="${day.key}" data-index="${index}" aria-label="Mehr für ${P.esc(recipe.titel)}">+</button>
+                                </span>
+                                ${meta.join('')}
+                            </div>
+                            <button class="remove" type="button" data-action="remove" data-day="${day.key}" data-index="${index}" aria-label="${P.esc(recipe.titel)} entfernen">×</button>
+                        </div>`;
+                }).join('');
+
+                const isToday = day.key === today;
+                return `
+                    <article class="day${isToday ? ' is-today' : ''}" aria-label="${day.name}">
+                        <div class="day-head">
+                            <strong>${day.name}${isToday ? '<span class="today-badge">heute</span>' : ''}</strong>
+                            <span>${day.label}</span>
+                        </div>
+                        ${meals}
+                        <button class="add-meal" type="button" data-action="add" data-day="${day.key}" data-name="${day.name}">+ Rezept hinzufügen</button>
+                    </article>`;
+            }).join('');
+
+            const entries = P.weekEntries(week, plan);
+            const daysWithMeals = new Set(entries.map(e => e.day.key)).size;
+            document.getElementById('summaryText').textContent = entries.length
+                ? `${entries.length} ${entries.length === 1 ? 'Gericht' : 'Gerichte'} an ${daysWithMeals} ${daysWithMeals === 1 ? 'Tag' : 'Tagen'} geplant.`
+                : 'Noch nichts geplant. Fang mit einem Tag an oder lass dir Vorschläge machen.';
+        }
+
+        function changeEntry(dayKey, index, fn) {
+            const plan = P.getPlan();
+            const list = plan[dayKey] || [];
+            if (!list[index]) return;
+            fn(list, index, plan);
+            plan[dayKey] = list;
+            P.savePlan(plan);
+            render();
+        }
+
+        daysEl.addEventListener('click', event => {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+            const { action, day } = button.dataset;
+            const index = Number(button.dataset.index);
+
+            if (action === 'add') {
+                openPicker(day, button.dataset.name);
+            } else if (action === 'remove') {
+                changeEntry(day, index, list => list.splice(index, 1));
+                say('Gericht entfernt.');
+            } else if (action === 'plus' || action === 'minus') {
+                changeEntry(day, index, list => {
+                    const recipe = P.BY_ID.get(list[index].id);
+                    const now = Number(list[index].menge) || P.defaultMenge(recipe);
+                    list[index].menge = Math.max(1, Math.min(99, now + (action === 'plus' ? 1 : -1)));
+                });
+            }
+        });
+
+        /* Wochen wechseln */
+        document.getElementById('prevWeek').addEventListener('click', () => { week = P.shiftWeek(week, -1); say(''); render(); });
+        document.getElementById('nextWeek').addEventListener('click', () => { week = P.shiftWeek(week, 1); say(''); render(); });
+
+        /* Personen: gilt für neu geplante Gerichte und passt bereits geplante dieser Woche an */
+        function changePersons(delta) {
+            const before = P.getPersonen();
+            const after = Math.max(1, Math.min(20, before + delta));
+            if (after === before) return;
+            P.setPersonen(after);
+            const plan = P.getPlan();
+            P.weekDays(week).forEach(day => {
+                (plan[day.key] || []).forEach(entry => {
+                    const recipe = P.BY_ID.get(entry.id);
+                    if (recipe && P.planArt(recipe) === 'personen' && Number(entry.menge) === before) entry.menge = after;
+                });
+            });
+            P.savePlan(plan);
+            renderPersons();
+            render();
+        }
+        document.getElementById('personsMinus').addEventListener('click', () => changePersons(-1));
+        document.getElementById('personsPlus').addEventListener('click', () => changePersons(1));
+
+        /* Vorschläge für freie Tage: Hauptgerichte, möglichst ohne Wiederholung */
+        document.getElementById('fillWeek').addEventListener('click', () => {
+            const plan = P.getPlan();
+            const used = new Set(P.weekEntries(week, plan).map(e => e.recipe.id));
+            const pool = P.RECIPES.filter(r => r.kategorie === 'Hauptgericht' && !used.has(r.id));
+            let added = 0;
+            P.weekDays(week).forEach(day => {
+                if ((plan[day.key] || []).length || !pool.length) return;
+                const pick = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+                plan[day.key] = [{ id: pick.id, menge: P.defaultMenge(pick) }];
+                added++;
+            });
+            P.savePlan(plan);
+            render();
+            say(added ? `${added} ${added === 1 ? 'Vorschlag' : 'Vorschläge'} eingetragen. Gefällt dir einer nicht? Einfach mit × entfernen.` : 'Alle Tage sind schon belegt.');
+        });
+
+        document.getElementById('clearWeek').addEventListener('click', () => {
+            const plan = P.getPlan();
+            const removed = P.weekEntries(week, plan).length;
+            if (!removed) { say('Diese Woche ist schon leer.'); return; }
+            P.weekDays(week).forEach(day => delete plan[day.key]);
+            P.savePlan(plan);
+            render();
+            say('Woche geleert.');
+        });
+
+        /* Rezept-Auswahl */
+        const picker = document.getElementById('picker');
+        const pickerSearch = document.getElementById('pickerSearch');
+        const pickerList = document.getElementById('pickerList');
+        const pickerChips = document.getElementById('pickerChips');
+        const categories = ['Alle', ...new Set(P.RECIPES.map(r => r.kategorie).filter(Boolean))];
+
+        function renderChips() {
+            pickerChips.innerHTML = categories.map(c =>
+                `<button class="chip${c === pickerCategory ? ' is-active' : ''}" type="button" data-cat="${P.esc(c)}">${P.esc(c)}</button>`
+            ).join('');
+        }
+
+        function renderPickerList() {
+            const q = P.normalize(pickerSearch.value);
+            const list = P.RECIPES.filter(r => {
+                if (pickerCategory !== 'Alle' && r.kategorie !== pickerCategory) return false;
+                if (!q) return true;
+                const hay = P.normalize([r.titel, ...(r.tags || []), ...(r.zutaten || []).map(z => z.name)].join(' '));
+                return q.split(' ').every(word => hay.includes(word));
+            });
+            pickerList.innerHTML = list.length ? list.map(r => {
+                const meta = [r.kategorie];
+                if (r.zeitMin) meta.push(`${r.zeitMin} Min.`);
+                if (r.naehrwerte && r.naehrwerte.kcal) meta.push(`${r.naehrwerte.kcal} kcal`);
+                return `<li><button type="button" data-id="${P.esc(r.id)}"><strong>${P.esc(r.titel)}</strong><span>${P.esc(meta.join(' · '))}</span></button></li>`;
+            }).join('') : '<li class="lead" style="padding:12px">Kein Rezept gefunden.</li>';
+        }
+
+        function openPicker(dayKey, dayName) {
+            pickerDay = dayKey;
+            document.getElementById('pickerTitle').textContent = `Rezept für ${dayName}`;
+            pickerSearch.value = '';
+            renderChips();
+            renderPickerList();
+            if (typeof picker.showModal === 'function') picker.showModal(); else picker.setAttribute('open', '');
+            pickerSearch.focus();
+        }
+
+        function closePicker() {
+            if (typeof picker.close === 'function') picker.close(); else picker.removeAttribute('open');
+        }
+
+        pickerSearch.addEventListener('input', renderPickerList);
+        pickerChips.addEventListener('click', event => {
+            const chip = event.target.closest('[data-cat]');
+            if (!chip) return;
+            pickerCategory = chip.dataset.cat;
+            renderChips();
+            renderPickerList();
+        });
+        pickerList.addEventListener('click', event => {
+            const button = event.target.closest('button[data-id]');
+            if (!button || !pickerDay) return;
+            const recipe = P.BY_ID.get(button.dataset.id);
+            const plan = P.getPlan();
+            (plan[pickerDay] = plan[pickerDay] || []).push({ id: recipe.id, menge: P.defaultMenge(recipe) });
+            P.savePlan(plan);
+            closePicker();
+            render();
+            say(`${recipe.titel} eingeplant.`);
+        });
+        document.getElementById('closePicker').addEventListener('click', closePicker);
+        picker.addEventListener('click', event => { if (event.target === picker) closePicker(); });
+
+        renderPersons();
+        render();
+    </script>
+
+    <script src="assets/tests/test-runner.js"></script>
+    <script>
+        if (window.KPTest && window.KPTest.enabled) {
+            KPTest.add('Sieben Tage angezeigt', () => {
+                const n = document.querySelectorAll('#days .day').length;
+                return { ok: n === 7, message: `${n} Tage` };
+            });
+            KPTest.add('Rezepte zur Auswahl vorhanden', () => {
+                return { ok: KPPlaner.RECIPES.length > 0, message: `${KPPlaner.RECIPES.length} Rezepte` };
+            });
+            KPTest.add('Mengen werden mit Personen umgerechnet', () => {
+                const r = KPPlaner.RECIPES.find(x => !x.portionsEinheit && Number(x.portionen) === 2);
+                if (!r) return { ok: true, message: 'kein passendes Rezept, übersprungen' };
+                const f = KPPlaner.factorFor({ menge: 4 }, r);
+                return { ok: f === 2, message: `Faktor ${f} für 4 Personen` };
+            });
+        }
+    </script>
+</body>
+</html>
