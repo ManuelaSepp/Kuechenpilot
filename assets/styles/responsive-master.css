@@ -281,3 +281,13 @@ html body {
 html body :is(h1, h2, h3, .next-button, .cook-button, .eyebrow, .slogan, .menu-tile strong, .day-label, .week-label) {
     font-family: "Architects Daughter", "Comfortaa", sans-serif;
 }
+
+/* Große Kopfkacheln (mit Figur) bleiben komplett in Handschrift. */
+html body .welcome-card,
+html body .welcome-card :is(p, span, label, button, input, select, a, strong, small) {
+    font-family: "Architects Daughter", "Comfortaa", sans-serif;
+}
+
+html body .welcome-card {
+    line-height: normal;
+}
