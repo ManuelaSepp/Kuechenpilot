@@ -6,7 +6,8 @@
  *   kuechenpilotWochenplan   { "2026-11-23": [ { id, menge } ] }   (Schlüssel = Datum des Tages)
  *   kuechenpilotPersonen      Zahl (Standard 2), auch von personen.html gesetzt
  *   kuechenpilotWoche         Montag der zuletzt angesehenen Woche ("2026-11-23")
- *   kuechenpilotEinkauf       { "<Montag>": { gekauft: [], habeIch: [], dochKaufen: [], eigene: [] } }
+ *   kuechenpilotEinkauf       { "<Montag>": { gekauft: [], habeIch: [], dochKaufen: [], eigene: [], eingeraeumt: [] } }
+ *   Wochenplan-Einträge bekommen nach "Gekocht" { gekocht: "<Datum>" } und fallen aus der Einkaufsliste.
  *   kuechenpilotGrundvorratDetails  (kommt von vorrat.html)
  */
 (function () {
@@ -469,25 +470,36 @@
         'Vorgekochte Reste': () => false
     };
 
-    function getStock() {
+    /* Gespeicherte Vorrats-Einträge wie auf vorrat.html: [{ name, amount, unit, custom }] oder null. */
+    function getStockDetails() {
         let details = readJson(KEYS.vorratDetails, null);
         if (!Array.isArray(details)) {
             const names = readJson(KEYS.vorrat, null);
             details = Array.isArray(names) ? names.map(name => ({ name })) : null;
         }
         if (!details) return null;
-        return details
-            .filter(d => d && typeof d.name === 'string' && d.name.trim())
-            .map(d => {
-                const cls = classify(cleanName(d.name)) || { name: d.name };
-                return {
-                    name: d.name,
-                    canonical: cls.name,
-                    amount: parseNumber(d.amount),
-                    unit: d.unit || '',
-                    custom: !!d.custom
-                };
-            });
+        return details.filter(d => d && typeof d.name === 'string' && d.name.trim());
+    }
+
+    function saveStockDetails(details) {
+        writeJson(KEYS.vorratDetails, details);
+        writeJson(KEYS.vorrat, details.map(d => d.name));
+    }
+
+    function getStock(details) {
+        details = details || getStockDetails();
+        if (!details) return null;
+        return details.map((d, index) => {
+            const cls = classify(cleanName(d.name)) || { name: d.name };
+            return {
+                index,
+                name: d.name,
+                canonical: cls.name,
+                amount: parseNumber(d.amount),
+                unit: d.unit || '',
+                custom: !!d.custom
+            };
+        });
     }
 
     function findStock(item, stock) {
@@ -502,6 +514,175 @@
             const sk = normalize(s.name);
             return s.custom && sk.length > 3 && (key.includes(sk) || sk.includes(key));
         }) || null;
+    }
+
+    /* ---------- Vorrat ändern: Einkauf einräumen, Gekochtes abziehen ---------- */
+
+    /* Menge aus Grundeinheit (g/ml/Stück …) in die Einheit des Vorrats-Eintrags umrechnen. */
+    function fromBase(amount, baseUnit, stockUnit) {
+        const target = toBase(1, stockUnit);
+        if (target.unit !== baseUnit) return null;
+        return amount / target.amount;
+    }
+
+    function stockNumber(n) {
+        const r = n >= 10 ? Math.round(n) : Math.round(n * 100) / 100;
+        return String(r).replace('.', ',');
+    }
+
+    /* Gekaufte Menge so runden wie auf der Einkaufsliste angezeigt.
+       Löffelmengen (TL, EL, Prise) kauft man nicht – dann ohne Menge (= "ist da"). */
+    const SPOON_UNITS = ['TL', 'EL', 'Prise', 'Prisen', 'Msp.'];
+
+    function roundBought(a) {
+        if (!a || SPOON_UNITS.includes(a.unit)) return null;
+        let amount = a.amount;
+        if (a.unit === 'g' || a.unit === 'ml') amount = amount >= 20 ? Math.ceil(amount / 5) * 5 : Math.ceil(amount);
+        else amount = Math.ceil(amount - 0.01);
+        return { amount, unit: a.unit };
+    }
+
+    /* Neue Einträge: große Mengen als kg / l, sonst wie gekauft. */
+    function storeAmount(a) {
+        if (a.unit === 'g' && a.amount >= 1000) return { amount: stockNumber(a.amount / 1000), unit: 'kg' };
+        if (a.unit === 'ml' && a.amount >= 1000) return { amount: stockNumber(a.amount / 1000), unit: 'l' };
+        if (a.unit === 'g' || a.unit === 'ml') return { amount: String(Math.ceil(a.amount)), unit: a.unit };
+        return { amount: stockNumber(a.amount), unit: a.unit };
+    }
+
+    function snapshot() {
+        return {
+            vorrat: localStorage.getItem(KEYS.vorrat),
+            vorratDetails: localStorage.getItem(KEYS.vorratDetails),
+            plan: localStorage.getItem(KEYS.plan),
+            einkauf: localStorage.getItem(KEYS.einkauf)
+        };
+    }
+
+    function restore(snap) {
+        if (!snap) return;
+        try {
+            Object.entries(snap).forEach(([k, v]) => {
+                if (v === null) localStorage.removeItem(KEYS[k]); else localStorage.setItem(KEYS[k], v);
+            });
+        } catch (e) { /* nichts zu tun */ }
+    }
+
+    /*
+     * Gekaufte Dinge in den Vorrat legen.
+     * items: [{ name, amounts: [{ amount, unit }] }] (Mengen in Grundeinheit, wie auf der Einkaufsliste)
+     * Rückgabe: [{ name, text }] – was passiert ist.
+     */
+    function addToStock(items) {
+        const details = (getStockDetails() || []).map(d => Object.assign({}, d));
+        const changes = [];
+        items.forEach(item => {
+            const stock = getStock(details);
+            const a = roundBought(item.amounts && item.amounts.length === 1 ? item.amounts[0] : null);
+            const found = findStock(item, stock);
+            if (found) {
+                const d = details[found.index];
+                const add = a ? fromBase(a.amount, a.unit, d.unit) : null;
+                if (add !== null && found.amount !== null) {
+                    d.amount = stockNumber(found.amount + add);
+                    changes.push({ name: d.name, text: `jetzt ${d.amount} ${d.unit}` });
+                } else if (add !== null && !String(d.amount || '').trim()) {
+                    d.amount = stockNumber(add);
+                    changes.push({ name: d.name, text: `jetzt ${d.amount} ${d.unit}` });
+                } else {
+                    changes.push({ name: d.name, text: 'war schon im Vorrat' });
+                }
+                return;
+            }
+            const neu = a ? storeAmount(a) : { amount: '', unit: 'Stück' };
+            details.push({ name: item.name, amount: neu.amount, unit: neu.unit, custom: true });
+            changes.push({ name: item.name, text: neu.amount ? `neu: ${neu.amount} ${neu.unit}` : 'neu im Vorrat' });
+        });
+        saveStockDetails(details);
+        return changes;
+    }
+
+    /*
+     * Ein Rezept wurde gekocht: Mengen aus dem Vorrat abziehen.
+     * Nur Einträge mit bekannter Menge und passender Einheit werden verringert.
+     * Rückgabe: [{ name, text }]
+     */
+    function removeFromStock(recipe, factor) {
+        const details = getStockDetails();
+        if (!details) return [];
+        const copy = details.map(d => Object.assign({}, d));
+        const changes = [];
+        const used = new Map();
+        (recipe.zutaten || []).forEach(zutat => {
+            const amount = parseNumber(zutat.menge);
+            const pieces = splitList(zutat);
+            if (amount === null || pieces.length !== 1) return;
+            const cls = classify(pieces[0]);
+            if (!cls) return;
+            const base = toBase(amount * (factor || 1), zutat.einheit);
+            const found = findStock({ name: cls.name, group: cls.group, category: cls.category }, getStock(copy));
+            if (!found || found.amount === null) return;
+            const take = fromBase(base.amount, base.unit, copy[found.index].unit);
+            if (take === null) return;
+            const key = found.index;
+            used.set(key, (used.get(key) || 0) + take);
+        });
+        const remove = [];
+        used.forEach((take, index) => {
+            const d = copy[index];
+            const left = Math.max(0, parseNumber(d.amount) - take);
+            if (left <= 0.0001 && d.custom) {
+                remove.push(index);
+                changes.push({ name: d.name, text: 'aufgebraucht' });
+            } else {
+                d.amount = stockNumber(left);
+                changes.push({ name: d.name, text: `noch ${d.amount} ${d.unit}` });
+            }
+        });
+        const kept = copy.filter((d, i) => !remove.includes(i));
+        saveStockDetails(kept);
+        return changes;
+    }
+
+    /*
+     * Wie viel von einem Rezept ist schon im Vorrat? Gewürze zählen nicht mit,
+     * die hat man meistens. Rückgabe: { have, total, missing: [Namen] }
+     */
+    function stockCoverage(recipe, stock) {
+        stock = stock === undefined ? getStock() : stock;
+        const seen = new Set();
+        const out = { have: 0, total: 0, missing: [] };
+        (recipe.zutaten || []).forEach(zutat => {
+            splitList(zutat).forEach(piece => {
+                const cls = classify(piece);
+                if (!cls || cls.category === CAT.gewuerz || seen.has(cls.name)) return;
+                seen.add(cls.name);
+                out.total++;
+                if (stock && findStock({ name: cls.name, group: cls.group, category: cls.category }, stock)) out.have++;
+                else out.missing.push(cls.name);
+            });
+        });
+        return out;
+    }
+
+    /* Im Wochenplan als gekocht markieren (heute zuerst, sonst ein anderer Tag dieser Woche). */
+    function markCooked(recipeId, menge) {
+        const plan = getPlan();
+        const today = isoDate(new Date());
+        const days = [today, ...weekDays(currentWeekOf(today)).map(d => d.key).filter(k => k !== today)];
+        for (const key of days) {
+            const entry = (plan[key] || []).find(e => e.id === recipeId && !e.gekocht);
+            if (entry) {
+                entry.gekocht = today;
+                savePlan(plan);
+                return key;
+            }
+        }
+        return null;
+    }
+
+    function currentWeekOf(iso) {
+        return isoDate(mondayOf(parseIso(iso)));
     }
 
     /* ---------- Einkaufsliste ---------- */
@@ -519,7 +700,8 @@
         options = options || {};
         const plan = options.plan || getPlan();
         const stock = options.stock !== undefined ? options.stock : getStock();
-        const entries = weekEntries(monday, plan);
+        /* schon gekochte Gerichte brauchen nichts mehr vom Einkauf */
+        const entries = weekEntries(monday, plan).filter(e => !e.entry.gekocht);
         const map = new Map();
 
         entries.forEach(({ entry, recipe }) => {
@@ -613,7 +795,8 @@
             gekauft: Array.isArray(s.gekauft) ? s.gekauft : [],
             habeIch: Array.isArray(s.habeIch) ? s.habeIch : [],
             dochKaufen: Array.isArray(s.dochKaufen) ? s.dochKaufen : [],
-            eigene: Array.isArray(s.eigene) ? s.eigene : []
+            eigene: Array.isArray(s.eigene) ? s.eigene : [],
+            eingeraeumt: Array.isArray(s.eingeraeumt) ? s.eingeraeumt : []
         };
     }
 
@@ -642,6 +825,7 @@
         isoDate, parseIso, mondayOf, currentWeek, setWeek, shiftWeek, weekDays, weekLabel,
         getPlan, savePlan, planArt, defaultMenge, factorFor, mengeLabel, weekEntries,
         parseNumber, classify, splitList, getStock, findStock,
+        getStockDetails, saveStockDetails, addToStock, removeFromStock, markCooked, snapshot, restore, stockCoverage,
         buildShoppingList, formatAmount, formatAmounts,
         getShopState, saveShopState
     };
