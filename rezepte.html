@@ -600,6 +600,11 @@
             font-size: 0.98rem;
         }
 
+        .source-top {
+            margin: -6px 0 16px;
+            text-align: center;
+        }
+
         .source a {
             color: var(--orange-dark);
         }
@@ -857,6 +862,7 @@
                 <section class="sheet detail-head">
                     <span class="kategorie">${esc(r.kategorie)}</span>
                     <h2>${esc(r.titel)}</h2>
+                    ${quelle.art ? `<p class="source source-top">Quelle: ${quelle.url ? `<a href="${esc(quelle.url)}" target="_blank" rel="noopener">${esc(quelle.art)} ↗</a>` : esc(quelle.art)}</p>` : ''}
                     ${anzahl ? `
                     <div class="servings" role="group" aria-label="Personen anpassen">
                         <button type="button" id="servingsLess" aria-label="Weniger">−</button>
@@ -897,7 +903,6 @@
                     ${tips.map(([icon, text]) => `<div class="tip-box"><img src="assets/icons/${icon}.png" alt=""><p>${esc(text)}</p></div>`).join('')}
                 </section>` : ''}
 
-                ${quelle.art ? `<p class="source">Quelle: ${quelle.url ? `<a href="${esc(quelle.url)}" target="_blank" rel="noopener">${esc(quelle.art)}</a>` : esc(quelle.art)}</p>` : ''}
             `;
 
             els.detail.querySelectorAll('.steps li').forEach(li => {
