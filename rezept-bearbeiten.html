@@ -384,6 +384,22 @@
         </div>
 
         <form class="content" id="recipeForm" novalidate>
+            <section class="sheet" aria-label="Rezepttext einfügen" id="importSheet">
+                <h2>Rezepttext einfügen</h2>
+                <p class="lead">Hast du ein Rezept irgendwo gelesen? Kopier den Text hier hinein. Ich fülle dann Name, Zutaten und Schritte für dich aus. Du kannst danach alles noch ändern.</p>
+                <label class="field">
+                    <span class="visually-hidden">Rezepttext</span>
+                    <textarea id="importText" placeholder="Name des Gerichts&#10;&#10;Zutaten&#10;500 g Kartoffeln&#10;1 Zwiebel&#10;&#10;Zubereitung&#10;Kartoffeln schälen und würfeln.&#10;20 Minuten köcheln."></textarea>
+                </label>
+                <div class="form-actions">
+                    <p class="message" id="importMessage" role="status"></p>
+                    <button class="next-button" type="button" id="importButton">
+                        <span>Felder ausfüllen</span>
+                        <span class="arrow" aria-hidden="true">↓</span>
+                    </button>
+                </div>
+            </section>
+
             <section class="sheet" aria-label="Das Wichtigste">
                 <h2>Das Wichtigste</h2>
                 <p class="lead">Nur der Name ist Pflicht, der Rest hilft beim Planen.</p>
@@ -533,6 +549,58 @@
         $('backButton').addEventListener('click', () => {
             location.href = editing ? `rezepte.html#rezept/${encodeURIComponent(editing.id)}` : 'rezepte.html';
         });
+        /* Rezepttext aufteilen: Überschriften "Zutaten" und "Zubereitung" trennen die Abschnitte. */
+        const ABSCHNITT_ZUTATEN = /^\s*(zutaten|du brauchst|du benötigst)\s*:?\s*$/i;
+        const ABSCHNITT_ZUBEREITUNG = /^\s*(zubereitung|zubereiten|anleitung|so geht'?s|so wird's|schritte)\s*:?\s*$/i;
+
+        function importText(text) {
+            const lines = text.split(/\r?\n/).map(l => l.trim());
+            let teil = 'kopf';
+            const kopf = [], zutaten = [], schritte = [];
+            lines.forEach(line => {
+                if (!line) return;
+                if (ABSCHNITT_ZUTATEN.test(line)) { teil = 'zutaten'; return; }
+                if (ABSCHNITT_ZUBEREITUNG.test(line)) { teil = 'schritte'; return; }
+                if (teil === 'kopf') kopf.push(line);
+                else if (teil === 'zutaten') zutaten.push(line);
+                else schritte.push(line);
+            });
+            const alles = kopf.join(' ') + ' ' + text;
+            const portionen = alles.match(/(\d+)\s*(?:portionen|personen|pers\.|stück)/i);
+            const zeit = alles.match(/(\d+)\s*(?:min|minuten)\b/i);
+            const kcal = alles.match(/(\d+)\s*kcal/i);
+            return {
+                titel: kopf[0] || '',
+                zutaten: zutaten.join('\n'),
+                schritte: schritte.join('\n'),
+                portionen: portionen ? Number(portionen[1]) : null,
+                zeitMin: zeit ? Number(zeit[1]) : null,
+                kcal: kcal ? Number(kcal[1]) : null,
+                gefunden: { zutaten: zutaten.length, schritte: schritte.length }
+            };
+        }
+
+        $('importButton').addEventListener('click', () => {
+            const text = $('importText').value.trim();
+            if (!text) {
+                $('importMessage').textContent = 'Kopier zuerst den Rezepttext hier hinein.';
+                return;
+            }
+            const r = importText(text);
+            if (!r.gefunden.zutaten && !r.gefunden.schritte) {
+                $('importMessage').textContent = 'Ich habe keine Zutaten und keine Schritte gefunden. Hast du die Überschriften „Zutaten“ und „Zubereitung“ mit kopiert?';
+                return;
+            }
+            if (r.titel && !$('titel').value.trim()) $('titel').value = r.titel.slice(0, 90);
+            if (r.portionen) $('portionen').value = Math.min(20, r.portionen);
+            if (r.zeitMin && !$('zeitMin').value) $('zeitMin').value = r.zeitMin;
+            if (r.kcal && !$('kcal').value) $('kcal').value = r.kcal;
+            if (r.zutaten) $('zutaten').value = r.zutaten;
+            if (r.schritte) $('schritte').value = r.schritte;
+            renderPreview();
+            $('importMessage').textContent = `Übernommen: ${r.gefunden.zutaten} Zutaten, ${r.gefunden.schritte} Schritte. Bitte kurz prüfen, bevor du speicherst.`;
+        });
+
         renderPreview();
         $('zutaten').addEventListener('input', renderPreview);
 
