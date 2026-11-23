@@ -374,9 +374,20 @@
                     <dt>Rezepte</dt><dd id="recipeCount">–</dd>
                     <dt>Rezepte-Stand</dt><dd id="recipeDate">–</dd>
                     <dt>Gespeichert</dt><dd id="storedCount">–</dd>
-                    <dt>Für Tüftler</dt><dd><a href="index.html?test=1">Test-Modus öffnen</a></dd>
+                    <dt class="tueftler" hidden>Für Tüftler</dt><dd class="tueftler" hidden><a href="index.html?test=1">Test-Modus öffnen</a></dd>
                 </dl>
             </section>
+            <script>
+            /* Tüftler-Bereich nur sichtbar, wenn die Seite einmal mit ?tueftler=1 geöffnet wurde. */
+            (function () {
+                let an = false;
+                try {
+                    if (new URLSearchParams(location.search).get('tueftler') === '1') localStorage.setItem('kpTueftler', '1');
+                    an = localStorage.getItem('kpTueftler') === '1';
+                } catch (e) {}
+                if (an) document.querySelectorAll('.tueftler').forEach(el => { el.hidden = false; });
+            })();
+            </script>
         </div>
     </main>
 
