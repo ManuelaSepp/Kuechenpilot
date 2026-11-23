@@ -14,7 +14,7 @@
         { href: 'einkauf.html', titel: 'Einkauf', text: 'Einkaufen leicht gemacht', icon: 'kiste.png' },
         { href: 'vorrat.html', titel: 'Vorrat', text: 'Vorräte im Blick', icon: 'regal.png' },
         { href: 'kaloriengrab.html', titel: 'Was war auf dem Teller?', text: 'Essen eintragen, Kalorien im Blick', icon: 'apfel.png' },
-        { href: 'personen.html', titel: 'Personen', text: 'Wer isst mit?', icon: 'klemmbrett.png' },
+        { href: 'personen.html', titel: 'Personen', text: 'Personen und Vorlieben eintragen (optional)', icon: 'klemmbrett.png' },
         { href: 'mehr.html', titel: 'Mehr', text: 'Einstellungen und Infos', icon: 'stern.png' }
     ];
 
