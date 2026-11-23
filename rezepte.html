@@ -293,6 +293,28 @@
             color: #b05a00;
         }
 
+        .link-open {
+            align-self: flex-start;
+            min-height: 50px;
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            border: 2px solid var(--orange);
+            border-radius: 18px;
+            background: var(--orange);
+            color: #ffffff;
+            font-size: 1.12rem;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: var(--shadow-small);
+        }
+
+        .link-open:hover,
+        .link-open:focus-visible {
+            background: var(--orange-dark);
+            outline: none;
+        }
+
         .badge-own {
             color: var(--orange-dark);
         }
@@ -865,6 +887,7 @@
                 r.naehrwerte && r.naehrwerte.kcal ? `${r.naehrwerte.kcal} kcal` : ''
             ].filter(Boolean);
             const open = r.status === 'unvollständig' ? '<span class="badge-open">noch unvollständig</span>'
+                : r.linkOnly ? '<span class="badge-own">nur Link</span>'
                 : r.eigen ? '<span class="badge-own">eigenes Rezept</span>' : '';
             return `
                 <a class="recipe-card" href="#rezept/${encodeURIComponent(r.id)}">
@@ -1076,13 +1099,59 @@
             });
         }
 
+        /* Nur-Link-Rezepte: kein Rezepttext, nur Name, Quelle, Notiz. */
+        function renderLinkOnly(r) {
+            const quelle = r.quelle || {};
+            els.detail.innerHTML = `
+                <section class="sheet detail-head">
+                    <span class="kategorie">${esc(r.kategorie)}</span>
+                    <h2>${esc(r.titel)}</h2>
+                    ${quelle.url ? `<p class="source">Quelle: <a href="${esc(quelle.url)}" target="_blank" rel="noopener">${esc(quelle.art || quelle.url)}</a></p>` : ''}
+                </section>
+                ${quelle.url ? `<a class="link-open" href="${esc(quelle.url)}" target="_blank" rel="noopener">Rezept auf der Seite öffnen</a>` : ''}
+                ${r.notizen && r.notizen.length ? `<section class="sheet"><h2>Meine Notiz</h2>${r.notizen.map(n => `<p>${esc(n)}</p>`).join('')}</section>` : ''}
+                <section class="sheet own-actions" aria-label="Eigener Eintrag">
+                    <div class="own-buttons">
+                        <button class="add-own" type="button" id="editOwn">Bearbeiten</button>
+                        <button class="add-own danger" type="button" id="deleteOwn">Löschen</button>
+                    </div>
+                    <div class="confirm-box" id="deleteConfirm" hidden>
+                        <p>„${esc(r.titel)}“ wirklich löschen? Das geht nicht rückgängig.</p>
+                        <div class="own-buttons">
+                            <button class="add-own danger" type="button" id="deleteYes">Ja, löschen</button>
+                            <button class="add-own" type="button" id="deleteNo">Abbrechen</button>
+                        </div>
+                    </div>
+                </section>`;
+            document.getElementById('editOwn').addEventListener('click', () => {
+                location.href = `rezept-bearbeiten.html?id=${encodeURIComponent(r.id)}`;
+            });
+            document.getElementById('deleteOwn').addEventListener('click', () => {
+                document.getElementById('deleteConfirm').hidden = false;
+            });
+            document.getElementById('deleteNo').addEventListener('click', () => {
+                document.getElementById('deleteConfirm').hidden = true;
+            });
+            document.getElementById('deleteYes').addEventListener('click', () => {
+                KPEigeneRezepte.remove(r.id);
+                location.replace('rezepte.html');
+            });
+        }
+
         /* ---------- Navigation ---------- */
 
         function route() {
             const match = location.hash.match(/^#rezept\/([^/]+)(?:\/(\d+))?$/);
             const recipe = match && RECIPES.find(r => r.id === decodeURIComponent(match[1]));
 
-            if (recipe) {
+            if (recipe && recipe.linkOnly) {
+                renderLinkOnly(recipe);
+                els.overview.hidden = true;
+                els.detail.hidden = false;
+                els.backLabel.textContent = 'Zurück zur Übersicht';
+                els.intro.textContent = 'Das Rezept steht auf der Quellseite. Hier hast du deine Notiz und den Link.';
+                document.title = `Küchenpilot - ${recipe.titel}`;
+            } else if (recipe) {
                 renderDetail(recipe, match[2] ? Number(match[2]) : 0);
                 els.overview.hidden = true;
                 els.detail.hidden = false;
