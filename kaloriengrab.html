@@ -384,6 +384,8 @@
             background: #fffaf0;
         }
 
+        .factor-label { display: block; margin: 8px 0; font-size: 0.95rem; }
+        .factor-label input { width: 90px; margin-left: 6px; }
         .free-entry {
             display: grid;
             grid-template-columns: minmax(0, 1fr) 110px;
@@ -563,6 +565,9 @@
                     <div>
                         <h3>Aus deinen Rezepten (1 Portion)</h3>
                         <input type="search" id="recipeSearch" placeholder="Rezept suchen …" autocomplete="off">
+                        <label class="factor-label">Wie viel davon? (1 = eine Portion, z. B. 0,5 oder 2)
+                            <input type="text" id="recipeFactor" value="1" inputmode="decimal" autocomplete="off">
+                        </label>
                         <div class="suggestions" id="suggestions"></div>
                     </div>
                     <div>
@@ -732,6 +737,12 @@
                 <span>${planned ? '📅 ' : ''}${esc(r.titel)}</span><small>${r.naehrwerte.kcal} kcal</small></button>`;
         }
 
+        /* Freier Faktor, z. B. 0,5 oder 1,5. Ungültige Eingaben zählen als 1. */
+        function faktor() {
+            const f = Number(String($('recipeFactor').value).replace(',', '.'));
+            return f > 0 && f <= 20 ? Math.round(f * 100) / 100 : 1;
+        }
+
         function renderSuggestions() {
             const words = normalize($('recipeSearch').value).split(/\s+/).filter(Boolean);
             const planned = words.length ? [] : plannedRecipes(state.day);
@@ -745,7 +756,9 @@
             $('suggestions').querySelectorAll('.suggestion').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const r = BY_ID.get(btn.dataset.id);
-                    addEntry({ name: r.titel, kcal: r.naehrwerte.kcal, id: r.id });
+                    const f = faktor();
+                    const label = f === 1 ? '' : ` (× ${String(f).replace('.', ',')})`;
+                    addEntry({ name: r.titel + label, kcal: Math.round(r.naehrwerte.kcal * f), id: r.id });
                 });
             });
         }
@@ -796,6 +809,7 @@
         });
 
         $('recipeSearch').addEventListener('input', renderSuggestions);
+        $('recipeFactor').addEventListener('input', renderSuggestions);
 
         $('addFree').addEventListener('click', () => {
             const name = $('freeName').value.trim();
