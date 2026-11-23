@@ -415,6 +415,47 @@
     padding:0;
 }
 
+/* Handy und Tablet: Personen-Felder als Fenster über der Seite. */
+.person-cards.as-popup{
+    position:fixed;
+    inset:0;
+    z-index:1001;
+    width:100%;
+    margin:0;
+    padding:72px 16px 28px;
+    overflow-y:auto;
+    background:rgba(51,36,10,.38);
+    display:grid;
+    align-content:start;
+    justify-items:center;
+}
+
+.person-cards.as-popup .person-sheet{
+    width:min(100%, 620px);
+}
+
+.popup-close{
+    position:fixed;
+    top:14px;
+    left:14px;
+    z-index:1002;
+    min-height:48px;
+    padding:8px 18px;
+    border:2px solid #f5a623;
+    border-radius:16px;
+    background:#ffffff;
+    color:#df8f12;
+    font:inherit;
+    font-size:1.05rem;
+    cursor:pointer;
+}
+
+.popup-close:hover,.popup-close:focus-visible{
+    background:#f5a623;
+    color:#ffffff;
+    outline:none;
+}
+
 .person-cards{
     width:min(100%, clamp(720px,64vw,790px));
     margin-top:28px;
@@ -671,6 +712,19 @@ function renderPersonCards(){
      </fieldset>
    </section>`);
  }
+
+ /* Auf Handy und Tablet als Fenster über der Seite zeigen, mit Schließen-Knopf. */
+ const alsFenster=window.matchMedia('(max-width: 1024px)').matches;
+ wrap.classList.toggle('as-popup', alsFenster);
+ if(alsFenster){
+   wrap.insertAdjacentHTML('afterbegin',`<button type="button" class="popup-close" onclick="closePersonPopup()">Schließen</button>`);
+   wrap.addEventListener('click',e=>{ if(e.target===wrap) closePersonPopup(); });
+ }
+}
+
+function closePersonPopup(){
+ openPersons=false;
+ renderPersonCards();
 }
 renderPersonCards();
 </script>
