@@ -642,6 +642,10 @@
         const haveSheet = document.getElementById('haveSheet');
         const OWN_CATEGORY = 'Eigene Einträge';
 
+        /* Eigene Einträge sind entweder Text (alt) oder { text, kat } (mit gewählter Abteilung). */
+        function eigenText(e) { return typeof e === 'string' ? e : e.text; }
+        function eigenKategorie(e) { return (typeof e === 'object' && e.kat) || OWN_CATEGORY; }
+
         function plural(n, one, many) {
             return `${n} ${n === 1 ? one : many}`;
         }
@@ -674,8 +678,9 @@
                 }
             });
 
-            state.eigene.forEach((text, i) => {
-                buy.push({ key: `eigen:${i}:${P.normalize(text)}`, name: text, category: OWN_CATEGORY, amounts: [], recipes: [], own: i });
+            state.eigene.forEach((eintrag, i) => {
+                const text = eigenText(eintrag);
+                buy.push({ key: `eigen:${i}:${P.normalize(text)}`, name: text, category: eigenKategorie(eintrag), amounts: [], recipes: [], own: i });
             });
 
             const toStore = buy.filter(i => i.own === undefined && state.gekauft.includes(i.key) && !state.eingeraeumt.includes(i.key));
@@ -835,6 +840,10 @@
             return `
                 <form class="add-own" id="ownForm">
                     <input type="text" id="ownInput" placeholder="Noch etwas dazu? z. B. Spülmittel" autocomplete="off" aria-label="Eigenen Eintrag hinzufügen">
+                    <select id="ownCategory" aria-label="Abteilung wählen">
+                        <option value="${OWN_CATEGORY}">Eigene Einträge</option>
+                        ${P.CATEGORY_ORDER.map(c => `<option value="${c}">${c}</option>`).join('')}
+                    </select>
                     <button type="submit">+</button>
                 </form>`;
         }
@@ -879,7 +888,7 @@
                 updateState(s => { s.eigene.splice(Number(removeOwn.dataset.removeOwn), 1); s.gekauft = s.gekauft.filter(k => !k.startsWith('eigen:')); });
             } else if (event.target.closest('[data-remind-add]')) {
                 const b = event.target.closest('[data-remind-add]');
-                updateState(s => { if (!s.eigene.includes(b.dataset.name)) s.eigene.push(b.dataset.name); });
+                updateState(s => { if (!s.eigene.some(e => eigenText(e) === b.dataset.name)) s.eigene.push(b.dataset.name); });
             } else if (event.target.closest('[data-remind-skip]')) {
                 P.snoozeReminder(event.target.closest('[data-remind-skip]').dataset.remindSkip);
                 render();
@@ -901,7 +910,8 @@
             event.preventDefault();
             const text = document.getElementById('ownInput').value.trim();
             if (!text) return;
-            updateState(s => s.eigene.push(text));
+            const kat = document.getElementById('ownCategory')?.value || OWN_CATEGORY;
+            updateState(s => s.eigene.push(kat === OWN_CATEGORY ? text : { text, kat }));
             const input = document.getElementById('ownInput');
             if (input) input.focus();
         });
