@@ -48,8 +48,8 @@
         .kp-menu-button[hidden] { display: none; }
         .kp-menu-button.kp-menu-in-hero {
             position: absolute;
-            top: 0;
-            right: 0;
+            top: 12px;
+            right: 12px;
             width: 46px;
             height: 46px;
             gap: 4px;
@@ -137,6 +137,9 @@
     }
 
     function bauen() {
+        /* Auf der Startseite ist kein Menü nötig, dort stehen alle Bereiche schon als Kacheln. */
+        if (aktuelleSeite() === 'index.html') return;
+
         const style = document.createElement('style');
         style.textContent = CSS;
         document.head.appendChild(style);
@@ -169,10 +172,12 @@
             <button type="button" class="kp-menu-close" aria-label="Menü schließen">Schließen</button>`;
 
         /* Knopf direkt in den Kopfbereich setzen, damit er nah am Inhalt sitzt. */
-        const kopf = document.querySelector('.hero-shell');
-        if (kopf) {
+        /* Knopf in die Kachel mit dem Text setzen, oben rechts. */
+        const kachel = document.querySelector('.welcome-card') || document.querySelector('.hero-shell');
+        if (kachel) {
             knopf.classList.add('kp-menu-in-hero');
-            kopf.appendChild(knopf);
+            if (getComputedStyle(kachel).position === 'static') kachel.style.position = 'relative';
+            kachel.appendChild(knopf);
         } else {
             document.body.appendChild(knopf);
         }
