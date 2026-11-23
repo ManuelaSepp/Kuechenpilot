@@ -46,6 +46,15 @@
             background: #df8f12;
         }
         .kp-menu-button[hidden] { display: none; }
+        .kp-menu-button.kp-menu-in-hero {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 46px;
+            height: 46px;
+            gap: 4px;
+        }
+        .kp-menu-button.kp-menu-in-hero span { width: 20px; height: 2.5px; }
         .kp-menu-button:focus-visible { outline: 3px solid rgba(245, 166, 35, 0.45); outline-offset: 2px; }
         .kp-menu-layer {
             position: fixed;
@@ -159,7 +168,14 @@
             </nav>
             <button type="button" class="kp-menu-close" aria-label="Menü schließen">Schließen</button>`;
 
-        document.body.appendChild(knopf);
+        /* Knopf direkt in den Kopfbereich setzen, damit er nah am Inhalt sitzt. */
+        const kopf = document.querySelector('.hero-shell');
+        if (kopf) {
+            knopf.classList.add('kp-menu-in-hero');
+            kopf.appendChild(knopf);
+        } else {
+            document.body.appendChild(knopf);
+        }
         document.body.appendChild(schicht);
 
         function oeffnen() {
