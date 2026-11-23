@@ -621,6 +621,29 @@ function toggleShakeDetails(select){
  if(details) details.hidden=select.value==='none';
 }
 
+const DETAILS_KEY='kuechenpilotPersonenDetails';
+
+function ladeDetails(){
+ try{ const v=JSON.parse(localStorage.getItem(DETAILS_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; }
+}
+
+function sichereDetails(){
+ const liste=[...document.querySelectorAll('#personCards .person-sheet')].map(sheet=>({
+   texte:[...sheet.querySelectorAll('input[type=text], textarea')].map(el=>el.value),
+   auswahl:[...sheet.querySelectorAll('select')].map(el=>el.value),
+   allergien:[...sheet.querySelectorAll('input[type=checkbox]:checked')].map(el=>el.value)
+ }));
+ try{ localStorage.setItem(DETAILS_KEY,JSON.stringify(liste)); }catch(e){}
+}
+
+function angabenEintragen(sheet, daten){
+ sheet.querySelectorAll('input[type=text], textarea').forEach((el,i)=>{ if(daten.texte && daten.texte[i]!=null) el.value=daten.texte[i]; });
+ sheet.querySelectorAll('select').forEach((el,i)=>{ if(daten.auswahl && daten.auswahl[i]!=null) el.value=daten.auswahl[i]; });
+ sheet.querySelectorAll('input[type=checkbox]').forEach(el=>{ el.checked=(daten.allergien||[]).includes(el.value); });
+ const haeufigkeit=sheet.querySelector('.shake-frequency');
+ if(haeufigkeit) toggleShakeDetails(haeufigkeit);
+}
+
 function renderPersonCards(){
  const wrap=document.getElementById('personCards');
  wrap.innerHTML='';
@@ -703,6 +726,7 @@ function renderPersonCards(){
          <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sellerie"> Sellerie</label>
          <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Senf"> Senf</label>
          <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sesam"> Sesam</label>
+         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Paprika"> Paprika</label>
          <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sonstige"> Sonstige</label>
        </div>
 
@@ -712,6 +736,10 @@ function renderPersonCards(){
      </fieldset>
    </section>`);
  }
+
+ /* Gespeicherte Angaben wieder eintragen. */
+ const gespeichert=ladeDetails();
+ wrap.querySelectorAll('.person-sheet').forEach((sheet,idx)=>{ if(gespeichert[idx]) angabenEintragen(sheet, gespeichert[idx]); });
 
  /* Auf Handy und Tablet als Fenster über der Seite zeigen, mit Schließen-Knopf. */
  const alsFenster=window.matchMedia('(max-width: 1024px)').matches;
@@ -726,6 +754,9 @@ function closePersonPopup(){
  openPersons=false;
  renderPersonCards();
 }
+const personenKarten=document.getElementById('personCards');
+personenKarten.addEventListener('input', sichereDetails);
+personenKarten.addEventListener('change', sichereDetails);
 renderPersonCards();
 </script>
 

@@ -526,6 +526,7 @@
             font-weight: 600;
         }
 
+        .ersatz-hinweis { display: block; margin-top: 2px; color: #a86a12; font-size: 0.9rem; }
         .scale-note {
             margin: -4px 0 12px;
             color: var(--muted);
@@ -848,6 +849,7 @@
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
     <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
+    <script src="assets/scripts/ersatz.js?v=1"></script>
     <script src="assets/scripts/planer.js?v=4"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -989,7 +991,9 @@
                     ${g.items.map(z => {
                         const amount = [z.menge, z.einheit].filter(Boolean).join(' ');
                         const name = amount ? z.name : (z.name || z.text);
-                        return `<li><span class="menge">${esc(amount)}</span><span>${esc(name)}</span></li>`;
+                        const ersatz = window.KPErsatz ? KPErsatz.fuerZutat(z) : [];
+                        const hinweis = ersatz.map(e => e.vorschlaege.join(', ')).join(' · ');
+                        return `<li><span class="menge">${esc(amount)}</span><span>${esc(name)}${hinweis ? `<small class="ersatz-hinweis">Ersatz für euch: ${esc(hinweis)}</small>` : ''}</span></li>`;
                     }).join('')}
                 </ul>`).join('');
         }
