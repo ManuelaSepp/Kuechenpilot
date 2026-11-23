@@ -384,6 +384,32 @@
         </div>
 
         <form class="content" id="recipeForm" novalidate>
+            <section class="sheet" aria-label="Nur Link merken" id="linkSheet">
+                <h2>Nur den Link merken</h2>
+                <p class="lead">Du willst das Rezept nicht abtippen? Trag hier nur Name und Link ein. Die Rezeptseite öffnest du dann direkt aus der App. Das Rezept erscheint dann bei den Rezepten, aber nicht bei Heute, im Wochenkorb oder auf der Einkaufsliste.</p>
+                <div class="fields">
+                    <label class="field">
+                        <span>Name des Gerichts</span>
+                        <input id="linkTitel" type="text" maxlength="90" placeholder="z. B. Butter Chicken">
+                    </label>
+                    <label class="field">
+                        <span>Link zur Seite</span>
+                        <input id="linkUrl" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
+                    </label>
+                    <label class="field wide">
+                        <span>Eigene Notiz (optional)</span>
+                        <textarea id="linkNotiz" style="min-height: 80px" placeholder="z. B. Mit weniger Chili, schmeckt zu Reis."></textarea>
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <p class="message" id="linkMessage" role="alert"></p>
+                    <button class="next-button" type="button" id="linkButton">
+                        <span>Link speichern</span>
+                        <span class="arrow" aria-hidden="true">→</span>
+                    </button>
+                </div>
+            </section>
+
             <section class="sheet" aria-label="Rezepttext einfügen" id="importSheet">
                 <h2>Rezepttext einfügen</h2>
                 <p class="lead">Hast du ein Rezept irgendwo gelesen? Kopier den Text hier hinein. Ich fülle dann Name, Zutaten und Schritte für dich aus. Du kannst danach alles noch ändern.</p>
@@ -579,6 +605,30 @@
                 gefunden: { zutaten: zutaten.length, schritte: schritte.length }
             };
         }
+
+        $('linkButton').addEventListener('click', () => {
+            const titel = $('linkTitel').value.trim();
+            const url = cleanUrl($('linkUrl').value);
+            if (!titel) { $('linkMessage').textContent = 'Wie heißt das Gericht?'; return; }
+            if (!url) { $('linkMessage').textContent = 'Trag einen Link ein, der zur Seite führt.'; return; }
+            const notiz = $('linkNotiz').value.trim();
+            const saved = ER.save({
+                id: '',
+                titel,
+                kategorie: $('kategorie').value,
+                tags: [],
+                portionen: 2,
+                geraete: [],
+                naehrwerte: {},
+                zutaten: [],
+                schritte: [],
+                tipps: [],
+                notizen: notiz ? [notiz] : [],
+                linkOnly: true,
+                quelle: { art: new URL(url).hostname.replace(/^www\./, ''), url }
+            });
+            location.href = `rezepte.html#rezept/${encodeURIComponent(saved.id)}`;
+        });
 
         $('importButton').addEventListener('click', () => {
             const text = $('importText').value.trim();
