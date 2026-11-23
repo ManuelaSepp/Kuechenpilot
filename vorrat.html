@@ -654,9 +654,14 @@
                     <label class="stock-option"><input type="checkbox" name="stock" value="Tomatenmark" checked><span>Tomatenmark</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Backpulver" checked><span>Backpulver</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Honig" checked><span>Honig</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Kräuter und Gewürze" checked><span>Kräuter und Gewürze</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Oregano" checked><span>Oregano</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Thymian" checked><span>Thymian</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Paprikapulver" checked><span>Paprikapulver</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Curry" checked><span>Curry</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kreuzkümmel" checked><span>Kreuzkümmel</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Sojasauce" checked><span>Sojasauce</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Kaffee oder Tee" checked><span>Kaffee oder Tee</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kaffee" checked><span>Kaffee</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Tee" checked><span>Tee</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Mehl" checked><span>Mehl</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Haferflocken" checked><span>Haferflocken</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Nudeln" checked><span>Nudeln</span></label>
@@ -671,12 +676,15 @@
                 <p>Lebensmittel, die häufig als Grundlage oder zum Abschmecken gebraucht werden.</p>
                 <div class="stock-grid">
                     <label class="stock-option"><input type="checkbox" name="stock" value="Eier" checked><span>Eier</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Milch oder Pflanzendrink" checked><span>Milch oder Pflanzendrink</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Butter oder Margarine" checked><span>Butter oder Margarine</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Milch" checked><span>Milch</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Pflanzendrink" checked><span>Pflanzendrink</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Butter" checked><span>Butter</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Margarine" checked><span>Margarine</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Käse" checked><span>Käse</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Joghurt" checked><span>Joghurt</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Quark" checked><span>Quark</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Sahne oder Kochcreme" checked><span>Sahne oder Kochcreme</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Sahne" checked><span>Sahne</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Kochcreme" checked><span>Kochcreme</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Senf" checked><span>Senf</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Ketchup" checked><span>Ketchup</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Mayonnaise" checked><span>Mayonnaise</span></label>
@@ -689,9 +697,11 @@
                 <h2>Gefrierschrank</h2>
                 <p>Praktische Reserven für schnelle Gerichte und Tage ohne frischen Einkauf.</p>
                 <div class="stock-grid">
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Brot oder Brötchen" checked><span>Brot oder Brötchen</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Brot" checked><span>Brot</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Brötchen" checked><span>Brötchen</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Fisch" checked><span>Fisch</span></label>
-                    <label class="stock-option"><input type="checkbox" name="stock" value="Fleisch oder Geflügel" checked><span>Fleisch oder Geflügel</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Fleisch" checked><span>Fleisch</span></label>
+                    <label class="stock-option"><input type="checkbox" name="stock" value="Geflügel" checked><span>Geflügel</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Gemüsemischung" checked><span>Gemüsemischung</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Erbsen" checked><span>Erbsen</span></label>
                     <label class="stock-option"><input type="checkbox" name="stock" value="Spinat" checked><span>Spinat</span></label>
@@ -769,6 +779,23 @@
 
         const units = ['g', 'kg', 'ml', 'l', 'Stück', 'Packung', 'Dose', 'Glas', 'Flasche', 'Päckchen', 'Portion'];
         const defaultUnits = {
+            'Oregano': 'g',
+            'Thymian': 'g',
+            'Paprikapulver': 'g',
+            'Curry': 'g',
+            'Kreuzkümmel': 'g',
+            'Kaffee': 'g',
+            'Tee': 'g',
+            'Milch': 'l',
+            'Pflanzendrink': 'l',
+            'Butter': 'g',
+            'Margarine': 'g',
+            'Sahne': 'ml',
+            'Kochcreme': 'ml',
+            'Brot': 'Stück',
+            'Brötchen': 'Stück',
+            'Fleisch': 'g',
+            'Geflügel': 'g',
             'Salz': 'g',
             'Pfeffer': 'g',
             'Zucker': 'g',
@@ -788,16 +815,16 @@
             'Paniermehl': 'g',
             'Backpulver': 'Päckchen',
             'Honig': 'g',
-            'Kräuter und Gewürze': 'g',
+            
             'Sojasauce': 'ml',
-            'Kaffee oder Tee': 'g',
-            'Milch oder Pflanzendrink': 'l',
-            'Butter oder Margarine': 'g',
+            
+            
+            
             'Eier': 'Stück',
             'Käse': 'g',
             'Joghurt': 'g',
             'Quark': 'g',
-            'Sahne oder Kochcreme': 'ml',
+            
             'Senf': 'ml',
             'Ketchup': 'ml',
             'Mayonnaise': 'ml',
@@ -808,9 +835,9 @@
             'Spinat': 'g',
             'Beeren': 'g',
             'Tiefgekühlte Kräuter': 'g',
-            'Brot oder Brötchen': 'Stück',
+            
             'Fisch': 'g',
-            'Fleisch oder Geflügel': 'g',
+            
             'Vorgekochte Reste': 'Portion'
         };
 
