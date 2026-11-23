@@ -33,7 +33,7 @@
             { muster: /\beier?\b/i, ersatz: ['Apfelmus (2 EL pro Ei)', 'Speisestärke mit Wasser (1 EL + 1 EL pro Ei)'] }
         ],
         'Erdnüsse/Nüsse': [
-            { muster: /\b(mandel|walnuss|haselnuss|erdnuss|cashew|pistazie)/i, ersatz: ['Sonnenblumenkerne', 'Kürbiskerne'] }
+            { muster: /\b(mandel|walnuss|haselnuss|erdnuss|cashew|pistazie)/i, ersatz: ['Sonnenblumenkerne', 'geröstete Haferflocken'] }
         ],
         'Soja': [
             { muster: /\bsojasauce\b/i, ersatz: ['Kokosaminos'] },
