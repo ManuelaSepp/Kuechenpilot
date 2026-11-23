@@ -203,6 +203,53 @@
             gap: 8px;
         }
 
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+            gap: 10px;
+        }
+
+        .cat-tile {
+            display: grid;
+            gap: 4px;
+            padding: 12px 10px;
+            border: 2px solid rgba(245, 166, 35, 0.30);
+            border-radius: 16px;
+            background: #ffffff;
+            color: var(--text);
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .cat-tile strong {
+            font-size: 1rem;
+            overflow-wrap: anywhere;
+            font-weight: 600;
+        }
+
+        .cat-tile small {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .cat-tile:hover,
+        .cat-tile:focus-visible {
+            border-color: var(--orange);
+            outline: none;
+        }
+
+        .cat-tile[aria-pressed="true"] {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #ffffff;
+        }
+
+        .cat-tile[aria-pressed="true"] small {
+            color: #ffffff;
+        }
+
         .chip {
             padding: 7px 14px;
             border: 2px solid rgba(245, 166, 35, 0.30);
@@ -770,16 +817,16 @@
         </div>
 
         <div class="recipe-area" id="overview">
+            <section class="sheet" aria-label="Kategorien">
+                <h2>Kategorien</h2>
+                <div class="cat-grid" id="categoryTiles"></div>
+            </section>
+
             <section class="sheet" aria-label="Rezepte suchen und filtern">
                 <label class="search-field">
                     <span>Suchen nach Rezept oder Zutat</span>
                     <input id="search" type="search" autocomplete="off" placeholder="z. B. Hähnchen, Kartoffeln, Kuchen …">
                 </label>
-
-                <div class="filter-group">
-                    <span class="filter-label">Kategorie</span>
-                    <div class="chips" id="categoryChips"></div>
-                </div>
 
                 <div class="filter-group">
                     <span class="filter-label">Zubereitung</span>
@@ -812,7 +859,7 @@
             overview: document.getElementById('overview'),
             detail: document.getElementById('detail'),
             search: document.getElementById('search'),
-            categoryChips: document.getElementById('categoryChips'),
+            categoryTiles: document.getElementById('categoryTiles'),
             deviceChips: document.getElementById('deviceChips'),
             resultLine: document.getElementById('resultLine'),
             grid: document.getElementById('recipeGrid'),
@@ -853,6 +900,22 @@
         ].join(' '))]));
 
         /* ---------- Übersicht ---------- */
+
+        /* Kategorien als kleine Kacheln oben; "Alle" zeigt wieder alles. */
+        function renderTiles(container, entries, key) {
+            const all = [[ALL, RECIPES.length], ...entries];
+            container.innerHTML = all.map(([name, count]) => `
+                <button type="button" class="cat-tile" data-value="${esc(name)}" aria-pressed="${state[key] === name}">
+                    <strong>${esc(name)}</strong> <small>${count} ${count === 1 ? 'Rezept' : 'Rezepte'}</small>
+                </button>`).join('');
+            container.querySelectorAll('.cat-tile').forEach(tile => {
+                tile.addEventListener('click', () => {
+                    state[key] = tile.dataset.value;
+                    container.querySelectorAll('.cat-tile').forEach(c => c.setAttribute('aria-pressed', c === tile));
+                    renderList();
+                });
+            });
+        }
 
         function renderChips(container, entries, key) {
             const all = [[ALL, RECIPES.length], ...entries];
@@ -1181,7 +1244,7 @@
             renderList();
         });
 
-        renderChips(els.categoryChips, countBy(RECIPES.map(r => r.kategorie)), 'category');
+        renderTiles(els.categoryTiles, countBy(RECIPES.map(r => r.kategorie)), 'category');
         renderChips(els.deviceChips, countBy(RECIPES.flatMap(r => r.geraete || [])), 'device');
         renderList();
         window.addEventListener('hashchange', route);
