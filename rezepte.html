@@ -1038,6 +1038,11 @@
                         <h2>Zutaten</h2>
                         <p class="scale-note" id="scaleNote" hidden></p>
                         <div id="ingredientList"></div>
+                        <button class="next-button shop-button" type="button" id="shopButton">
+                            <img src="assets/icons/kiste.png" alt="" aria-hidden="true">
+                            <span>Zutaten auf die Einkaufsliste</span>
+                        </button>
+                        <p class="hint" id="shopMessage" role="status" hidden></p>
                     </section>
 
                     <section class="sheet steps">
@@ -1256,6 +1261,27 @@
         route();
     </script>
 
+    <script>
+    /* Zutaten dieses Rezepts direkt auf die Einkaufsliste der aktuellen Woche setzen. */
+    document.addEventListener('click', e => {
+        const knopf = e.target.closest('#shopButton');
+        if (!knopf || !current || !current.recipe) return;
+        const r = current.recipe;
+        const sc = current.anzahl ? KPPortionen.skaliereRezept(r, current.anzahl) : r;
+        const woche = KPPlaner.currentWeek();
+        const st = KPPlaner.getShopState(woche);
+        let neu = 0;
+        (sc.zutaten || []).forEach(z => {
+            const menge = [z.menge, z.einheit].filter(Boolean).join(' ');
+            const text = (menge ? `${menge} ${z.name || z.text}` : (z.name || z.text)).trim();
+            if (text && !st.eigene.includes(text)) { st.eigene.push(text); neu++; }
+        });
+        KPPlaner.saveShopState(woche, st);
+        const meldung = document.getElementById('shopMessage');
+        meldung.hidden = false;
+        meldung.textContent = neu ? `${neu} Zutaten stehen jetzt auf der Einkaufsliste.` : 'Diese Zutaten stehen schon auf der Einkaufsliste.';
+    });
+    </script>
     <script src="assets/tests/test-runner.js"></script>
     <script>
         if (window.KPTest && window.KPTest.enabled) {
