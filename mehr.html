@@ -358,7 +358,7 @@
                     <button class="action-button danger" type="button" id="resetButton">Alles zurücksetzen</button>
                 </div>
                 <div class="confirm-box" id="confirmBox" hidden>
-                    <p>Wirklich alles löschen? Personen, Vorrat, Wochenplan, Einkaufsliste und Kalorien sind danach weg.</p>
+                    <p>Wirklich alles löschen? Personen, Vorrat, Wochenplan, Einkaufsliste, Kalorien und deine eigenen Rezepte sind danach weg.</p>
                     <div class="actions">
                         <button class="action-button danger" type="button" id="confirmReset">Ja, alles löschen</button>
                         <button class="action-button" type="button" id="cancelReset">Abbrechen</button>
@@ -381,6 +381,7 @@
     </main>
 
     <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
     <script>
         const PREFIX = 'kuechenpilot';
         const $ = id => document.getElementById(id);

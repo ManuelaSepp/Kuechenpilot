@@ -293,6 +293,69 @@
             color: #b05a00;
         }
 
+        .badge-own {
+            color: var(--orange-dark);
+        }
+
+        .result-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px 16px;
+        }
+
+        .add-own {
+            min-height: 46px;
+            padding: 8px 18px;
+            border: 2px solid var(--orange);
+            border-radius: 16px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font: inherit;
+            font-size: 1.08rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+        }
+
+        .add-own:hover,
+        .add-own:focus-visible {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .add-own.danger {
+            border-color: #d9534f;
+            color: #d9534f;
+            box-shadow: none;
+        }
+
+        .add-own.danger:hover,
+        .add-own.danger:focus-visible {
+            background: #d9534f;
+            color: #ffffff;
+        }
+
+        .own-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .confirm-box {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border: 2px dashed #d9534f;
+            border-radius: 16px;
+            background: #fff5f4;
+        }
+
+        .confirm-box p {
+            margin: 0 0 12px;
+        }
+
         .empty {
             padding: 28px;
             text-align: center;
@@ -648,6 +711,10 @@
             .recipe-grid {
                 grid-template-columns: 1fr;
             }
+
+            .add-own {
+                width: 100%;
+            }
         }
     </style>
     <link rel="stylesheet" href="assets/styles/responsive-master.css?v=6">
@@ -698,7 +765,10 @@
                 </div>
             </section>
 
-            <p class="result-line" id="resultLine" aria-live="polite"></p>
+            <div class="result-row">
+                <p class="result-line" id="resultLine" aria-live="polite"></p>
+                <button class="add-own" type="button" id="addOwn" onclick="location.href='rezept-bearbeiten.html'">+ Eigenes Rezept anlegen</button>
+            </div>
             <div class="recipe-grid" id="recipeGrid"></div>
         </div>
 
@@ -707,6 +777,7 @@
 
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
+    <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
     <script src="assets/scripts/planer.js?v=4"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -793,7 +864,8 @@
                 r.zeitMin ? `ca. ${r.zeitMin} Min.` : '',
                 r.naehrwerte && r.naehrwerte.kcal ? `${r.naehrwerte.kcal} kcal` : ''
             ].filter(Boolean);
-            const open = r.status === 'unvollständig' ? '<span class="badge-open">noch unvollständig</span>' : '';
+            const open = r.status === 'unvollständig' ? '<span class="badge-open">noch unvollständig</span>'
+                : r.eigen ? '<span class="badge-own">eigenes Rezept</span>' : '';
             return `
                 <a class="recipe-card" href="#rezept/${encodeURIComponent(r.id)}">
                     <span class="kategorie">${esc(r.kategorie)}</span>
@@ -898,7 +970,39 @@
                 </section>` : ''}
 
                 ${quelle.art ? `<p class="source">Quelle: ${quelle.url ? `<a href="${esc(quelle.url)}" target="_blank" rel="noopener">${esc(quelle.art)}</a>` : esc(quelle.art)}</p>` : ''}
+
+                ${r.eigen ? `
+                <section class="sheet own-actions" aria-label="Eigenes Rezept">
+                    <h2>Dein eigenes Rezept</h2>
+                    <div class="own-buttons">
+                        <button class="add-own" type="button" id="editOwn">Bearbeiten</button>
+                        <button class="add-own danger" type="button" id="deleteOwn">Löschen</button>
+                    </div>
+                    <div class="confirm-box" id="deleteConfirm" hidden>
+                        <p>„${esc(r.titel)}“ wirklich löschen? Das geht nicht rückgängig.</p>
+                        <div class="own-buttons">
+                            <button class="add-own danger" type="button" id="deleteYes">Ja, löschen</button>
+                            <button class="add-own" type="button" id="deleteNo">Abbrechen</button>
+                        </div>
+                    </div>
+                </section>` : ''}
             `;
+
+            if (r.eigen) {
+                document.getElementById('editOwn').addEventListener('click', () => {
+                    location.href = `rezept-bearbeiten.html?id=${encodeURIComponent(r.id)}`;
+                });
+                document.getElementById('deleteOwn').addEventListener('click', () => {
+                    document.getElementById('deleteConfirm').hidden = false;
+                });
+                document.getElementById('deleteNo').addEventListener('click', () => {
+                    document.getElementById('deleteConfirm').hidden = true;
+                });
+                document.getElementById('deleteYes').addEventListener('click', () => {
+                    KPEigeneRezepte.remove(r.id);
+                    location.replace('rezepte.html');
+                });
+            }
 
             els.detail.querySelectorAll('.steps li').forEach(li => {
                 li.addEventListener('click', () => li.classList.toggle('done'));
