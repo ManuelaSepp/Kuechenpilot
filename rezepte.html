@@ -527,6 +527,12 @@
         }
 
         .ersatz-hinweis { display: block; margin-top: 2px; color: #a86a12; font-size: 0.9rem; }
+        .wer-isst-mit { margin: 12px 0 4px; }
+        .wer-isst-mit summary { cursor: pointer; font-family: 'Architects Daughter', cursive; font-size: 1.1rem; }
+        .wer-isst-mit summary span { color: #a86a12; }
+        .wer-chip { display: inline-flex; align-items: center; gap: 6px; margin: 4px 10px 4px 0; padding: 6px 10px; border-radius: 999px; border: 1px solid #d8c7a8; }
+        .wer-weitere { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+        .wer-weitere input { width: 72px; padding: 6px; border-radius: 8px; border: 1px solid #d8c7a8; }
         .scale-note {
             margin: -4px 0 12px;
             color: var(--muted);
@@ -868,7 +874,7 @@
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
     <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
-    <script src="assets/scripts/ersatz.js?v=1"></script>
+    <script src="assets/scripts/ersatz.js?v=2"></script>
     <script src="assets/scripts/planer.js?v=5"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -1010,9 +1016,9 @@
                     ${g.items.map(z => {
                         const amount = [z.menge, z.einheit].filter(Boolean).join(' ');
                         const name = amount ? z.name : (z.name || z.text);
-                        const ersatz = window.KPErsatz ? KPErsatz.fuerZutat(z) : [];
-                        const hinweis = ersatz.map(e => e.vorschlaege.join(', ')).join(' · ');
-                        return `<li><span class="menge">${esc(amount)}</span><span>${esc(name)}${hinweis ? `<small class="ersatz-hinweis">Ersatz für euch: ${esc(hinweis)}</small>` : ''}</span></li>`;
+                        const ersatz = window.KPErsatz && current ? KPErsatz.fuerZutat(z, KPErsatz.gewaehlte(current.recipe.id)) : [];
+                        const hinweis = ersatz.map(e => `${e.personen.join(', ')}: ${e.vorschlaege.join(' oder ')}`).join(' · ');
+                        return `<li><span class="menge">${esc(amount)}</span><span>${esc(name)}${hinweis ? `<small class="ersatz-hinweis">Ersatz für ${esc(hinweis)}</small>` : ''}</span></li>`;
                     }).join('')}
                 </ul>`).join('');
         }
@@ -1020,9 +1026,24 @@
         function renderDetail(r, wunsch) {
             const n = r.naehrwerte || {};
             const standard = KPPortionen.standard(r);
+            const personenRezept = KPPortionen.basis(r).personen;
+            /* „Wer isst mit?“: Standard ist die eingestellte Personenzahl, nicht ein fester Wert. */
+            const wer = KPErsatz.werIsstMit(r.id);
+            const werZahl = Math.min(20, Math.max(1, wer.ids.length + wer.weitere));
             /* Personenzahl kann von der Heute-Seite mitkommen: #rezept/<id>/<anzahl> */
-            const anzahl = standard && wunsch ? Math.min(20, Math.max(1, wunsch)) : standard;
+            const anzahl = standard && wunsch ? Math.min(20, Math.max(1, wunsch))
+                : (standard && personenRezept ? werZahl : standard);
             current = { recipe: r, anzahl };
+            const werHtml = personenRezept ? `
+                    <details class="wer-isst-mit" id="werIsstMit">
+                        <summary>Wer isst mit? <span>${werZahl} ${werZahl === 1 ? 'Person' : 'Personen'}</span></summary>
+                        ${KPErsatz.personen().length
+                            ? KPErsatz.personen().map(p => `<label class="wer-chip"><input type="checkbox" data-person="${p.index}" ${wer.ids.includes(p.index) ? 'checked' : ''}> ${esc(p.name)}</label>`).join('')
+                            : '<p class="hint">Noch keine Personen angelegt. <a href="personen.html">Personen eintragen</a></p>'}
+                        <label class="wer-weitere">Weitere Personen ohne Namen
+                            <input type="number" id="werWeitere" min="0" max="50" value="${wer.weitere}">
+                        </label>
+                    </details>` : '';
             const boxes = [
                 r.zeitMin ? [`ca. ${r.zeitMin}`, 'Minuten'] : null,
                 n.kcal ? [n.kcal, 'kcal pro Portion'] : null,
@@ -1046,6 +1067,7 @@
                         <output id="servingsValue" aria-live="polite"></output>
                         <button type="button" id="servingsMore" aria-label="Mehr">+</button>
                     </div>` : ''}
+                    ${anzahl ? werHtml : ''}
                     <div class="fact-boxes">
                         ${boxes.map(([value, label]) => `<div class="fact-box"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('')}
                     </div>
@@ -1128,6 +1150,18 @@
             if (anzahl) {
                 document.getElementById('servingsLess').addEventListener('click', () => setServings(current.anzahl - 1));
                 document.getElementById('servingsMore').addEventListener('click', () => setServings(current.anzahl + 1));
+            }
+
+            /* „Wer isst mit?“: Auswahl speichern und Zahl sofort übernehmen. */
+            const werBox = document.getElementById('werIsstMit');
+            if (werBox) {
+                werBox.addEventListener('change', () => {
+                    const ids = [...werBox.querySelectorAll('input[data-person]:checked')].map(el => Number(el.dataset.person));
+                    const weitere = Math.max(0, Number(document.getElementById('werWeitere').value) || 0);
+                    KPErsatz.werIsstMitSpeichern(r.id, { ids, weitere });
+                    werBox.querySelector('summary span').textContent = `${Math.max(1, ids.length + weitere)} ${ids.length + weitere === 1 ? 'Person' : 'Personen'}`;
+                    setServings(Math.max(1, ids.length + weitere));
+                });
             }
             setServings(anzahl);
         }
