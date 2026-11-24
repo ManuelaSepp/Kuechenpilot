@@ -15,7 +15,6 @@
     /* Unverträglichkeit → Regeln: Muster für die Zutat und zwei Ersatzvorschläge. */
     const REGELN = {
         'Paprika': [
-            { muster: /\bpaprikapulver\b/i, ersatz: ['Kreuzkümmel', 'Kurkuma (etwas weniger)'] },
             { muster: /\bpaprika\b/i, ersatz: ['Zucchini', 'Möhre'] }
         ],
         'Milch/Laktose': [
