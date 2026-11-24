@@ -762,7 +762,7 @@ renderPersonCards();
 
 
 
-<script src="assets/tests/test-runner.js"></script>
+<script>if (/[?&]test=1/.test(location.search)) document.write('<script src="assets/tests/test-runner.js"><\/script>');</script>
 <script>
 if (window.KPTest && window.KPTest.enabled) {
   async function urlExists(path) {

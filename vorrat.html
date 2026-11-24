@@ -1134,7 +1134,7 @@
         updateHiddenInfo();
     </script>
 
-    <script src="assets/tests/test-runner.js"></script>
+    <script>if (/[?&]test=1/.test(location.search)) document.write('<script src="assets/tests/test-runner.js"><\/script>');</script>
     <script src="assets/scripts/menue.js?v=1"></script>
 </body>
 </html>
