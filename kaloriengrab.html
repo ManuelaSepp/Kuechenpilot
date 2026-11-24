@@ -827,7 +827,7 @@
         render();
     </script>
 
-    <script src="assets/tests/test-runner.js"></script>
+    <script>if (/[?&]test=1/.test(location.search)) document.write('<script src="assets/tests/test-runner.js"><\/script>');</script>
     <script>
         if (window.KPTest && window.KPTest.enabled) {
             KPTest.add('Rezepte mit Kalorien vorhanden', () => ({ ok: RECIPES.length > 0, message: `${RECIPES.length} Rezepte mit kcal` }));

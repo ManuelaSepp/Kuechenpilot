@@ -869,7 +869,7 @@
     <script src="data/rezepte.js"></script>
     <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
     <script src="assets/scripts/ersatz.js?v=1"></script>
-    <script src="assets/scripts/planer.js?v=4"></script>
+    <script src="assets/scripts/planer.js?v=5"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
         const RECIPES = DATA.rezepte;
@@ -1301,7 +1301,7 @@
         meldung.textContent = neu ? `${neu} Zutaten stehen jetzt auf der Einkaufsliste.` : 'Diese Zutaten stehen schon auf der Einkaufsliste.';
     });
     </script>
-    <script src="assets/tests/test-runner.js"></script>
+    <script>if (/[?&]test=1/.test(location.search)) document.write('<script src="assets/tests/test-runner.js"><\/script>');</script>
     <script>
         if (window.KPTest && window.KPTest.enabled) {
             KPTest.add('Rezeptdaten geladen', () => {

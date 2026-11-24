@@ -633,7 +633,7 @@
     <script src="assets/scripts/portionen.js?v=2"></script>
     <script src="data/rezepte.js"></script>
     <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
-    <script src="assets/scripts/planer.js?v=4"></script>
+    <script src="assets/scripts/planer.js?v=5"></script>
     <script>
         const P = window.KPPlaner;
         let week = P.currentWeek();
@@ -949,7 +949,7 @@
         render();
     </script>
 
-    <script src="assets/tests/test-runner.js"></script>
+    <script>if (/[?&]test=1/.test(location.search)) document.write('<script src="assets/tests/test-runner.js"><\/script>');</script>
     <script>
         if (window.KPTest && window.KPTest.enabled) {
             KPTest.add('Zutaten werden zusammengezählt', () => {
