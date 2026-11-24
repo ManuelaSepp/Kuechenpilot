@@ -647,6 +647,25 @@
             object-fit: contain;
         }
 
+        .shop-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: auto;
+            max-width: 100%;
+            min-height: 40px;
+            margin-top: 12px;
+            padding: 6px 14px;
+            font-size: 0.95rem;
+            min-width: 0;
+        }
+        .shop-button span { line-height: 1.2; }
+        .shop-button img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
         .cooked-button:disabled {
             opacity: 0.5;
             cursor: default;
@@ -1040,7 +1059,7 @@
                         <div id="ingredientList"></div>
                         <button class="next-button shop-button" type="button" id="shopButton">
                             <img src="assets/icons/kiste.png" alt="" aria-hidden="true">
-                            <span>Zutaten auf die Einkaufsliste</span>
+                            <span>Auf die Einkaufsliste</span>
                         </button>
                         <p class="hint" id="shopMessage" role="status" hidden></p>
                     </section>
