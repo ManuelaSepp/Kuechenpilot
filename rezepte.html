@@ -139,6 +139,100 @@
             transform: translateY(-1px);
         }
 
+
+        /* ---------- Knöpfe „Suchen“ und „Eigenes Rezept“ ---------- */
+
+        .tool-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .tool-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 54px;
+            padding: 8px 16px;
+            border: 2px solid var(--orange);
+            border-radius: 20px;
+            background: #ffffff;
+            color: var(--orange-dark);
+            font-family: "Architects Daughter", sans-serif;
+            font-size: 1.18rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            box-shadow: var(--shadow-small);
+            transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+        }
+
+        .tool-button:hover,
+        .tool-button:focus-visible,
+        .tool-button[aria-expanded="true"] {
+            background: var(--orange);
+            color: #ffffff;
+            outline: none;
+        }
+
+        .search-sheet {
+            position: relative;
+        }
+
+        .search-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            width: 44px;
+            height: 44px;
+            border: 0;
+            border-radius: 50%;
+            background: none;
+            color: var(--muted);
+            font-size: 1.8rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .search-close:hover,
+        .search-close:focus-visible {
+            background: var(--orange-soft);
+            color: var(--orange-dark);
+            outline: none;
+        }
+
+        /* Kleine Überschriften in den Kacheln: Handschrift, kräftig, orange. */
+        .sheet-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--orange-dark);
+            font-family: "Architects Daughter", sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Airfryer: Hinweis und Backofen-Werte */
+        .oven-note {
+            margin: 14px 0 0;
+            padding: 12px 16px;
+            border: 2px dashed var(--orange);
+            border-radius: 16px;
+            background: var(--orange-soft);
+            line-height: 1.45;
+        }
+
+        .oven-note strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--orange-dark);
+        }
+
+        .oven-value {
+            color: var(--orange-dark);
+            font-style: italic;
+        }
+
         /* ---------- Rezeptbereich ---------- */
 
         .recipe-area {
@@ -161,12 +255,6 @@
 
         .search-field {
             display: block;
-        }
-
-        .search-field span {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 1.05rem;
         }
 
         .search-field input {
@@ -231,6 +319,7 @@
         }
 
         .cat-tile small {
+            font-family: "Comfortaa", sans-serif;
             color: var(--muted);
             font-size: 0.92rem;
         }
@@ -844,27 +933,32 @@
         </div>
 
         <div class="recipe-area" id="overview">
+            <div class="tool-row">
+                <button class="tool-button" type="button" id="searchToggle" aria-expanded="false" aria-controls="searchSheet">
+                    <span aria-hidden="true">🔍</span> Suchen
+                </button>
+                <button class="tool-button" type="button" id="addOwn" onclick="location.href='rezept-bearbeiten.html'">+ Eigenes Rezept</button>
+            </div>
+
+            <section class="sheet search-sheet" id="searchSheet" aria-label="Rezepte suchen und filtern" hidden>
+                <button class="search-close" type="button" id="searchClose" aria-label="Suche schließen">×</button>
+                <label class="search-field">
+                    <span class="sheet-label">Rezept oder Zutat</span>
+                    <input id="search" type="search" autocomplete="off" placeholder="z. B. Hähnchen, Kartoffeln, Kuchen …">
+                </label>
+
+                <div class="filter-group">
+                    <span class="sheet-label">Zubereitung</span>
+                    <div class="chips" id="deviceChips"></div>
+                </div>
+            </section>
+
             <section class="sheet" aria-label="Kategorien">
                 <h2>Kategorien</h2>
                 <div class="cat-grid" id="categoryTiles"></div>
             </section>
 
-            <section class="sheet" aria-label="Rezepte suchen und filtern">
-                <label class="search-field">
-                    <span>Suchen nach Rezept oder Zutat</span>
-                    <input id="search" type="search" autocomplete="off" placeholder="z. B. Hähnchen, Kartoffeln, Kuchen …">
-                </label>
-
-                <div class="filter-group">
-                    <span class="filter-label">Zubereitung</span>
-                    <div class="chips" id="deviceChips"></div>
-                </div>
-            </section>
-
-            <div class="result-row">
-                <p class="result-line" id="resultLine" aria-live="polite"></p>
-                <button class="add-own" type="button" id="addOwn" onclick="location.href='rezept-bearbeiten.html'">+ Eigenes Rezept anlegen</button>
-            </div>
+            <p class="result-line" id="resultLine" aria-live="polite"></p>
             <div class="recipe-grid" id="recipeGrid"></div>
         </div>
 
@@ -875,6 +969,7 @@
     <script src="data/rezepte.js"></script>
     <script src="assets/scripts/eigene-rezepte.js?v=1"></script>
     <script src="assets/scripts/ersatz.js?v=2"></script>
+    <script src="assets/scripts/airfryer.js?v=1"></script>
     <script src="assets/scripts/planer.js?v=5"></script>
     <script>
         const DATA = window.KP_REZEPTE || { rezepte: [] };
@@ -1068,6 +1163,7 @@
                         <button type="button" id="servingsMore" aria-label="Mehr">+</button>
                     </div>` : ''}
                     ${anzahl ? werHtml : ''}
+                    <div class="oven-note" id="ovenNote" role="status" hidden></div>
                     <div class="fact-boxes">
                         ${boxes.map(([value, label]) => `<div class="fact-box"><strong>${esc(value)}</strong><span>${esc(label)}</span></div>`).join('')}
                     </div>
@@ -1187,6 +1283,22 @@
                     neu => `<strong class="step-amount">${neu}</strong>`);
             });
 
+            /* Airfryer-Rezepte: ab mehr Personen, als in den eigenen Airfryer passen, Backofen-Werte zeigen. */
+            const ofen = window.KPAirfryer && KPAirfryer.brauchtOfen(r, current.anzahl || KPPortionen.basis(r).anzahl);
+            if (ofen) {
+                document.querySelectorAll('#stepList li span').forEach(span => {
+                    span.innerHTML = KPAirfryer.mitOfenWerten(span.innerHTML);
+                });
+            }
+            const ovenNote = document.getElementById('ovenNote');
+            ovenNote.hidden = !ofen;
+            if (ofen) {
+                const keiner = KPAirfryer.lade().keiner;
+                ovenNote.innerHTML = keiner
+                    ? '<strong>Ohne Airfryer? Kein Problem.</strong>Die Backofen-Werte stehen in Klammern bei den Schritten (Ober-/Unterhitze, vorgeheizt). Es sind Richtwerte, schau lieber etwas früher nach.'
+                    : `<strong>Für mehr als ${KPAirfryer.lade().personen === 2 ? 'zwei' : KPAirfryer.lade().personen} Personen passt das je nach Größe deines Airfryers vermutlich nicht mehr hinein. Dann nimm lieber den Backofen.</strong>Die Backofen-Werte stehen in Klammern bei den Schritten (Ober-/Unterhitze, vorgeheizt). Es sind Richtwerte, schau lieber etwas früher nach.`;
+            }
+
             const note = document.getElementById('scaleNote');
             note.hidden = !original || anzahl === original;
             note.textContent = `Umgerechnet vom Originalrezept für ${KPPortionen.beschriftung(r, original)}. Auch die Mengen in der Zubereitung sind angepasst.`;
@@ -1305,6 +1417,33 @@
         els.search.addEventListener('input', () => {
             state.query = els.search.value;
             renderList();
+        });
+
+        /* Suche erst nach Tipp auf „Suchen“ zeigen. Solange sie offen ist, wird in allen
+           Kategorien gesucht und die Kategorie-Kachel ausgeblendet, damit die Treffer
+           am Handy direkt unter dem Suchfeld stehen. */
+        const searchToggle = document.getElementById('searchToggle');
+        const searchSheet = document.getElementById('searchSheet');
+        const categorySheet = els.categoryTiles.closest('.sheet');
+
+        function setSearchOpen(open) {
+            searchSheet.hidden = !open;
+            categorySheet.hidden = open;
+            searchToggle.setAttribute('aria-expanded', String(open));
+            state.query = '';
+            state.device = ALL;
+            state.category = ALL;
+            els.search.value = '';
+            renderTiles(els.categoryTiles, countBy(RECIPES.map(r => r.kategorie)), 'category');
+            renderChips(els.deviceChips, countBy(RECIPES.flatMap(r => r.geraete || [])), 'device');
+            renderList();
+            if (open) els.search.focus();
+        }
+
+        searchToggle.addEventListener('click', () => setSearchOpen(searchSheet.hidden));
+        document.getElementById('searchClose').addEventListener('click', () => {
+            setSearchOpen(false);
+            searchToggle.focus();
         });
 
         renderTiles(els.categoryTiles, countBy(RECIPES.map(r => r.kategorie)), 'category');

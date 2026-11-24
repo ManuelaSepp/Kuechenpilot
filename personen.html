@@ -471,6 +471,22 @@
     box-shadow:var(--shadow);
 }
 
+
+/* Deine Küche: Airfryer-Größe für den ganzen Haushalt. */
+.kitchen-sheet{
+    background:var(--card);
+    border:2px solid rgba(245,166,35,.42);
+    border-radius:30px;
+    padding:clamp(28px,4vw,42px) clamp(24px,4.5vw,56px);
+    box-shadow:var(--shadow);
+}
+.person-cards.as-popup .kitchen-sheet{width:min(100%, 620px);}
+.kitchen-sheet h2{margin:0 0 14px;color:var(--orange-dark);}
+.airfryer-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-bottom:16px;}
+.airfryer-row[hidden]{display:none;}
+.airfryer-row .count-value{font-size:1.8rem;min-width:36px;}
+.no-airfryer{display:inline-flex;}
+.kitchen-hint{margin:14px 0 0;text-align:left;color:var(--muted);font-size:.95rem;}
 .person-sheet h2{margin:0 0 18px;color:var(--orange-dark);}
 .person-sheet label{display:block;margin-top:12px;}
 .person-sheet input:not([type="checkbox"]),
@@ -605,6 +621,7 @@
     </main>
 
     
+<script src="assets/scripts/airfryer.js?v=1"></script>
 <script>
 let personCount=(()=>{try{const n=Number(JSON.parse(localStorage.getItem('kuechenpilotPersonen')||'2'));return n>=1?Math.round(n):2;}catch(e){return 2;}})();
 document.getElementById('personCount').textContent=personCount;
@@ -789,6 +806,24 @@ function renderPersonCards(){
    </section>`);
  }
 
+ /* Für den ganzen Haushalt: Wie groß ist der Airfryer? */
+ const af=window.KPAirfryer?KPAirfryer.lade():{personen:2,keiner:false};
+ wrap.insertAdjacentHTML('beforeend',`
+   <section class="kitchen-sheet" aria-label="Deine Küche">
+     <h2>Deine Küche</h2>
+     <div class="airfryer-row" id="airfryerRow" ${af.keiner?'hidden':''}>
+       <span class="airfryer-text">Mein Airfryer reicht für</span>
+       <div class="person-counter small">
+         <button class="count-button" type="button" onclick="changeAirfryer(-1)" aria-label="Eine Person weniger">−</button>
+         <div class="count-value" id="airfryerCount">${af.personen}</div>
+         <button class="count-button" type="button" onclick="changeAirfryer(1)" aria-label="Eine Person mehr">+</button>
+       </div>
+       <span class="airfryer-text">Personen</span>
+     </div>
+     <label class="allergy-chip no-airfryer"><input type="checkbox" id="noAirfryer" ${af.keiner?'checked':''} onchange="setNoAirfryer(this.checked)"> Ich habe keinen Airfryer</label>
+     <p class="kitchen-hint">Bei Airfryer-Rezepten für mehr Personen zeige ich dir dann die Werte für den Backofen.</p>
+   </section>`);
+
  /* Gespeicherte Angaben wieder eintragen. */
  const gespeichert=ladeDetails();
  wrap.querySelectorAll('.person-sheet').forEach((sheet,idx)=>{ if(gespeichert[idx]) angabenEintragen(sheet, gespeichert[idx]); });
@@ -800,6 +835,19 @@ function renderPersonCards(){
    wrap.insertAdjacentHTML('afterbegin',`<button type="button" class="popup-close" onclick="closePersonPopup()">Schließen</button>`);
    wrap.addEventListener('click',e=>{ if(e.target===wrap) closePersonPopup(); });
  }
+}
+
+function changeAirfryer(d){
+ if(!window.KPAirfryer) return;
+ const n=Math.min(20,Math.max(1,KPAirfryer.lade().personen+d));
+ KPAirfryer.speichere({personen:n});
+ document.getElementById('airfryerCount').textContent=n;
+}
+
+function setNoAirfryer(keiner){
+ if(!window.KPAirfryer) return;
+ KPAirfryer.speichere({keiner});
+ document.getElementById('airfryerRow').hidden=keiner;
 }
 
 function closePersonPopup(){
