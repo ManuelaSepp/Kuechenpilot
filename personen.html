@@ -541,6 +541,12 @@
 }
 
 .allergy-details{margin-top:14px!important;}
+.allergy-details summary{cursor:pointer;font-family:'Architects Daughter',cursive;font-size:1.1rem;padding:4px 0;}
+.allergy-details textarea{width:100%;margin-top:8px;}
+.own-rows{margin-top:12px;display:grid;gap:8px;}
+.own-row{display:grid;gap:4px;font-size:.95rem;}
+.own-row[hidden]{display:none;}
+.own-row input{width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #d8c7a8;}
 
 @media (max-width:760px){
  .person-options-grid{grid-template-columns:1fr;}
@@ -623,23 +629,69 @@ function toggleShakeDetails(select){
 
 const DETAILS_KEY='kuechenpilotPersonenDetails';
 
+/* Häufige Allergien als Häkchen: [gespeicherter Wert, Anzeige]. */
+const ALLERGIEN=[
+ ['Gluten','Gluten'],
+ ['Milch/Laktose','Milch/Laktose'],
+ ['Ei','Ei'],
+ ['Erdnüsse','Erdnüsse'],
+ ['Schalenfrüchte','Schalenfrüchte (Mandel, Haselnuss, Walnuss, Cashew, Pistazie)'],
+ ['Soja','Soja'],
+ ['Fisch/Meeresfrüchte','Fisch/Meeresfrüchte'],
+ ['Sellerie','Sellerie'],
+ ['Senf','Senf'],
+ ['Sesam','Sesam'],
+ ['Paprika','Paprika']
+];
+
+/* Alte Einträge „Erdnüsse/Nüsse“ werden beim Eintragen auf die getrennten Punkte umgestellt. */
+function allergienUmstellen(liste){
+ const out=[];
+ (liste||[]).forEach(a=>{ if(a==='Erdnüsse/Nüsse') out.push('Erdnüsse','Schalenfrüchte'); else out.push(a); });
+ return [...new Set(out)];
+}
+
+/* Eigene Ersatz-Zeilen nur für angekreuzte Allergien zeigen. */
+function zeileAnzeigen(sheet){
+ sheet.querySelectorAll('.own-row').forEach(row=>{
+   const cb=[...sheet.querySelectorAll('input[type=checkbox]')].find(el=>el.value===row.dataset.for);
+   row.hidden=!(cb&&cb.checked);
+ });
+}
+
 function ladeDetails(){
  try{ const v=JSON.parse(localStorage.getItem(DETAILS_KEY)||'[]'); return Array.isArray(v)?v:[]; }catch(e){ return []; }
 }
 
 function sichereDetails(){
- const liste=[...document.querySelectorAll('#personCards .person-sheet')].map(sheet=>({
-   texte:[...sheet.querySelectorAll('input[type=text], textarea')].map(el=>el.value),
-   auswahl:[...sheet.querySelectorAll('select')].map(el=>el.value),
-   allergien:[...sheet.querySelectorAll('input[type=checkbox]:checked')].map(el=>el.value)
- }));
+ const liste=[...document.querySelectorAll('#personCards .person-sheet')].map(sheet=>{
+   const eigene={};
+   sheet.querySelectorAll('[data-ersatz]').forEach(el=>{ const v=el.value.trim(); if(v) eigene[el.dataset.ersatz]=v; });
+   return {
+     name:(sheet.querySelector('.person-name')?.value||'').trim(),
+     texte:[...sheet.querySelectorAll('input[type=text]:not([data-ersatz]), textarea:not([data-weitere])')].map(el=>el.value),
+     auswahl:[...sheet.querySelectorAll('select')].map(el=>el.value),
+     ernaehrung:sheet.querySelectorAll('select')[1]?.value||'',
+     allergien:[...sheet.querySelectorAll('input[type=checkbox]:checked')].map(el=>el.value),
+     eigeneErsaetze:eigene,
+     weitere:sheet.querySelector('[data-weitere]')?.value||''
+   };
+ });
  try{ localStorage.setItem(DETAILS_KEY,JSON.stringify(liste)); }catch(e){}
 }
 
 function angabenEintragen(sheet, daten){
- sheet.querySelectorAll('input[type=text], textarea').forEach((el,i)=>{ if(daten.texte && daten.texte[i]!=null) el.value=daten.texte[i]; });
+ sheet.querySelectorAll('input[type=text]:not([data-ersatz]), textarea:not([data-weitere])').forEach((el,i)=>{ if(daten.texte && daten.texte[i]!=null) el.value=daten.texte[i]; });
+ const nameFeld=sheet.querySelector('.person-name');
+ if(nameFeld && daten.name) nameFeld.value=daten.name;
  sheet.querySelectorAll('select').forEach((el,i)=>{ if(daten.auswahl && daten.auswahl[i]!=null) el.value=daten.auswahl[i]; });
- sheet.querySelectorAll('input[type=checkbox]').forEach(el=>{ el.checked=(daten.allergien||[]).includes(el.value); });
+ const alle=allergienUmstellen(daten.allergien);
+ sheet.querySelectorAll('input[type=checkbox]').forEach(el=>{ el.checked=alle.includes(el.value); });
+ sheet.querySelectorAll('[data-ersatz]').forEach(el=>{ el.value=(daten.eigeneErsaetze||{})[el.dataset.ersatz]||''; });
+ const weitere=sheet.querySelector('[data-weitere]');
+ /* Alte Daten: „Weitere oder genaue Angaben“ war das vierte Textfeld. */
+ if(weitere) weitere.value=daten.weitere!=null ? daten.weitere : ((daten.texte||[])[3]||'');
+ zeileAnzeigen(sheet);
  const haeufigkeit=sheet.querySelector('.shake-frequency');
  if(haeufigkeit) toggleShakeDetails(haeufigkeit);
 }
@@ -656,7 +708,7 @@ function renderPersonCards(){
      <h2>Person ${i}</h2>
 
      <label>Name
-       <input type="text">
+       <input type="text" class="person-name">
      </label>
 
      <div class="person-options-grid">
@@ -717,22 +769,22 @@ function renderPersonCards(){
      <fieldset class="allergy-fieldset">
        <legend>Allergien / Unverträglichkeiten</legend>
        <div class="allergy-options">
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Gluten"> Gluten</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Milch/Laktose"> Milch/Laktose</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Ei"> Ei</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Erdnüsse/Nüsse"> Erdnüsse/Nüsse</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Soja"> Soja</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Fisch/Meeresfrüchte"> Fisch/Meeresfrüchte</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sellerie"> Sellerie</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Senf"> Senf</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sesam"> Sesam</label>
-         <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Paprika"> Paprika</label>
+         ${ALLERGIEN.map(([wert, text]) => `<label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="${wert}"> ${text}</label>`).join('')}
          <label class="allergy-chip"><input type="checkbox" name="person-${i}-allergies" value="Sonstige"> Sonstige</label>
        </div>
 
-       <label class="allergy-details">Weitere oder genaue Angaben
-         <textarea></textarea>
-       </label>
+       <div class="own-rows">
+         ${ALLERGIEN.map(([wert, text]) => `
+         <label class="own-row" data-for="${wert}" hidden>
+           <span>${text}: Ich ersetze das durch</span>
+           <input type="text" data-ersatz="${wert}" placeholder="z. B. Pinienkerne">
+         </label>`).join('')}
+       </div>
+
+       <details class="allergy-details">
+         <summary>Weitere Unverträglichkeiten</summary>
+         <textarea data-weitere placeholder="Alles, was nicht in der Liste steht"></textarea>
+       </details>
      </fieldset>
    </section>`);
  }
@@ -756,7 +808,11 @@ function closePersonPopup(){
 }
 const personenKarten=document.getElementById('personCards');
 personenKarten.addEventListener('input', sichereDetails);
-personenKarten.addEventListener('change', sichereDetails);
+personenKarten.addEventListener('change', e=>{
+ const sheet=e.target.closest('.person-sheet');
+ if(sheet && e.target.matches('input[type=checkbox]')) zeileAnzeigen(sheet);
+ sichereDetails();
+});
 renderPersonCards();
 </script>
 
